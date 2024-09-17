@@ -1,0 +1,33 @@
+[project]
+name = "llm"
+version = "0.1.0"
+description = "Ground-up implementation of LLMs with minimal dependencies"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "David Tagliamonti" }, { email = "noreply@dtag.ai" }]
+requires-python = ">=3.12"
+
+
+[project.urls]
+homepage = "https://github.com/davidtag/llm"
+repository = "https://github.com/davidtag/llm"
+
+
+[tool.black]
+line-length = 110
+
+
+[tool.flake8]
+max-line-length = 110
+ignore = [
+    "ANN101", # Missing type annotation for self in method
+    "ANN102", # Missing type annotation for cls in classmethod
+    "ANN002", # Missing type annotation for *args
+    "ANN003", # Missing type annotation for **kwargs
+    "E203",   # whitespace before ':' (conflicts with black)
+    "W503",   # line break before binary operator  (conflicts with black)
+]
+per-file-ignores = """
+    __init__.py: F401,D104
+    test_*: D102
+"""
