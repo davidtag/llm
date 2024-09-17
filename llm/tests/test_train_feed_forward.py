@@ -1,0 +1,148 @@
+"""An integration test of FeedForward and CrossEntropyLoss, testing training end-to-end."""
+
+import unittest
+
+import numpy as np
+
+from llm.optimizers.adam import Adam
+from llm.optimizers.sgd import StochasticGradientDescent
+from llm.layers.feed_forward import FeedForward
+from llm.layers.layer_norm import LayerNorm
+from llm.loss.cross_entropy import CrossEntropyLoss
+from llm.utils.math import softmax
+
+
+class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
+    """Tests a full training pipeline of FeedForward and CrossEntropyLoss."""
+
+    def setUp(self) -> None:
+        self.data = np.array(
+            [
+                [-0.80672381, -0.08818247, 0.002, 0.005, -0.3],
+                [0.63413982, 1.32233656, 0.332, -0.332, 1.223],
+                [0.1814214, -0.50674539, -0.0223, 0.33546, 0.223],
+                [1.16085551, -0.15033837, -0.332, -1.334, -0.09],
+            ]
+        )
+        self.N = self.data.shape[0]
+        self.D = self.data.shape[1]
+        self.C = 3
+        self.targets = np.array([0, 1, 1, 2])
+
+    def assert_probabilites_match_targets(self, probabilities: np.ndarray, decimal: int = 2) -> None:
+        """Assert that probabilities for the true labels are 1 within a decimal error."""
+        assert probabilities.shape == (self.N, self.C)
+        probabilities_for_true_labels = probabilities[np.arange(self.N), self.targets]
+        expected = np.ones(shape=(self.N,))
+        np.testing.assert_almost_equal(probabilities_for_true_labels, expected, decimal=decimal)
+
+    def test_train_with_sgd(self, num_iters: int = 200) -> None:
+        """Test that we can overfit a small training dataset using the SGD optimizer."""
+        optimizer = StochasticGradientDescent(lr=1)
+        model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
+        loss_fn = CrossEntropyLoss()
+
+        initial_loss = None
+        last_loss = None
+
+        for i in range(num_iters):
+            # Forward Pass
+            logits = model.forward(self.data)
+            loss = loss_fn.forward(logits, self.targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            model.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 0.01)
+
+        # Predictions are Correct
+        logits = model.forward(self.data)
+        probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities, decimal=2)  # probs ~0.99
+
+    def test_train_with_adam(self, num_iters: int = 50) -> None:
+        """Test that we can overfit a small training dataset using the Adam optimizer."""
+        optimizer = Adam(lr=0.5)
+        model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
+        loss_fn = CrossEntropyLoss()
+
+        initial_loss = None
+        last_loss = None
+
+        for i in range(num_iters):
+            # Forward Pass
+            logits = model.forward(self.data)
+            loss = loss_fn.forward(logits, self.targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            model.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 1e-4)  # Adam much better than SGB at getting to minima
+
+        # Predictions are Correct
+        logits = model.forward(self.data)
+        probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities, decimal=4)  # probs ~0.9999
+
+    def test_train_with_layer_norm_and_adam(self, num_iters: int = 50) -> None:
+        """Test that we can overfit a small training dataset using the Adam optimizer."""
+        optimizer = Adam(lr=0.5)
+        norm = LayerNorm(n_input=self.D, optimizer=optimizer)
+        model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
+        loss_fn = CrossEntropyLoss()
+
+        initial_loss = None
+        last_loss = None
+
+        for i in range(num_iters):
+            # Forward Pass
+            data_norm = norm.forward(self.data)
+            logits = model.forward(data_norm)
+            loss = loss_fn.forward(logits, self.targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            norm.backward(model.cache["dx"])
+            model.step()
+            norm.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 0.01)
+
+        # Predictions are Correct
+        data_norm = norm.forward(self.data)
+        logits = model.forward(data_norm)
+        probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities, decimal=3)  # probs ~0.999
+
+
+if __name__ == "__main__":
+    unittest.main()

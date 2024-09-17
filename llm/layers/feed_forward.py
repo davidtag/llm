@@ -1,0 +1,79 @@
+"""Implementation for a feed-forward layer."""
+
+from typing import Optional
+
+import numpy as np
+
+from llm.optimizers import Optimizer
+from llm.layers.linear import Linear
+from llm.utils.math import relu
+
+
+class FeedForward(object):
+    """A 2-layer feed-forward network with ReLU activation."""
+
+    def __init__(
+        self,
+        n_input: int,
+        n_hidden: int,
+        n_output: int,
+        enable_grad: bool = True,
+        optimizer: Optional[Optimizer] = None,
+    ) -> None:
+        """Initialize the layer."""
+        self.n_input = n_input
+        self.n_hidden = n_hidden
+        self.n_output = n_output
+        self.enable_grad = enable_grad
+        self.optimizer = optimizer
+        self.cache = {}
+
+        self.layer_1 = Linear(
+            n_input=n_input,
+            n_output=n_hidden,
+            enable_grad=enable_grad,
+            optimizer=optimizer,
+        )
+        self.layer_2 = Linear(
+            n_input=n_hidden,
+            n_output=n_output,
+            enable_grad=enable_grad,
+            optimizer=optimizer,
+        )
+
+    @property
+    def n_params(self) -> int:
+        """The number of parameters in the layer."""
+        return self.layer_1.n_params + self.layer_2.n_params
+
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        """Compute the layer output for a given input."""
+        assert x.ndim == 2 and x.shape[-1] == self.n_input
+
+        h = self.layer_1.forward(x)
+        a = relu(h)
+        out = self.layer_2.forward(a)
+
+        return out
+
+    def backward(self, dout: np.ndarray) -> None:
+        """Compute the layer gradients given the upstream gradient."""
+        assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
+        assert dout.shape == (self.layer_1.cache["x"].shape[0], self.n_output)
+
+        self.layer_2.backward(dout)
+        da = self.layer_2.cache["dx"]
+        a = self.layer_2.cache["x"]
+        dh = da * (a > 0)
+        self.layer_1.backward(dh)
+        dx = self.layer_1.cache["dx"]
+
+        self.cache["dx"] = dx
+
+    def step(self) -> None:
+        """Performs a single optimization step."""
+        assert self.enable_grad, "Cannot take an optimization step with enable_grad=False"
+        assert self.optimizer, "Cannot take an optimization step with optimizer=None"
+
+        self.layer_2.step()
+        self.layer_1.step()
