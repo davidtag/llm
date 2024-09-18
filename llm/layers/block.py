@@ -47,6 +47,7 @@ class Block(object):
             n_hidden=d_ff,
             n_output=d_model,
             enable_grad=enable_grad,
+            optimizer=optimizer,
         )
         self.norm_2 = LayerNorm(n_input=d_model, enable_grad=enable_grad, optimizer=optimizer)
 
