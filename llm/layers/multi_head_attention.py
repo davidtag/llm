@@ -13,6 +13,7 @@ class MultiHeadAttention(object):
 
     TODO(dtag): Support causal masks.
     """
+
     def __init__(
         self,
         d_model: int = 512,
@@ -44,12 +45,7 @@ class MultiHeadAttention(object):
     @property
     def n_params(self) -> int:
         """The number of parameters in the layer."""
-        return (
-            self.w_q.size
-            + self.w_k.size
-            + self.w_v.size
-            + self.w_o.size
-        )
+        return self.w_q.size + self.w_k.size + self.w_v.size + self.w_o.size
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
@@ -60,7 +56,7 @@ class MultiHeadAttention(object):
         V = np.matmul(x, self.w_v)  # shape = (h, N, d_v)
 
         scale = 1 / np.sqrt(self.d_k)
-        logits = scale * np.matmul(Q, np.transpose(K, axes=[0,2,1]))  # shape = (h, N, N)
+        logits = scale * np.matmul(Q, np.transpose(K, axes=[0, 2, 1]))  # shape = (h, N, N)
         weights = softmax(logits)  # shape = (h, N, N)
         head = np.matmul(weights, V)  # shape = (h, N, d_v)
 
@@ -97,14 +93,16 @@ class MultiHeadAttention(object):
         dheads_squeezed = np.hsplit(dconcat, indices_or_sections=self.h)  # List[(N, d_v)] of length h
         dhead = np.stack(dheads_squeezed, axis=0)  # shape = (h, N, d_v)
 
-        dV = np.matmul(np.transpose(weights, axes=[0,2,1]), dhead)  # shape = (h, N, d_v)
-        dweights = np.matmul(dhead, np.transpose(V, axes=[0,2,1]))  # shape = (h, N, N)
+        dV = np.matmul(np.transpose(weights, axes=[0, 2, 1]), dhead)  # shape = (h, N, d_v)
+        dweights = np.matmul(dhead, np.transpose(V, axes=[0, 2, 1]))  # shape = (h, N, N)
 
-        dlogits = weights * (dweights - np.sum(dweights * weights, axis=2, keepdims=True)) # shape = (h, N, N)
+        dlogits = weights * (
+            dweights - np.sum(dweights * weights, axis=2, keepdims=True)
+        )  # shape = (h, N, N)
 
         scale = 1 / np.sqrt(self.d_k)
         dQ = scale * np.matmul(dlogits, K)  # shape = (h, N, d_k)
-        dK = scale * np.matmul(np.transpose(dlogits, axes=[0,2,1]), Q) # shape = (h, N, d_k)
+        dK = scale * np.matmul(np.transpose(dlogits, axes=[0, 2, 1]), Q)  # shape = (h, N, d_k)
 
         dw_q = np.matmul(np.transpose(x), dQ)  # shape = (h, d_model, d_k)
         dw_k = np.matmul(np.transpose(x), dK)  # shape = (h, d_model, d_k)

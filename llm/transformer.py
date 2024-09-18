@@ -596,7 +596,14 @@ class BlockStack(object):
         self.cache = {}
 
         self.blocks = [
-            Block(d_model=d_model, d_k=d_k, d_v=d_v, h=h, d_ff=d_ff, enable_grad=enable_grad)
+            Block(
+                d_model=d_model,
+                d_k=d_k,
+                d_v=d_v,
+                h=h,
+                d_ff=d_ff,
+                enable_grad=enable_grad,
+            )
             for _ in range(n_blocks)
         ]
 
