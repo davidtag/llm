@@ -6,8 +6,10 @@ import numpy as np
 
 from llm.optimizers.adam import Adam
 from llm.optimizers.sgd import StochasticGradientDescent
+from llm.layers.linear import Linear
 from llm.layers.feed_forward import FeedForward
 from llm.layers.layer_norm import LayerNorm
+from llm.layers.multi_head_attention import MultiHeadAttention
 from llm.loss.cross_entropy import CrossEntropyLoss
 from llm.utils.math import softmax
 
@@ -105,7 +107,7 @@ class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
         self.assert_probabilites_match_targets(probabilities, decimal=4)  # probs ~0.9999
 
     def test_train_with_layer_norm_and_adam(self, num_iters: int = 50) -> None:
-        """Test that we can overfit a small training dataset using the Adam optimizer."""
+        """Test that we can overfit a small training dataset using a normalization layer."""
         optimizer = Adam(lr=0.5)
         norm = LayerNorm(n_input=self.D, optimizer=optimizer)
         model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
@@ -141,6 +143,46 @@ class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
         data_norm = norm.forward(self.data)
         logits = model.forward(data_norm)
         probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities, decimal=3)  # probs ~0.999
+
+    def test_train_multihead_attention(self, num_iters: int = 50) -> None:
+        """Test that we can overfit a small training dataset using a multi-head attention layer."""
+        optimizer = Adam(lr=0.05)
+        layer_1 = MultiHeadAttention(d_model=self.D, optimizer=optimizer)
+        layer_2 = Linear(n_input=self.D, n_output=self.C, optimizer=optimizer)  # needed to project to output
+        loss_fn = CrossEntropyLoss()
+
+        initial_loss = None
+        last_loss = None
+
+        for i in range(num_iters):
+            # Forward Pass
+            hidden = layer_1.forward(self.data)
+            logits = layer_2.forward(hidden)
+            loss = loss_fn.forward(logits, self.targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            layer_2.backward(dlogits)
+            layer_1.backward(layer_2.cache["dx"])
+            layer_2.step()
+            layer_1.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 1e-4)
+
+        # Predictions are Correct
+        hidden = layer_1.forward(self.data)
+        logits = layer_2.forward(hidden)
+        probabilities = softmax(logits)
+        print(probabilities)
         self.assert_probabilites_match_targets(probabilities, decimal=3)  # probs ~0.999
 
 
