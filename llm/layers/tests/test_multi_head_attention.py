@@ -22,10 +22,10 @@ class TestMultiHeadAttention(unittest.TestCase):
 
     def test_n_params(self) -> None:
         model = MultiHeadAttention(d_model=13, d_k=17, d_v=37, h=7)
-        self.assertEqual(model.n_params, 7 * 13 * (17 + 17 + 37+ 37))
+        self.assertEqual(model.n_params, 7 * 13 * (17 + 17 + 37 + 37))
 
         model = MultiHeadAttention(d_model=14, d_k=64, d_v=37, h=8)
-        self.assertEqual(model.n_params, 8 * 14 * (64 + 64 + 37+ 37))
+        self.assertEqual(model.n_params, 8 * 14 * (64 + 64 + 37 + 37))
 
     def test_forward(self) -> None:
         model = MultiHeadAttention(d_model=3, d_k=13, d_v=17, h=16)
@@ -147,7 +147,6 @@ class TestMultiHeadAttention(unittest.TestCase):
         loss2 = out2.sum()
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
-
 
     def test_backward_random_dx(self) -> None:
         model = MultiHeadAttention(d_model=3)
