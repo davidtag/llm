@@ -4,8 +4,8 @@ from typing import Optional
 
 import numpy as np
 
-from llm.optimizers import Optimizer
 from llm.layers.linear import Linear
+from llm.optimizers import Optimizer
 from llm.utils.math import relu
 
 
