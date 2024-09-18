@@ -182,7 +182,6 @@ class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
         hidden = layer_1.forward(self.data)
         logits = layer_2.forward(hidden)
         probabilities = softmax(logits)
-        print(probabilities)
         self.assert_probabilites_match_targets(probabilities, decimal=3)  # probs ~0.999
 
 
