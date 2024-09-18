@@ -51,6 +51,8 @@ class MultiHeadAttention(object):
         """Compute the layer output for a given input."""
         assert x.ndim == 2 and x.shape[-1] == self.d_model
 
+        N = x.shape[0]
+
         Q = np.matmul(x, self.w_q)  # shape = (h, N, d_k)
         K = np.matmul(x, self.w_k)  # shape = (h, N, d_k)
         V = np.matmul(x, self.w_v)  # shape = (h, N, d_v)
@@ -61,7 +63,7 @@ class MultiHeadAttention(object):
         head = np.matmul(weights, V)  # shape = (h, N, d_v)
 
         heads = np.split(head, indices_or_sections=self.h, axis=0)  # List[(1, N, d_v)] of length h
-        heads_squeezed = [head.squeeze() for head in heads]  # List[(N, d_v)] of length h
+        heads_squeezed = [head.reshape(N, self.d_v) for head in heads]  # List[(N, d_v)] of length h
         concat = np.hstack(heads_squeezed)  # shape = (N, h * d_v)
 
         out = np.matmul(concat, self.w_o)  # size = (N, d_model)
