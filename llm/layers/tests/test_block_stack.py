@@ -11,6 +11,7 @@ class TestBlockStack(unittest.TestCase):
     """Unit tests for BlockStack."""
 
     def setUp(self) -> None:
+        np.random.seed(31415926)
         self.data = np.array(
             [
                 [-0.80672381, -0.08818247, 0.002],
@@ -75,7 +76,7 @@ class TestBlockStack(unittest.TestCase):
         out2 = model.forward(x)
         loss2 = out2.sum()
         actual_change = loss2 - loss
-        self.assertAlmostEqual(actual_change, expected_change, places=1)
+        self.assertAlmostEqual(actual_change, expected_change, places=2)
 
     def test_backward_random_dx(self) -> None:
         model = BlockStack(n_blocks=2, d_model=3)
@@ -93,4 +94,4 @@ class TestBlockStack(unittest.TestCase):
         out2 = model.forward(x)
         loss2 = out2.sum()
         actual_change = loss2 - loss
-        self.assertAlmostEqual(actual_change, expected_change, places=1)
+        self.assertAlmostEqual(actual_change, expected_change, places=2)
