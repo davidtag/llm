@@ -80,7 +80,7 @@ class TestFeedForward(unittest.TestCase):
         out2 = model.forward(x)
         loss2 = out2.sum()
         actual_change = loss2 - loss
-        self.assertAlmostEqual(actual_change, expected_change, places=3)  # TODO(dtag): flaky
+        self.assertAlmostEqual(actual_change, expected_change, places=2)
 
     def test_backward_random_dx(self) -> None:
         model = FeedForward(n_input=3, n_hidden=13, n_output=5)
@@ -98,7 +98,7 @@ class TestFeedForward(unittest.TestCase):
         out2 = model.forward(x)
         loss2 = out2.sum()
         actual_change = loss2 - loss
-        self.assertAlmostEqual(actual_change, expected_change, places=3)  # TODO(dtag): flaky
+        self.assertAlmostEqual(actual_change, expected_change, places=2)
 
 
 if __name__ == "__main__":
