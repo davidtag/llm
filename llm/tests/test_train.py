@@ -265,6 +265,3 @@ class TestTraingEndToEnd(unittest.TestCase):
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=2)
 
-
-if __name__ == "__main__":
-    unittest.main()

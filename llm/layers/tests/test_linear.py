@@ -124,6 +124,3 @@ class TestLinear(unittest.TestCase):
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
-
-if __name__ == "__main__":
-    unittest.main()

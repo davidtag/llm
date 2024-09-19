@@ -222,6 +222,3 @@ class TestSoftmax(unittest.TestCase):
         expected_y_sum = np.ones(shape=(5,))
         np.testing.assert_almost_equal(y_sum, expected_y_sum)
 
-
-if __name__ == "__main__":
-    unittest.main()
