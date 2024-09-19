@@ -1,4 +1,4 @@
-"""An integration test of FeedForward and CrossEntropyLoss, testing training end-to-end."""
+"""A set of integration tests of various layers/losses/optimizers, testing training end-to-end."""
 
 import unittest
 
@@ -16,8 +16,8 @@ from llm.loss.cross_entropy import CrossEntropyLoss
 from llm.utils.math import softmax
 
 
-class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
-    """Tests a full training pipeline of FeedForward and CrossEntropyLoss."""
+class TestTraingEndToEnd(unittest.TestCase):
+    """Tests a full training pipeline for various layers/losses/optmizers."""
 
     def setUp(self) -> None:
         self.data = np.array(
