@@ -112,7 +112,7 @@ class Transformer(object):
         for _ in range(max_tokens):
             probs = self.predict(current_sequence)
             token = np.random.choice(self.vocab_size, p=probs)
-            np.append(current_sequence, token)
+            current_sequence = np.append(current_sequence, token)
             output_sequence.append(token)
 
         return np.array(output_sequence)
