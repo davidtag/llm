@@ -14,6 +14,7 @@ from llm.layers.layer_norm import LayerNorm
 from llm.layers.linear import Linear
 from llm.layers.multi_head_attention import MultiHeadAttention
 from llm.loss.cross_entropy import CrossEntropyLoss
+from llm.models.transformer import Transformer
 from llm.utils.math import softmax
 
 
@@ -338,5 +339,39 @@ class TestTraingEndToEnd(unittest.TestCase):
         # Predictions are Correct
         hidden = layer_1.forward(data)
         logits = layer_2.forward(hidden)
+        probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities, decimal=4)
+
+    def test_train_transformer_depth_1(self, num_iters: int = 50) -> None:
+        """Test that we can train a Transformer model with depth 1."""
+        optimizer = Adam(lr=0.01)
+        model = Transformer(vocab_size=self.C, n_blocks=1, optimizer=optimizer)
+        loss_fn = CrossEntropyLoss()
+
+        initial_loss = None
+        last_loss = None
+
+        for i in range(num_iters):
+            # Forward Pass
+            logits = model.forward(self.targets)
+            loss = loss_fn.forward(logits, self.targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            model.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 1e-3)
+
+        # Predictions are Correct
+        logits = model.forward(self.targets)
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=4)
