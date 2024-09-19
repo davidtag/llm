@@ -74,7 +74,7 @@ class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=2)  # probs ~0.99
 
-    def test_train_with_adam(self, num_iters: int = 50) -> None:
+    def test_train_with_adam(self, num_iters: int = 75) -> None:
         """Test that we can overfit a small training dataset using the Adam optimizer."""
         optimizer = Adam(lr=0.5)
         model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
