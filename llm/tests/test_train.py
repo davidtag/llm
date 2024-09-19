@@ -8,6 +8,7 @@ from llm.optimizers.adam import Adam
 from llm.optimizers.sgd import StochasticGradientDescent
 from llm.layers.block import Block
 from llm.layers.block_stack import BlockStack
+from llm.layers.embedding import Embedding
 from llm.layers.feed_forward import FeedForward
 from llm.layers.layer_norm import LayerNorm
 from llm.layers.linear import Linear
@@ -264,3 +265,78 @@ class TestTraingEndToEnd(unittest.TestCase):
         logits = layer_2.forward(hidden)
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=2)
+
+    def test_train_embedding(self, num_iters: int = 50) -> None:
+        """Test that we can train an embedding layer."""
+        optimizer = Adam(lr=0.5)
+        model = Embedding(vocab_size=self.C, d_model=self.C, optimizer=optimizer)
+        loss_fn = CrossEntropyLoss()
+
+        initial_loss = None
+        last_loss = None
+
+        for i in range(num_iters):
+            # Forward Pass
+            logits = model.forward(self.targets)
+            loss = loss_fn.forward(logits, self.targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            model.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 1e-4)
+
+        # Predictions are Correct
+        logits = model.forward(self.targets)
+        probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities, decimal=4)
+
+    def test_train_embedding_with_linear(self, num_iters: int = 50) -> None:
+        """Test that we can train an embedding layer when stacked with a linear layer."""
+        optimizer = Adam(lr=0.1)
+        layer_1 = Embedding(vocab_size=500, d_model=512, optimizer=optimizer)
+        layer_2 = Linear(n_input=512, n_output=self.C, optimizer=optimizer)
+        loss_fn = CrossEntropyLoss()
+
+        initial_loss = None
+        last_loss = None
+
+        data = np.array([234, 496, 210, 8])
+
+        for i in range(num_iters):
+            # Forward Pass
+            hidden = layer_1.forward(data)
+            logits = layer_2.forward(hidden)
+            loss = loss_fn.forward(logits, self.targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            layer_2.backward(dlogits)
+            layer_1.backward(layer_2.cache["dx"])
+            # layer_2.step()  # intentionaly don't train layer_2, just the embedding
+            layer_1.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 1e-6)
+
+        # Predictions are Correct
+        hidden = layer_1.forward(data)
+        logits = layer_2.forward(hidden)
+        probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities, decimal=4)
