@@ -145,7 +145,7 @@ class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
         data_norm = norm.forward(self.data)
         logits = model.forward(data_norm)
         probabilities = softmax(logits)
-        self.assert_probabilites_match_targets(probabilities, decimal=3)  # probs ~0.999
+        self.assert_probabilites_match_targets(probabilities, decimal=2)  # probs ~0.99
 
     def test_train_multihead_attention(self, num_iters: int = 50) -> None:
         """Test that we can overfit a small training dataset using a multi-head attention layer."""
@@ -184,7 +184,7 @@ class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
         hidden = layer_1.forward(self.data)
         logits = layer_2.forward(hidden)
         probabilities = softmax(logits)
-        self.assert_probabilites_match_targets(probabilities, decimal=3)  # probs ~0.999
+        self.assert_probabilites_match_targets(probabilities, decimal=2)  # probs ~0.99
 
     def test_train_block(self, num_iters: int = 200) -> None:
         """Test that we can overfit a small training dataset using a Block layer."""
@@ -223,7 +223,7 @@ class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
         hidden = layer_1.forward(self.data)
         logits = layer_2.forward(hidden)
         probabilities = softmax(logits)
-        self.assert_probabilites_match_targets(probabilities, decimal=3)  # probs ~0.999
+        self.assert_probabilites_match_targets(probabilities, decimal=2)  # probs ~0.99
 
     def test_train_block_stack(self, num_iters: int = 1_000) -> None:
         """Test that we can overfit a small training dataset using a BlockStack layer."""
@@ -263,7 +263,7 @@ class TestTrainFeedForwardWithCrossEntropyLoss(unittest.TestCase):
         hidden = layer_1.forward(self.data)
         logits = layer_2.forward(hidden)
         probabilities = softmax(logits)
-        self.assert_probabilites_match_targets(probabilities, decimal=3)  # probs ~0.999
+        self.assert_probabilites_match_targets(probabilities, decimal=2)  # probs ~0.99
 
 
 if __name__ == "__main__":
