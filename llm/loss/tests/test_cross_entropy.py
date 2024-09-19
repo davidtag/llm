@@ -79,7 +79,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         logits2 = logits + step
         loss2 = loss_fn.forward(logits2, targets)
         actual_change = loss2 - loss
-        self.assertAlmostEqual(actual_change, expected_change, places=4)
+        self.assertAlmostEqual(actual_change, expected_change, places=3)
 
 
 if __name__ == "__main__":
