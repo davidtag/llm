@@ -123,4 +123,3 @@ class TestLinear(unittest.TestCase):
         loss2 = out2.sum()
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
-

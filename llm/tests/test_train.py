@@ -264,4 +264,3 @@ class TestTraingEndToEnd(unittest.TestCase):
         logits = layer_2.forward(hidden)
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=2)
-
