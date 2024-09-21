@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """A set of integration tests of various layers/losses/optimizers, testing training end-to-end."""
 
 import unittest
@@ -18,7 +19,7 @@ from llm.models.transformer import Transformer
 from llm.utils.math import softmax
 
 
-class TestTraingEndToEnd(unittest.TestCase):
+class TestTrainingEndToEnd(unittest.TestCase):
     """Tests a full training pipeline for various layers/losses/optmizers."""
 
     def setUp(self) -> None:
