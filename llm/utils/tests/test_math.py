@@ -147,7 +147,7 @@ class TestLogSoftmax(unittest.TestCase):
         self.assertEqual(x.shape, (2, 2, 3))
         self.assertEqual(y.shape, (2, 2, 3))
         # softmax probabilities are 1/3 each
-        expected = np.array([-np.log(3)] * 12).reshape(2, 2, 3)
+        expected = np.array([-np.log(3)] * 12).reshape(2, 2, 3)  # pylint:disable=too-many-function-args
         np.testing.assert_almost_equal(y, expected)
 
     def test_large_values(self) -> None:
@@ -208,7 +208,7 @@ class TestSoftmax(unittest.TestCase):
         y = softmax(x)
         self.assertEqual(x.shape, (2, 2, 3))
         self.assertEqual(y.shape, (2, 2, 3))
-        expected = np.array([1 / 3] * 12).reshape(2, 2, 3)
+        expected = np.array([1 / 3] * 12).reshape(2, 2, 3)  # pylint:disable=too-many-function-args
         np.testing.assert_almost_equal(y, expected)
 
     def test_large_values(self) -> None:
