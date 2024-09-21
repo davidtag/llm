@@ -369,3 +369,63 @@ class TestTrainingEndToEnd(unittest.TestCase):
         logits = model.forward(self.targets)
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=4)
+
+    def test_train_transformer_vocab_size_2(self, num_iters: int = 50) -> None:
+        """Test that we can train a Transformer model on a small vocab size."""
+        optimizer = Adam(lr=0.05)
+        model = Transformer(
+            vocab_size=2,
+            n_blocks=1,
+            d_model=64,
+            d_k=8,
+            d_v=8,
+            h=8,
+            d_ff=256,
+            optimizer=optimizer,
+        )
+        loss_fn = CrossEntropyLoss()
+
+        training_sequence = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+        data = training_sequence[:-1]
+        targets = training_sequence[1:]
+
+        initial_loss = float("inf")
+        last_loss = float("inf")
+
+        for i in range(num_iters):
+            # Forward Pass
+            logits = model.forward(data)
+            loss = loss_fn.forward(logits, targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            model.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 1e-3)
+
+        # Predictions are Correct
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1]))[0], 1.0, places=6)
+        self.assertAlmostEqual(model.predict(np.array([1, 0, 1, 0]))[1], 1.0, places=6)
+
+        # Generation is correct
+        np.testing.assert_array_equal(
+            model.generate(np.array([0, 1, 0, 1, 0, 1, 0, 1]), max_tokens=10),
+            np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1]),
+        )
+        np.testing.assert_array_equal(
+            model.generate(np.array([0, 1, 0, 1, 0, 1, 0, 1, 0]), max_tokens=10),
+            np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
+        )
+
+        # TODO(dtag): When causal masks are implemented, these should also pass
+        # self.assertAlmostEqual(model.predict(np.array([0]))[1], 1.0, places=6)
+        # self.assertAlmostEqual(model.predict(np.array([1]))[0], 1.0, places=6)
