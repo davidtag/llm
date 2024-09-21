@@ -1,4 +1,4 @@
-"""Implementation for a feed-forward layer."""
+"""Implementation of a 2-layer feed-forward (multi-layer perceptron, MLP) layer."""
 
 from typing import Optional
 

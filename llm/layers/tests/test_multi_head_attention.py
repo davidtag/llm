@@ -21,6 +21,7 @@ class TestMultiHeadAttention(unittest.TestCase):
         )
 
     def test_n_params(self) -> None:
+        """Test the layer reports the correct number of parameters."""
         model = MultiHeadAttention(d_model=13, d_k=17, d_v=37, h=7)
         self.assertEqual(model.n_params, 7 * 13 * (17 + 17 + 37 + 37))
 
@@ -28,12 +29,14 @@ class TestMultiHeadAttention(unittest.TestCase):
         self.assertEqual(model.n_params, 8 * 14 * (64 + 64 + 37 + 37))
 
     def test_forward(self) -> None:
+        """Test the forward pass."""
         model = MultiHeadAttention(d_model=3, d_k=13, d_v=17, h=16)
 
         out = model.forward(self.data)
         self.assertEqual(out.shape, (4, 3))
 
     def test_backward_at_zero(self) -> None:
+        """Test the backward pass with upstream gradient being 0."""
         model = MultiHeadAttention(d_model=3, d_k=13, d_v=17, h=16)
 
         out = model.forward(self.data)
@@ -59,6 +62,7 @@ class TestMultiHeadAttention(unittest.TestCase):
         self.assertTrue(np.all(dw_o == 0))
 
     def test_backward_at_one_dx(self) -> None:
+        """Test the backward pass for dx with upstream gradient being 1."""
         model = MultiHeadAttention(d_model=3)
 
         out = model.forward(self.data)
@@ -78,6 +82,7 @@ class TestMultiHeadAttention(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=places)
 
     def test_backward_at_one_dw_q(self) -> None:
+        """Test the backward pass for dw_q with upstream gradient being 1."""
         model = MultiHeadAttention(d_model=3)
 
         out = model.forward(self.data)
@@ -96,6 +101,7 @@ class TestMultiHeadAttention(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=1)
 
     def test_backward_at_one_dw_k(self) -> None:
+        """Test the backward pass for dw_k with upstream gradient being 1."""
         model = MultiHeadAttention(d_model=3)
 
         out = model.forward(self.data)
@@ -114,6 +120,7 @@ class TestMultiHeadAttention(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=1)
 
     def test_backward_at_one_dw_v(self) -> None:
+        """Test the backward pass for dw_v with upstream gradient being 1."""
         model = MultiHeadAttention(d_model=3)
 
         out = model.forward(self.data)
@@ -132,6 +139,7 @@ class TestMultiHeadAttention(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
     def test_backward_at_one_dw_o(self) -> None:
+        """Test the backward pass for dw_o with upstream gradient being 1."""
         model = MultiHeadAttention(d_model=3)
 
         out = model.forward(self.data)
@@ -150,6 +158,7 @@ class TestMultiHeadAttention(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
     def test_backward_random_dx(self) -> None:
+        """Test the backward pass for dx with upstream gradient being random."""
         model = MultiHeadAttention(d_model=3)
 
         out = model.forward(self.data)

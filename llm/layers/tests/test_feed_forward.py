@@ -21,6 +21,7 @@ class TestFeedForward(unittest.TestCase):
         )
 
     def test_n_params(self) -> None:
+        """Test the layer reports the correct number of parameters."""
         model = FeedForward(n_input=3, n_hidden=13, n_output=5)
         layer_1_params = 3 * 13 + 13
         layer_2_params = 13 * 5 + 5
@@ -34,12 +35,14 @@ class TestFeedForward(unittest.TestCase):
         self.assertEqual(model.n_params, total_params)
 
     def test_forward(self) -> None:
+        """Test the forward pass."""
         model = FeedForward(n_input=3, n_hidden=13, n_output=5)
 
         out = model.forward(self.data)
         self.assertEqual(out.shape, (4, 5))
 
     def test_backward_at_zero(self) -> None:
+        """Test the backward pass with upstream gradient being 0."""
         model = FeedForward(n_input=3, n_hidden=13, n_output=5)
 
         out = model.forward(self.data)
@@ -65,6 +68,7 @@ class TestFeedForward(unittest.TestCase):
         self.assertTrue(np.all(db2 == 0))
 
     def test_backward_at_one_dx(self) -> None:
+        """Test the backward pass for dx with upstream gradient being 1."""
         model = FeedForward(n_input=3, n_hidden=13, n_output=5)
 
         out = model.forward(self.data)
@@ -83,6 +87,7 @@ class TestFeedForward(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=2)
 
     def test_backward_random_dx(self) -> None:
+        """Test the backward pass for dx with upstream gradient being random."""
         model = FeedForward(n_input=3, n_hidden=13, n_output=5)
 
         out = model.forward(self.data)

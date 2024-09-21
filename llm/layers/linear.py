@@ -1,4 +1,4 @@
-"""Implementation for a linear layer."""
+"""Implementation of a linear layer."""
 
 from typing import Optional
 

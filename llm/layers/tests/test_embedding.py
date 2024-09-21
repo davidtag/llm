@@ -14,10 +14,12 @@ class TestEmbedding(unittest.TestCase):
         self.data = np.array([0, 13, 19, 17, 19, 255])
 
     def test_n_params(self) -> None:
+        """Test the layer reports the correct number of parameters."""
         model = Embedding(vocab_size=1000, d_model=512)
         self.assertEqual(model.n_params, 512_000)
 
     def test_forward(self) -> None:
+        """Test the forward pass."""
         model = Embedding(vocab_size=256, d_model=512)
 
         out = model.forward(self.data)
@@ -27,6 +29,7 @@ class TestEmbedding(unittest.TestCase):
         self.assertFalse(np.all(out[2] == out[3]))
 
     def test_backward_at_zero(self) -> None:
+        """Test the backward pass with upstream gradient being 0."""
         model = Embedding(vocab_size=256, d_model=512)
 
         out = model.forward(self.data)
@@ -39,6 +42,7 @@ class TestEmbedding(unittest.TestCase):
         self.assertTrue(np.all(dembedding_mat == 0))
 
     def test_backward_at_one(self) -> None:
+        """Test the backward pass with upstream gradient being 1."""
         model = Embedding(vocab_size=256, d_model=512)
 
         out = model.forward(self.data)
@@ -60,6 +64,7 @@ class TestEmbedding(unittest.TestCase):
         self.assertTrue(np.all(dembedding_mat[137] == 0))
 
     def test_backward_random(self) -> None:
+        """Test the backward pass with upstream gradient being random."""
         model = Embedding(vocab_size=256, d_model=512)
 
         out = model.forward(self.data)

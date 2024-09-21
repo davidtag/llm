@@ -1,4 +1,4 @@
-"""Implementation of a stack of identical Transformer block layer."""
+"""Implementation of a stack of identical Transformer block layers."""
 
 from typing import Optional
 
@@ -50,7 +50,7 @@ class BlockStack:
     @property
     def n_params(self) -> int:
         """The number of parameters in the layer."""
-        return sum([block.n_params for block in self.blocks])
+        return sum(block.n_params for block in self.blocks)
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

@@ -21,6 +21,7 @@ class TestLinear(unittest.TestCase):
         )
 
     def test_n_params(self) -> None:
+        """Test the layer reports the correct number of parameters."""
         model = Linear(n_input=3, n_output=5)
         self.assertEqual(model.n_params, 3 * 5 + 5)
 
@@ -28,12 +29,14 @@ class TestLinear(unittest.TestCase):
         self.assertEqual(model.n_params, 50 * 73 + 73)
 
     def test_forward(self) -> None:
+        """Test the forward pass."""
         model = Linear(n_input=3, n_output=2)
 
         out = model.forward(self.data)
         self.assertEqual(out.shape, (4, 2))
 
     def test_backward_at_zero(self) -> None:
+        """Test the backward pass with upstream gradient being 0."""
         model = Linear(n_input=3, n_output=2)
 
         out = model.forward(self.data)
@@ -53,6 +56,7 @@ class TestLinear(unittest.TestCase):
         self.assertTrue(np.all(db == 0))
 
     def test_backward_at_one_dx(self) -> None:
+        """Test the backward pass for dx with upstream gradient being 1."""
         model = Linear(n_input=3, n_output=2)
 
         out = model.forward(self.data)
@@ -71,6 +75,7 @@ class TestLinear(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
     def test_backward_at_one_dw(self) -> None:
+        """Test the backward pass for dw with upstream gradient being 1."""
         model = Linear(n_input=3, n_output=2)
 
         out = model.forward(self.data)
@@ -89,6 +94,7 @@ class TestLinear(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
     def test_backward_at_one_db(self) -> None:
+        """Test the backward pass for db with upstream gradient being 1."""
         model = Linear(n_input=3, n_output=2)
 
         out = model.forward(self.data)
@@ -107,6 +113,7 @@ class TestLinear(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
     def test_backward_random_dx(self) -> None:
+        """Test the backward pass for dx with upstream gradient being random."""
         model = Linear(n_input=3, n_output=2)
 
         out = model.forward(self.data)
