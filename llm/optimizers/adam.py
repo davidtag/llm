@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 """Implements the Adam optimizer."""
 
 from typing import List
@@ -29,7 +30,7 @@ class AdamParameterOptimizer(ParameterOptimizer):
         self.m = np.zeros_like(w)
         self.v = np.zeros_like(w)
 
-    def step(self, dw: np.ndarray) -> np.ndarray:
+    def step(self, dw: np.ndarray) -> None:
         """Update the parameter based on the current value of the gradient."""
         assert dw.shape == self.w.shape
 

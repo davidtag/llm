@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 """Interface for implementing optimizers."""
 
 import abc
@@ -11,14 +12,14 @@ class ParameterOptimizer(abc.ABC):
     It stores all relevant state to perform update steps.
     """
 
-    def __init__(self, w: np.array) -> None:
+    def __init__(self, w: np.ndarray) -> None:
         """Initialize the parameter optimizer."""
-        self.w: np.ndarray = w
+        self.w = w
 
     @abc.abstractmethod
-    def step(self, dw: np.ndarray) -> np.ndarray:
+    def step(self, dw: np.ndarray) -> None:
         """Update the parameter based on the current value of the gradient."""
-        pass
+        raise NotImplementedError
 
 
 class Optimizer(abc.ABC):
@@ -31,4 +32,4 @@ class Optimizer(abc.ABC):
     @abc.abstractmethod
     def get_parameter_optimizer(self, w: np.ndarray) -> ParameterOptimizer:
         """Create a parameter optimizer for `w`."""
-        pass
+        raise NotImplementedError

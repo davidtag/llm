@@ -1,3 +1,4 @@
+# pylint: disable=too-few-public-methods
 """Implements the stochastic gradient descent optimizer."""
 
 from typing import List
@@ -19,7 +20,7 @@ class StochasticGradientDescentParameterOptimizer(ParameterOptimizer):
         super().__init__(w=w)
         self.lr = lr
 
-    def step(self, dw: np.ndarray) -> np.ndarray:
+    def step(self, dw: np.ndarray) -> None:
         """Update the parameter based on the current value of the gradient."""
         assert dw.shape == self.w.shape
 
