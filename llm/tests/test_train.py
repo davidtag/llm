@@ -415,7 +415,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
 
         # Predictions are Correct
         self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1]))[0], 1.0, places=5)
-        self.assertAlmostEqual(model.predict(np.array([1, 0, 1, 0]))[1], 1.0, places=5)
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1, 0]))[1], 1.0, places=5)
 
         # Generation is correct
         np.testing.assert_array_equal(
