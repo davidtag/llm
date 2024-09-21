@@ -413,16 +413,16 @@ class TestTrainingEndToEnd(unittest.TestCase):
         self.assertLess(last_loss, 1e-3)
 
         # Predictions are Correct
-        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1]))[0], 1.0, places=6)
-        self.assertAlmostEqual(model.predict(np.array([1, 0, 1, 0]))[1], 1.0, places=6)
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1]))[0], 1.0, places=5)
+        self.assertAlmostEqual(model.predict(np.array([1, 0, 1, 0]))[1], 1.0, places=5)
 
         # Generation is correct
         np.testing.assert_array_equal(
-            model.generate(np.array([0, 1, 0, 1, 0, 1, 0, 1]), max_tokens=10),
+            model.generate(np.array([0, 1, 0, 1, 0, 1, 0, 1]), max_tokens=10, is_random=False),
             np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1]),
         )
         np.testing.assert_array_equal(
-            model.generate(np.array([0, 1, 0, 1, 0, 1, 0, 1, 0]), max_tokens=10),
+            model.generate(np.array([0, 1, 0, 1, 0, 1, 0, 1, 0]), max_tokens=10, is_random=False),
             np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
         )
 

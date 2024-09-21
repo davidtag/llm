@@ -104,14 +104,17 @@ class Transformer:
         probabilities = softmax(next_token_logits)
         return probabilities
 
-    def generate(self, start_sequence: np.ndarray, max_tokens: int = 5) -> np.ndarray:
+    def generate(self, start_sequence: np.ndarray, max_tokens: int = 5, is_random: bool = True) -> np.ndarray:
         """Generate an output sequence based on predicted next token probabilities."""
         current_sequence = start_sequence.copy()
         output_sequence = []
 
         for _ in range(max_tokens):
             probs = self.predict(current_sequence)
-            token = np.random.choice(self.vocab_size, p=probs)
+            if is_random:
+                token = np.random.choice(self.vocab_size, p=probs)
+            else:
+                token = np.argmax(probs)
             current_sequence = np.append(current_sequence, token)
             output_sequence.append(token)
 
