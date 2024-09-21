@@ -5,17 +5,10 @@ import unittest
 
 import numpy as np
 
-from llm.optimizers.adam import Adam
-from llm.optimizers.sgd import StochasticGradientDescent
-from llm.layers.block import Block
-from llm.layers.block_stack import BlockStack
-from llm.layers.embedding import Embedding
-from llm.layers.feed_forward import FeedForward
-from llm.layers.layer_norm import LayerNorm
-from llm.layers.linear import Linear
-from llm.layers.multi_head_attention import MultiHeadAttention
-from llm.loss.cross_entropy import CrossEntropyLoss
-from llm.models.transformer import Transformer
+from llm.optimizers import Adam, StochasticGradientDescent
+from llm.layers import Block, BlockStack, Embedding, FeedForward, LayerNorm, Linear, MultiHeadAttention
+from llm.loss import CrossEntropyLoss
+from llm.models import Transformer
 from llm.utils.math import softmax
 
 
