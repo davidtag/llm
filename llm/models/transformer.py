@@ -73,9 +73,9 @@ class Transformer:
         assert input_sequence.ndim == 1
         assert input_sequence.min() >= 0 and input_sequence.max() < self.vocab_size
 
-        raw_embedding = self.embedding_layer.forward(input_sequence)  # shape = (N, d_model)
-        refined_embedding = self.decoder.forward(raw_embedding)  # shape = (N, d_model)
-        logits = self.unembedding_layer.forward(refined_embedding)  # shape = (N, vocab_size)
+        raw_embedding = self.embedding_layer.forward(input_sequence)  # shape = (n, d_model)
+        refined_embedding = self.decoder.forward(raw_embedding)  # shape = (n, d_model)
+        logits = self.unembedding_layer.forward(refined_embedding)  # shape = (n, vocab_size)
 
         return logits
 

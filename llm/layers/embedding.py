@@ -60,13 +60,17 @@ class Embedding:
         """Compute the layer output for a given input."""
         assert input_sequence.ndim == 1
         assert input_sequence.min() >= 0 and input_sequence.max() < self.vocab_size
+        n = len(input_sequence)
+        assert n <= self.context_window
 
-        out = self.token_embedding_matrix[input_sequence]  # shape = (len(input_sequence), d_model)
+        token_embeddings = self.token_embedding_matrix[input_sequence]  # shape = (n, d_model)
+        position_embeddings = self.position_embedding_matrix[:n]  # shape = (n, d_model)
+        embeddings = token_embeddings + position_embeddings
 
         if self.enable_grad:
             self.cache["input_sequence"] = input_sequence
 
-        return out
+        return embeddings
 
     def backward(self, dout: np.ndarray) -> None:
         """Compute the layer gradients given the upstream gradient."""
@@ -83,6 +87,7 @@ class Embedding:
 
         for i, row in enumerate(dout):
             dtoken_embedding_matrix[input_sequence[i]] += row
+            dposition_embedding_matrix[i] = row
 
         self.cache["dtoken_embedding_matrix"] = dtoken_embedding_matrix
         self.cache["dposition_embedding_matrix"] = dposition_embedding_matrix
