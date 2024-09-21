@@ -7,7 +7,7 @@ import numpy as np
 from llm.optimizers import Optimizer
 
 
-class Embedding(object):
+class Embedding:
     """A learned embedding layer for a fixed vocab size.
 
     TODO(dtag): Support positional encodings.

@@ -7,7 +7,7 @@ import numpy as np
 from llm.optimizers import Optimizer
 
 
-class Linear(object):
+class Linear:
     """Implements a single linear layer with a weight matrix and bias."""
 
     def __init__(

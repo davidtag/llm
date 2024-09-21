@@ -8,7 +8,7 @@ from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 
 
-class MultiHeadAttention(object):
+class MultiHeadAttention:
     """A single multi-head attention sub-layer of a Transformer block.
 
     TODO(dtag): Support causal masks.

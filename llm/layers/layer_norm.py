@@ -7,7 +7,7 @@ import numpy as np
 from llm.optimizers import Optimizer
 
 
-class LayerNorm(object):
+class LayerNorm:
     """Implements a single layer normalization."""
 
     def __init__(

@@ -9,7 +9,7 @@ from llm.optimizers import Optimizer
 from llm.utils.math import relu
 
 
-class FeedForward(object):
+class FeedForward:
     """A 2-layer feed-forward network with ReLU activation."""
 
     def __init__(

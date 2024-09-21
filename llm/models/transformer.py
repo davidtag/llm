@@ -11,7 +11,7 @@ from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 
 
-class Transformer(object):
+class Transformer:
     """A Transformer architecture for sequence processing."""
 
     def __init__(

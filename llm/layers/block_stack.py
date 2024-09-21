@@ -8,7 +8,7 @@ from llm.layers.block import Block
 from llm.optimizers import Optimizer
 
 
-class BlockStack(object):
+class BlockStack:
     """A stack of block in a Transformer architecture."""
 
     def __init__(

@@ -48,8 +48,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass
@@ -82,8 +82,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass
@@ -117,8 +117,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass
@@ -156,8 +156,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         layer_2 = Linear(n_input=self.D, n_output=self.C, optimizer=optimizer)  # needed to project to output
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass
@@ -195,8 +195,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         layer_2 = Linear(n_input=self.D, n_output=self.C, optimizer=optimizer)  # needed to project to output
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass
@@ -235,8 +235,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         layer_2 = Linear(n_input=self.D, n_output=self.C, optimizer=optimizer)  # needed to project to output
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass
@@ -273,8 +273,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         model = Embedding(vocab_size=self.C, d_model=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass
@@ -308,8 +308,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         layer_2 = Linear(n_input=512, n_output=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         data = np.array([234, 496, 210, 8])
 
@@ -348,8 +348,8 @@ class TestTraingEndToEnd(unittest.TestCase):
         model = Transformer(vocab_size=self.C, n_blocks=1, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
-        initial_loss = None
-        last_loss = None
+        initial_loss = float("inf")
+        last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass

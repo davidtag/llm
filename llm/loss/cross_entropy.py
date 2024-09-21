@@ -5,7 +5,7 @@ import numpy as np
 from llm.utils.math import log_softmax, softmax
 
 
-class CrossEntropyLoss(object):
+class CrossEntropyLoss:
     """Implements the cross-entropy, or negative loglikelihood, loss function."""
 
     def __init__(

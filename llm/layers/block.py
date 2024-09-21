@@ -10,7 +10,7 @@ from llm.layers.multi_head_attention import MultiHeadAttention
 from llm.optimizers import Optimizer
 
 
-class Block(object):
+class Block:
     """A single block in a Transformer architecture."""
 
     def __init__(
