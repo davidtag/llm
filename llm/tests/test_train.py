@@ -1,5 +1,5 @@
 # pylint: disable=invalid-name
-"""A set of integration tests of various layers/losses/optimizers, testing training end-to-end."""
+"""A set of integration tests of various layers/losses/model/optimizers, testing training end-to-end."""
 
 import unittest
 
@@ -13,7 +13,7 @@ from llm.utils.math import softmax
 
 
 class TestTrainingEndToEnd(unittest.TestCase):
-    """Tests a full training pipeline for various layers/losses/optmizers."""
+    """Tests a full training pipeline for various layers/losses/models/optmizers."""
 
     def setUp(self) -> None:
         self.data = np.array(
