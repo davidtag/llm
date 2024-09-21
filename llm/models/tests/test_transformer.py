@@ -15,6 +15,7 @@ class TestTransformer(unittest.TestCase):
         self.model = Transformer(vocab_size=13, n_blocks=2, d_model=10, d_k=17, d_v=37, h=7, d_ff=256)
 
     def test_n_params(self) -> None:
+        """Test the layer reports the correct number of parameters."""
         embedding_params = 13 * 10
         block_stack_params = 2 * (
             # MultiHeadAttention
@@ -35,10 +36,12 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(self.model.n_params, total_params)
 
     def test_forward(self) -> None:
+        """Test the forward pass."""
         out = self.model.forward(self.data)
         self.assertEqual(out.shape, (7, 13))
 
     def test_backward_at_zero(self) -> None:
+        """Test the backward pass with upstream gradient being 0."""
         out = self.model.forward(self.data)
 
         dout = np.zeros_like(out)
@@ -49,12 +52,14 @@ class TestTransformer(unittest.TestCase):
         self.assertTrue(np.all(self.model.embedding_layer.cache["dembedding_mat"] == 0))
 
     def test_predict(self) -> None:
+        """Test the predict method."""
         probs = self.model.predict(self.data)
-        self.assertEqual(probs.shape, (13,))
+        self.assertEqual(probs.shape, (13,))  # probability distribution over the vocab
         self.assertTrue(np.all(probs > 0))
         self.assertAlmostEqual(probs.sum(), 1)
 
     def test_generate(self) -> None:
+        """Test the generate method."""
         output = self.model.generate(self.data, max_tokens=5)
         self.assertTrue(output.shape, (5,))
         self.assertGreaterEqual(min(output), 0)
