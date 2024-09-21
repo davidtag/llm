@@ -43,7 +43,7 @@ class Transformer:
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
-        self.encoder = BlockStack(
+        self.decoder = BlockStack(
             n_blocks=n_blocks,
             d_model=d_model,
             d_k=d_k,
@@ -63,7 +63,7 @@ class Transformer:
     @property
     def n_params(self) -> int:
         """The number of parameters in the layer."""
-        return self.embedding_layer.n_params + self.encoder.n_params + self.unembedding_layer.n_params
+        return self.embedding_layer.n_params + self.decoder.n_params + self.unembedding_layer.n_params
 
     def forward(self, input_sequence: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
@@ -71,7 +71,7 @@ class Transformer:
         assert input_sequence.min() >= 0 and input_sequence.max() < self.vocab_size
 
         raw_embedding = self.embedding_layer.forward(input_sequence)  # shape = (N, d_model)
-        refined_embedding = self.encoder.forward(raw_embedding)  # shape = (N, d_model)
+        refined_embedding = self.decoder.forward(raw_embedding)  # shape = (N, d_model)
         logits = self.unembedding_layer.forward(refined_embedding)  # shape = (N, vocab_size)
 
         return logits
@@ -84,8 +84,8 @@ class Transformer:
         dlogits = dout
         self.unembedding_layer.backward(dlogits)
         drefined_embedding = self.unembedding_layer.cache["dx"]
-        self.encoder.backward(drefined_embedding)
-        draw_embedding = self.encoder.cache["dx"]
+        self.decoder.backward(drefined_embedding)
+        draw_embedding = self.decoder.cache["dx"]
         self.embedding_layer.backward(draw_embedding)
 
     def step(self) -> None:
@@ -94,7 +94,7 @@ class Transformer:
         assert self.optimizer, "Cannot take an optimization step with optimizer=None"
 
         self.unembedding_layer.step()
-        self.encoder.step()
+        self.decoder.step()
         self.embedding_layer.step()
 
     def predict(self, input_sequence: np.ndarray) -> np.ndarray:

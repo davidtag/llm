@@ -48,7 +48,7 @@ class TestTransformer(unittest.TestCase):
         self.model.backward(dout)
 
         self.assertTrue(np.all(self.model.unembedding_layer.cache["dx"] == 0))
-        self.assertTrue(np.all(self.model.encoder.cache["dx"] == 0))
+        self.assertTrue(np.all(self.model.decoder.cache["dx"] == 0))
         self.assertTrue(np.all(self.model.embedding_layer.cache["dembedding_mat"] == 0))
 
     def test_predict(self) -> None:
