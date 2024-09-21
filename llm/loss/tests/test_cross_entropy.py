@@ -11,6 +11,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
     """Unit tests for CrossEntropyLoss."""
 
     def test_forward_equal_probabilties(self) -> None:
+        """Test the forward pass where output probabilities are uniform."""
         loss_fn = CrossEntropyLoss()
 
         logits = np.array([[0, 0]])  # all probabilties become 1/2
@@ -24,6 +25,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         self.assertAlmostEqual(loss, np.log(3))  # -log(1/3)
 
     def test_zero_loss(self) -> None:
+        """Test the forward & backward pass when the loss is 0."""
         loss_fn = CrossEntropyLoss()
 
         logits = np.array(
@@ -42,6 +44,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         np.testing.assert_almost_equal(dlogits, expected)
 
     def test_large_loss(self) -> None:
+        """Test numerical stability when the loss function is large."""
         loss_fn = CrossEntropyLoss()
 
         logits = np.array(
@@ -66,7 +69,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
         )
         np.testing.assert_almost_equal(dlogits, expected)
 
-    def test_random_step(self) -> None:
+    def test_backward_random_step(self) -> None:
+        """Test correctness of the backward pass using a random step in the input."""
         loss_fn = CrossEntropyLoss()
 
         logits = np.random.standard_normal(size=(5, 3))
