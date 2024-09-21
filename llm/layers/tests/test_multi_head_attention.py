@@ -11,6 +11,7 @@ class TestMultiHeadAttention(unittest.TestCase):
     """Unit tests for MultiHeadAttention."""
 
     def setUp(self) -> None:
+        np.random.seed(31415926)
         self.data = np.array(
             [
                 [-0.80672381, -0.08818247, 0.002],
