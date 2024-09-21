@@ -8,10 +8,7 @@ from llm.optimizers import Optimizer
 
 
 class Embedding:
-    """A learned embedding layer for a fixed vocab size.
-
-    TODO(dtag): Support positional encodings.
-    """
+    """A learned embedding layer for a fixed vocab size & context window."""
 
     def __init__(
         self,
