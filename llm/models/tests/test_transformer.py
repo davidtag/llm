@@ -12,11 +12,13 @@ class TestTransformer(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data = np.array([0, 2, 7, 2, 9, 4, 11])
-        self.model = Transformer(vocab_size=13, n_blocks=2, d_model=10, d_k=17, d_v=37, h=7, d_ff=256)
+        self.model = Transformer(
+            vocab_size=13, context_window=128, n_blocks=2, d_model=10, d_k=17, d_v=37, h=7, d_ff=256
+        )
 
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
-        embedding_params = 13 * 10
+        embedding_params = 13 * 10 + 128 * 10
         block_stack_params = 2 * (
             # MultiHeadAttention
             7 * 10 * (17 + 17 + 37 + 37)
@@ -49,7 +51,8 @@ class TestTransformer(unittest.TestCase):
 
         self.assertTrue(np.all(self.model.unembedding_layer.cache["dx"] == 0))
         self.assertTrue(np.all(self.model.decoder.cache["dx"] == 0))
-        self.assertTrue(np.all(self.model.embedding_layer.cache["dembedding_mat"] == 0))
+        self.assertTrue(np.all(self.model.embedding_layer.cache["dtoken_embedding_matrix"] == 0))
+        self.assertTrue(np.all(self.model.embedding_layer.cache["dposition_embedding_matrix"] == 0))
 
     def test_predict(self) -> None:
         """Test the predict method."""

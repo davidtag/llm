@@ -264,7 +264,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
     def test_train_embedding(self, num_iters: int = 50) -> None:
         """Test that we can train an embedding layer."""
         optimizer = Adam(lr=0.5)
-        model = Embedding(vocab_size=self.C, d_model=self.C, optimizer=optimizer)
+        model = Embedding(vocab_size=self.C, context_window=self.N, d_model=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
         initial_loss = float("inf")
@@ -298,7 +298,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
     def test_train_embedding_with_linear(self, num_iters: int = 50) -> None:
         """Test that we can train an embedding layer when stacked with a linear layer."""
         optimizer = Adam(lr=0.1)
-        layer_1 = Embedding(vocab_size=500, d_model=512, optimizer=optimizer)
+        layer_1 = Embedding(vocab_size=500, context_window=128, d_model=512, optimizer=optimizer)
         layer_2 = Linear(n_input=512, n_output=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
@@ -339,7 +339,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
     def test_train_transformer_depth_1(self, num_iters: int = 50) -> None:
         """Test that we can train a Transformer model with depth 1."""
         optimizer = Adam(lr=0.01)
-        model = Transformer(vocab_size=self.C, n_blocks=1, optimizer=optimizer)
+        model = Transformer(vocab_size=self.C, context_window=self.N, n_blocks=1, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
         initial_loss = float("inf")
@@ -375,6 +375,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
         optimizer = Adam(lr=0.05)
         model = Transformer(
             vocab_size=2,
+            context_window=128,
             n_blocks=1,
             d_model=64,
             d_k=8,

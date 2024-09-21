@@ -17,6 +17,7 @@ class Transformer:
     def __init__(
         self,
         vocab_size: int,
+        context_window: int,
         n_blocks: int = 6,
         d_model: int = 512,
         d_k: int = 64,
@@ -28,6 +29,7 @@ class Transformer:
     ) -> None:
         """Initialize the model."""
         self.vocab_size = vocab_size
+        self.context_window = context_window
         self.n_blocks = n_blocks
         self.d_model = d_model
         self.d_k = d_k
@@ -39,6 +41,7 @@ class Transformer:
 
         self.embedding_layer = Embedding(
             vocab_size=vocab_size,
+            context_window=context_window,
             d_model=d_model,
             enable_grad=enable_grad,
             optimizer=optimizer,
