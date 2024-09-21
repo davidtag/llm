@@ -62,18 +62,19 @@ class Embedding:
 
         token_embeddings = self.token_embedding_matrix[input_sequence]  # shape = (n, d_model)
         position_embeddings = self.position_embedding_matrix[:n]  # shape = (n, d_model)
-        embeddings = token_embeddings + position_embeddings
+        out = token_embeddings + position_embeddings
 
         if self.enable_grad:
             self.cache["input_sequence"] = input_sequence
 
-        return embeddings
+        return out
 
     def backward(self, dout: np.ndarray) -> None:
         """Compute the layer gradients given the upstream gradient."""
         assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
         input_sequence = self.cache["input_sequence"]
-        assert dout.shape == (input_sequence.shape[0], self.d_model)
+        n = len(input_sequence)
+        assert dout.shape == (n, self.d_model)
 
         dtoken_embedding_matrix = self.cache["dtoken_embedding_matrix"]
         dposition_embedding_matrix = self.cache["dposition_embedding_matrix"]
@@ -84,7 +85,8 @@ class Embedding:
 
         for i, row in enumerate(dout):
             dtoken_embedding_matrix[input_sequence[i]] += row
-            dposition_embedding_matrix[i] = row
+
+        dposition_embedding_matrix[:n] = dout
 
         self.cache["dtoken_embedding_matrix"] = dtoken_embedding_matrix
         self.cache["dposition_embedding_matrix"] = dposition_embedding_matrix
