@@ -30,8 +30,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         logits = np.array(
             [
-                [0.3, 100],  # almost all prob on 1
-                [900, -0.5],  # almost all prob on 0
+                [0.3, 100.0],  # almost all prob on 1
+                [900.0, -0.5],  # almost all prob on 0
             ]
         )
         targets = np.array([1, 0])
@@ -49,9 +49,9 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         logits = np.array(
             [
-                [0.3, 100],  # almost all prob on 1
-                [900, -0.5],  # almost all prob on 0
-                [45, -0.5],  # almost all prob on 0
+                [0.3, 100.0],  # almost all prob on 1
+                [900.0, -0.5],  # almost all prob on 0
+                [45.0, -0.5],  # almost all prob on 0
             ]
         )
         targets = np.array([0, 1, 1])
