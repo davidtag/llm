@@ -54,3 +54,5 @@ Ground-up implementation of LLMs with minimal dependencies
     - Use latest numpy
     - Add requirements files
     - Add test runner
+- Data Loader & batcher
+- Tokenizer (enc, dec, train)
