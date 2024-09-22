@@ -51,3 +51,8 @@ Ground-up implementation of LLMs with minimal dependencies
     # }
 - Support on-disk parameter dumping and loading: dump_params(file), load_params(file)
     - Transformer
+- Create virtual env and helper scripts
+    - Use latest Python version or one just before it
+    - Use latest numpy
+    - Add requirements files
+    - Add test runner
