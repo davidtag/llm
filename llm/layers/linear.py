@@ -37,9 +37,9 @@ class Linear:
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        assert x.ndim == 2 and x.shape[-1] == self.n_input
+        assert x.ndim >= 2 and x.shape[-1] == self.n_input  # shape = (D_1, ..., D_k, n_input)
 
-        out = np.matmul(x, self.w) + self.b
+        out = np.matmul(x, self.w) + self.b  # shape = (D_1, ..., D_k, n_output)
 
         if self.enable_grad:
             self.cache["x"] = x

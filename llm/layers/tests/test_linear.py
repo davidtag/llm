@@ -19,6 +19,11 @@ class TestLinear(unittest.TestCase):
                 [1.16085551, -0.15033837, -0.332],
             ]
         )
+        self.data_3d = np.array([self.data, 2 * self.data])
+
+        self.assertEqual(self.data.shape, (4, 3))
+        self.assertEqual(self.data_3d.shape, (2, 4, 3))
+        self.assertEqual(2 * self.data_3d[0].sum(), self.data_3d[1].sum())
 
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
@@ -30,10 +35,20 @@ class TestLinear(unittest.TestCase):
 
     def test_forward(self) -> None:
         """Test the forward pass."""
-        model = Linear(n_input=3, n_output=2)
+        model = Linear(n_input=3, n_output=9)
 
+        # Correct shape on 2D input
         out = model.forward(self.data)
-        self.assertEqual(out.shape, (4, 2))
+        self.assertEqual(out.shape, (4, 9))
+
+        # Correct shape on 3d input
+        out_3d = model.forward(self.data_3d)
+        self.assertEqual(out_3d.shape, (2, 4, 9))
+
+        # Confirm broadcasting works correctly
+        beta = 2 * out_3d[0] - out_3d[1]
+        xw_ratio = (out_3d[1] - beta) / (out_3d[0] - beta)
+        np.testing.assert_array_almost_equal(xw_ratio, np.ones_like(xw_ratio) * 2)
 
     def test_backward_at_zero(self) -> None:
         """Test the backward pass with upstream gradient being 0."""
