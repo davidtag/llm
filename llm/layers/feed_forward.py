@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy as np
 
+from llm.constants import DEFAULT_DTYPE
 from llm.layers.linear import Linear
 from llm.optimizers import Optimizer
 from llm.utils.math import relu
@@ -17,6 +18,7 @@ class FeedForward:
         n_input: int,
         n_hidden: int,
         n_output: int,
+        dtype: np.dtype = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -24,6 +26,7 @@ class FeedForward:
         self.n_input = n_input
         self.n_hidden = n_hidden
         self.n_output = n_output
+        self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
@@ -31,12 +34,14 @@ class FeedForward:
         self.layer_1 = Linear(
             n_input=n_input,
             n_output=n_hidden,
+            dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
         self.layer_2 = Linear(
             n_input=n_hidden,
             n_output=n_output,
+            dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
@@ -48,7 +53,7 @@ class FeedForward:
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        assert x.ndim == 2 and x.shape[-1] == self.n_input
+        assert x.ndim >= 2 and x.shape[-1] == self.n_input
 
         h = self.layer_1.forward(x)
         a = relu(h)
@@ -59,7 +64,7 @@ class FeedForward:
     def backward(self, dout: np.ndarray) -> None:
         """Compute the layer gradients given the upstream gradient."""
         assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
-        assert dout.shape == (self.layer_1.cache["x"].shape[0], self.n_output)
+        assert dout.shape == (*self.layer_1.cache["x"].shape[:-1], self.n_output)
 
         self.layer_2.backward(dout)
         da = self.layer_2.cache["dx"]
