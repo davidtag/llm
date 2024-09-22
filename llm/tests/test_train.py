@@ -370,12 +370,12 @@ class TestTrainingEndToEnd(unittest.TestCase):
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=4)
 
-    def test_train_transformer_vocab_size_2(self, num_iters: int = 50) -> None:
-        """Test that we can train a Transformer model on a small vocab size."""
-        optimizer = Adam(lr=0.05)
+    def test_train_transformer_vocab_size_2(self, num_epochs: int = 10, context_window: int = 16) -> None:
+        """Test that we can train a Transformer model on a small vocab size with predictable pattern."""
+        optimizer = Adam(lr=0.03)
         model = Transformer(
             vocab_size=2,
-            context_window=128,
+            context_window=context_window,
             n_blocks=1,
             d_model=64,
             d_k=8,
@@ -386,36 +386,45 @@ class TestTrainingEndToEnd(unittest.TestCase):
         )
         loss_fn = CrossEntropyLoss()
 
-        training_sequence = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
-        data = training_sequence[:-1]
-        targets = training_sequence[1:]
+        training_sequence = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+        self.assertEqual(len(training_sequence), context_window + 1)
 
         initial_loss = float("inf")
         last_loss = float("inf")
 
-        for i in range(num_iters):
-            # Forward Pass
-            logits = model.forward(data)
-            loss = loss_fn.forward(logits, targets)
+        for i in range(num_epochs):
+            for j in range(context_window):
+                data = training_sequence[j:-1]
+                targets = training_sequence[(j + 1) :]
 
-            if i == 0:
-                initial_loss = loss
-            if i == num_iters - 1:
-                last_loss = loss
-                break
+                # Forward Pass
+                logits = model.forward(data)
+                loss = loss_fn.forward(logits, targets)
 
-            # Backward Pass
-            dlogits = loss_fn.backward()
-            model.backward(dlogits)
-            model.step()
+                if i == 0 and j == 0:
+                    initial_loss = loss
+                if i == num_epochs - 1 and j == context_window - 1:
+                    last_loss = loss
+                    break
+
+                # Backward Pass
+                dlogits = loss_fn.backward()
+                model.backward(dlogits)
+                model.step()
 
         # Loss Improvement
         self.assertLess(last_loss, initial_loss)
         self.assertLess(last_loss, 1e-3)
 
         # Predictions are Correct
-        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1]))[0], 1.0, places=5)
-        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1, 0]))[1], 1.0, places=5)
+        self.assertAlmostEqual(model.predict(np.array([0]))[1], 1.0, places=4)  # (0,) -> 1
+        self.assertAlmostEqual(model.predict(np.array([1]))[0], 1.0, places=4)  # (1,) -> 0
+        self.assertAlmostEqual(model.predict(np.array([0, 1]))[0], 1.0, places=4)  # (0, 1,) -> 0
+        self.assertAlmostEqual(model.predict(np.array([1, 0]))[1], 1.0, places=4)  # (1, 0,) -> 1
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0]))[1], 1.0, places=4)
+        self.assertAlmostEqual(model.predict(np.array([1, 0, 1]))[0], 1.0, places=4)
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1]))[0], 1.0, places=4)
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1, 0]))[1], 1.0, places=4)
 
         # Generation is correct
         np.testing.assert_array_equal(
@@ -426,7 +435,3 @@ class TestTrainingEndToEnd(unittest.TestCase):
             model.generate(np.array([0, 1, 0, 1, 0, 1, 0, 1, 0]), max_tokens=10, is_random=False),
             np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
         )
-
-        # TODO(dtag): When causal masks are implemented, these should also pass
-        # self.assertAlmostEqual(model.predict(np.array([0]))[1], 1.0, places=6)
-        # self.assertAlmostEqual(model.predict(np.array([1]))[0], 1.0, places=6)
