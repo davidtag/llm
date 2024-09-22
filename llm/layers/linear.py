@@ -22,6 +22,7 @@ class Linear:
         """Initialize the layer."""
         self.n_input = n_input
         self.n_output = n_output
+        self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
