@@ -224,3 +224,22 @@ class TestLinear(unittest.TestCase):
         loss2 = out2.sum()
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
+
+    def test_backward_random_dx_3d(self) -> None:
+        """Test the backward pass for dx with random step (3d input)."""
+        model = Linear(n_input=3, n_output=2)
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        dx = model.cache["dx"]
+
+        step = 0.01 * np.random.random(size=self.data_3d.shape)
+        expected_change = np.sum(step * dx)
+        x = self.data_3d + step
+        out2 = model.forward(x)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=9)
