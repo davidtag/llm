@@ -27,6 +27,7 @@ Ground-up implementation of LLMs with minimal dependencies
     - Transformer
 - Support batching
     - FeedForward
+    - CrossEntropyLoss
     - LayerNorm
     - MultiHeadAttention
     - Block
