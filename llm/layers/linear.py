@@ -37,9 +37,9 @@ class Linear:
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        assert x.ndim >= 2 and x.shape[-1] == self.n_input  # shape = (D_1, ..., D_k, n_input)
+        assert x.ndim >= 2 and x.shape[-1] == self.n_input  # shape = (D_0, ..., D_k, n_input)
 
-        out = np.matmul(x, self.w) + self.b  # shape = (D_1, ..., D_k, n_output)
+        out = np.matmul(x, self.w) + self.b  # shape = (D_0, ..., D_k, n_output)
 
         if self.enable_grad:
             self.cache["x"] = x
@@ -50,11 +50,18 @@ class Linear:
         """Compute the layer gradients given the upstream gradient."""
         assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
         x = self.cache["x"]
-        assert dout.shape == (x.shape[0], self.n_output)
+        assert dout.shape == (*x.shape[:-1], self.n_output)  # shape = (D_0, ..., D_k, n_output)
 
-        dx = np.matmul(dout, np.transpose(self.w))
-        dw = np.matmul(np.transpose(x), dout)
-        db = np.sum(dout, axis=0, keepdims=True)
+        batch_axes = tuple(np.arange(x.ndim - 1))  # (0, 1, .., k)
+        non_matmul_axes = batch_axes[:-1]  # (0, 1, .., k-1). Empty for x.ndim == 2.
+
+        dx = np.matmul(dout, np.transpose(self.w))  # shape = (D_0, ..., D_k, n_input)
+
+        x_t = np.transpose(x, axes=(*non_matmul_axes, -1, -2))  # shape = (D_0, ..., D_k-1, n_input, D_k)
+        dw = np.matmul(x_t, dout)  # shape = (D_0, ..., D_k-1, n_input, n_output)
+        dw = np.sum(dw, axis=non_matmul_axes)  # sum along other dims since output is parallel in them
+
+        db = np.sum(dout, axis=batch_axes, keepdims=True).reshape(1, -1)
 
         self.cache["dx"] = dx
         self.cache["dw"] = dw

@@ -52,7 +52,7 @@ class TestLinear(unittest.TestCase):
 
     def test_backward_at_zero(self) -> None:
         """Test the backward pass with upstream gradient being 0."""
-        model = Linear(n_input=3, n_output=2)
+        model = Linear(n_input=3, n_output=9)
 
         out = model.forward(self.data)
 
@@ -63,8 +63,28 @@ class TestLinear(unittest.TestCase):
         db = model.cache["db"]
 
         self.assertEqual(dx.shape, (4, 3))
-        self.assertEqual(dw.shape, (3, 2))
-        self.assertEqual(db.shape, (1, 2))
+        self.assertEqual(dw.shape, (3, 9))
+        self.assertEqual(db.shape, (1, 9))
+
+        self.assertTrue(np.all(dx == 0))
+        self.assertTrue(np.all(dw == 0))
+        self.assertTrue(np.all(db == 0))
+
+    def test_backward_at_zero_3d(self) -> None:
+        """Test the backward pass with upstream gradient being 0 (3d input)."""
+        model = Linear(n_input=3, n_output=9)
+
+        out = model.forward(self.data_3d)
+
+        dout = np.zeros_like(out)
+        model.backward(dout)
+        dx = model.cache["dx"]
+        dw = model.cache["dw"]
+        db = model.cache["db"]
+
+        self.assertEqual(dx.shape, (2, 4, 3))
+        self.assertEqual(dw.shape, (3, 9))
+        self.assertEqual(db.shape, (1, 9))
 
         self.assertTrue(np.all(dx == 0))
         self.assertTrue(np.all(dw == 0))
