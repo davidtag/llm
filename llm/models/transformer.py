@@ -119,7 +119,7 @@ class Transformer:
                 token = np.random.choice(self.vocab_size, p=probs)
             else:
                 token = np.argmax(probs)
-            current_sequence = np.append(current_sequence, token)[: self.context_window]
+            current_sequence = np.append(current_sequence, token)[-self.context_window :]
             output_sequence.append(token)
 
         return np.array(output_sequence)
