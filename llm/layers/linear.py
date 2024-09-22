@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE
 from llm.optimizers import Optimizer
 
 
@@ -15,7 +15,7 @@ class Linear:
         self,
         n_input: int,
         n_output: int,
-        dtype: np.dtype = DEFAULT_DTYPE,
+        dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
