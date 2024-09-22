@@ -7,6 +7,7 @@ import numpy as np
 from llm.layers.multi_head_attention import MultiHeadAttention
 
 
+# TODO(dtag): Test masked=True
 class TestMultiHeadAttention(unittest.TestCase):
     """Unit tests for MultiHeadAttention."""
 

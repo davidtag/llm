@@ -7,6 +7,7 @@ import numpy as np
 from llm.layers.block_stack import BlockStack
 
 
+# TODO(dtag): Test masked_attention=True
 class TestBlockStack(unittest.TestCase):
     """Unit tests for BlockStack."""
 

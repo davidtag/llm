@@ -7,6 +7,7 @@ import numpy as np
 from llm.layers.block import Block
 
 
+# TODO(dtag): Test masked_attention=True
 class TestBlock(unittest.TestCase):
     """Unit tests for Block."""
 
