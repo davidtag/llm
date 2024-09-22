@@ -18,7 +18,6 @@ Ground-up implementation of LLMs with minimal dependencies
 - Support `bias` param for Linear layer
 - Add eps to LayerNorm
 - Support dtype
-    - FeedForward
     - LayerNorm
     - MultiHeadAttention
     - Block
@@ -26,8 +25,7 @@ Ground-up implementation of LLMs with minimal dependencies
     - Embedding
     - Transformer
 - Support batching
-    - FeedForward
-    - CrossEntropyLoss
+    - CrossEntropyLoss  - do next and test train loop
     - LayerNorm
     - MultiHeadAttention
     - Block
@@ -54,5 +52,6 @@ Ground-up implementation of LLMs with minimal dependencies
     - Use latest numpy
     - Add requirements files
     - Add test runner
+- Rename context_window to context_length
 - Data Loader & batcher
 - Tokenizer (enc, dec, train)
