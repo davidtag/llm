@@ -23,6 +23,7 @@ class TestLinear(unittest.TestCase):
 
         self.assertEqual(self.data.shape, (4, 3))
         self.assertEqual(self.data_3d.shape, (2, 4, 3))
+
         self.assertEqual(2 * self.data_3d[0].sum(), self.data_3d[1].sum())
 
     def test_n_params(self) -> None:
