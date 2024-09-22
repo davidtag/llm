@@ -87,7 +87,7 @@ class TestFeedForward(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=2)
 
     def test_backward_random_dx(self) -> None:
-        """Test the backward pass for dx with upstream gradient being random."""
+        """Test the backward pass for dx with random step."""
         model = FeedForward(n_input=3, n_hidden=13, n_output=5)
 
         out = model.forward(self.data)

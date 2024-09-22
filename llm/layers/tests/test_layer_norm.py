@@ -132,7 +132,7 @@ class TestLayerNorm(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
     def test_backward_random_dx(self) -> None:
-        """Test the backward pass for dx with upstream gradient being random."""
+        """Test the backward pass for dx with random step."""
         model = LayerNorm(n_input=3)
 
         out = model.forward(self.data)
@@ -151,7 +151,7 @@ class TestLayerNorm(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=3)
 
     def test_backward_random_dgamma(self) -> None:
-        """Test the backward pass for dgamma with upstream gradient being random."""
+        """Test the backward pass for dgamma with random step."""
         model = LayerNorm(n_input=3)
 
         out = model.forward(self.data)

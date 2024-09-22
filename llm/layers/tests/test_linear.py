@@ -113,7 +113,7 @@ class TestLinear(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
     def test_backward_random_dx(self) -> None:
-        """Test the backward pass for dx with upstream gradient being random."""
+        """Test the backward pass for dx with random step."""
         model = Linear(n_input=3, n_output=2)
 
         out = model.forward(self.data)

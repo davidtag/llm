@@ -22,6 +22,7 @@ class TestBlock(unittest.TestCase):
         )
 
     def test_n_params(self) -> None:
+        """Test the layer reports the correct number of parameters."""
         model = Block(d_model=13, d_k=17, d_v=37, h=7, d_ff=256)
         self.assertEqual(
             model.n_params,
@@ -41,12 +42,14 @@ class TestBlock(unittest.TestCase):
         )
 
     def test_forward(self) -> None:
+        """Test the forward pass."""
         model = Block(d_model=3)
 
         out = model.forward(self.data)
         self.assertEqual(out.shape, (4, 3))
 
     def test_backward_at_zero(self) -> None:
+        """Test the backward pass with upstream gradient being 0."""
         model = Block(d_model=3)
 
         out = model.forward(self.data)
@@ -60,6 +63,7 @@ class TestBlock(unittest.TestCase):
         self.assertTrue(np.all(dx == 0))
 
     def test_backward_at_one_dx(self) -> None:
+        """Test the backward pass for dx with upstream gradient being 1."""
         model = Block(d_model=3)
 
         out = model.forward(self.data)
@@ -78,6 +82,7 @@ class TestBlock(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=2)
 
     def test_backward_random_dx(self) -> None:
+        """Test the backward pass for dx gradients with random step."""
         model = Block(d_model=3)
 
         out = model.forward(self.data)

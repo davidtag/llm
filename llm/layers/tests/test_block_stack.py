@@ -83,7 +83,7 @@ class TestBlockStack(unittest.TestCase):
         self.assertAlmostEqual(actual_change, expected_change, places=2)
 
     def test_backward_random_dx(self) -> None:
-        """Test the backward pass for dx with upstream gradient being random."""
+        """Test the backward pass for dx with random step."""
         model = BlockStack(n_blocks=2, d_model=3)
 
         out = model.forward(self.data)
