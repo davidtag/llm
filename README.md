@@ -5,7 +5,6 @@ Ground-up implementation of LLMs with minimal dependencies
 # TODO
 
 - Fix weight initialization
-    - Linear (use uniform, fix gain)
     - LayerNorm (use gamma=1, beta=0)
     - MultiHeadAttention
     - Embedding (should embeddings be standard normal?)
@@ -19,7 +18,6 @@ Ground-up implementation of LLMs with minimal dependencies
 - Support `bias` param for Linear layer
 - Add eps to LayerNorm
 - Support dtype
-    - Linear
     - FeedForward
     - LayerNorm
     - MultiHeadAttention

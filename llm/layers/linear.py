@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy as np
 
+from llm.constants import DEFAULT_DTYPE
 from llm.optimizers import Optimizer
 
 
@@ -14,6 +15,7 @@ class Linear:
         self,
         n_input: int,
         n_output: int,
+        dtype: np.dtype = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -24,8 +26,9 @@ class Linear:
         self.optimizer = optimizer
         self.cache = {}
 
-        self.w = np.random.normal(loc=0, scale=np.sqrt(2 / n_input), size=(n_input, n_output))
-        self.b = np.random.normal(loc=0, scale=np.sqrt(2 / n_input), size=(1, n_output))
+        spread = np.sqrt(1 / n_input)
+        self.w = np.random.uniform(low=-spread, high=spread, size=(n_input, n_output)).astype(dtype)
+        self.b = np.random.uniform(low=-spread, high=spread, size=(1, n_output)).astype(dtype)
 
         self.w_opt = optimizer.get_parameter_optimizer(self.w) if optimizer else None
         self.b_opt = optimizer.get_parameter_optimizer(self.b) if optimizer else None
