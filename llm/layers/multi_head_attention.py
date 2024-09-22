@@ -18,7 +18,7 @@ class MultiHeadAttention:
         d_k: int = 64,
         d_v: int = 64,
         h: int = 8,
-        masked: bool = False,  # TODO(dtag): Implement support. Currently ignored and non-masked.
+        masked: bool = False,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -59,6 +59,17 @@ class MultiHeadAttention:
 
         scale = 1 / np.sqrt(self.d_k)
         logits = scale * np.matmul(Q, np.transpose(K, axes=[0, 2, 1]))  # shape = (h, N, N)
+        if self.masked:
+            # The output of the attention head is a weighted average of the value vectors
+            # i.e., for each head h, the rows of the matrix V[h, :, :].
+            # Fix a head h, position (row) i, and entry (column) j:
+            #    head[h,i,j] = weighted_average(V[h, {1,2,...n}, j])
+            #                = weighted_average(V[h, {1,2,...i}, j]) to preserve causality
+            # This means the weights associated with entries j > i need to be 0. This correspons
+            # to a mask where all upper-triangular entries are 0. Moreover, to set the weight to
+            # 0, we set the logits to -inf.
+            row_indices, column_indices = np.triu_indices(N, k=1)  # k=1 because diagonal isn't masked
+            logits[:, row_indices, column_indices] = -np.inf
         weights = softmax(logits)  # shape = (h, N, N)
         head = np.matmul(weights, V)  # shape = (h, N, d_v)
 
@@ -98,6 +109,11 @@ class MultiHeadAttention:
         dV = np.matmul(np.transpose(weights, axes=[0, 2, 1]), dhead)  # shape = (h, N, d_v)
         dweights = np.matmul(dhead, np.transpose(V, axes=[0, 2, 1]))  # shape = (h, N, N)
 
+        # NOTE: because dlogits is calculated by multiplying by weights and the effect of the mask is to zero
+        # out the weights, the effect of the mask is implicitly captured when computing dlogits; i.e., the
+        # mask zero's out the effect of the upper-triangular logits, so the derivative of the loss with
+        # respect to these entries should be 0, and the formula below does just that. This is why there's
+        # no special-case handling for self.masked here.
         dlogits = weights * (
             dweights - np.sum(dweights * weights, axis=2, keepdims=True)
         )  # shape = (h, N, N)
