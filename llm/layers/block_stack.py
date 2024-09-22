@@ -19,6 +19,7 @@ class BlockStack:
         d_v: int = 64,
         h: int = 8,
         d_ff: int = 2048,
+        masked_attention: bool = False,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -41,6 +42,7 @@ class BlockStack:
                 d_v=d_v,
                 h=h,
                 d_ff=d_ff,
+                masked_attention=masked_attention,
                 enable_grad=enable_grad,
                 optimizer=optimizer,
             )

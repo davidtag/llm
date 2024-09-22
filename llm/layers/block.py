@@ -20,6 +20,7 @@ class Block:
         d_v: int = 64,
         h: int = 8,
         d_ff: int = 2048,
+        masked_attention: bool = False,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -29,6 +30,7 @@ class Block:
         self.d_v = d_v
         self.h = h
         self.d_ff = d_ff
+        self.masked_attention = masked_attention
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
@@ -38,6 +40,7 @@ class Block:
             d_k=d_k,
             d_v=d_v,
             h=h,
+            masked=masked_attention,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )

@@ -53,6 +53,7 @@ class Transformer:
             d_v=d_v,
             h=h,
             d_ff=d_ff,
+            masked_attention=True,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )

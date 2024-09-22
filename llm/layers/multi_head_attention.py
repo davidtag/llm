@@ -10,10 +10,7 @@ from llm.utils.math import softmax
 
 
 class MultiHeadAttention:
-    """A single multi-head attention sub-layer of a Transformer block.
-
-    TODO(dtag): Support causal masks.
-    """
+    """A single multi-head attention sub-layer of a Transformer block."""
 
     def __init__(
         self,
@@ -21,6 +18,7 @@ class MultiHeadAttention:
         d_k: int = 64,
         d_v: int = 64,
         h: int = 8,
+        masked: bool = False,  # TODO(dtag): Implement support. Currently ignored and non-masked.
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -29,6 +27,7 @@ class MultiHeadAttention:
         self.d_k = d_k
         self.d_v = d_v
         self.h = h
+        self.masked = masked
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
