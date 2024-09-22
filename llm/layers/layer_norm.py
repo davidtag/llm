@@ -46,6 +46,8 @@ class LayerNorm:
             # Need random noise to avoid z values all being exactly 1 or -1
             # The standard deviation of a set of 2 values is always 1 or -1
             x_std += 5 * np.random.random(size=(*x.shape[:-1], 1))
+        # TODO(dtag): Add eps.
+        # https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html#torch.nn.LayerNorm
         z = (x - x_mean) / x_std
 
         out = z * self.gamma + self.beta

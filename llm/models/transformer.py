@@ -71,7 +71,7 @@ class Transformer:
 
     def forward(self, input_sequence: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        assert input_sequence.ndim == 1
+        assert input_sequence.ndim == 1  # TODO(dtag): Accept a batch dimension
         assert input_sequence.min() >= 0 and input_sequence.max() < self.vocab_size
 
         raw_embedding = self.embedding_layer.forward(input_sequence)  # shape = (n, d_model)

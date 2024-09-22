@@ -32,6 +32,8 @@ class MultiHeadAttention:
         self.optimizer = optimizer
         self.cache = {}
 
+        # See here. Gain of 2 is for relu activation but here we have sigmoid for some, linear for others
+        # https://pytorch.org/docs/stable/nn.init.html
         self.w_q = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_k))
         self.w_k = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_k))
         self.w_v = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_v))
@@ -49,6 +51,9 @@ class MultiHeadAttention:
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
+        # TODO(dtag): Support x.shape = (B, T, d_model)
+        # To x_reshape = x[:, np.newaxis, :, :] or x.reshape(B, 1, -T, d_model) to allow for the matmul
+        # below to work
         assert x.ndim == 2 and x.shape[-1] == self.d_model
 
         N = x.shape[0]
