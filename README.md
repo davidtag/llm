@@ -28,7 +28,6 @@ Ground-up implementation of LLMs with minimal dependencies
     - Embedding
     - Transformer
 - Support batching
-    - Linear
     - FeedForward
     - LayerNorm
     - MultiHeadAttention
