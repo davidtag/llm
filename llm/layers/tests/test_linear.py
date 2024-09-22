@@ -35,19 +35,21 @@ class TestLinear(unittest.TestCase):
 
     def test_forward(self) -> None:
         """Test the forward pass."""
+        model = Linear(n_input=3, n_output=2)
+
+        out = model.forward(self.data)
+        self.assertEqual(out.shape, (4, 2))
+
+    def test_forward_3d(self) -> None:
+        """Test the forward pass (3d input)."""
         model = Linear(n_input=3, n_output=9)
 
-        # Correct shape on 2D input
-        out = model.forward(self.data)
-        self.assertEqual(out.shape, (4, 9))
-
-        # Correct shape on 3d input
-        out_3d = model.forward(self.data_3d)
-        self.assertEqual(out_3d.shape, (2, 4, 9))
+        out = model.forward(self.data_3d)
+        self.assertEqual(out.shape, (2, 4, 9))
 
         # Confirm broadcasting works correctly
-        beta = 2 * out_3d[0] - out_3d[1]
-        xw_ratio = (out_3d[1] - beta) / (out_3d[0] - beta)
+        beta = 2 * out[0] - out[1]
+        xw_ratio = (out[1] - beta) / (out[0] - beta)
         np.testing.assert_array_almost_equal(xw_ratio, np.ones_like(xw_ratio) * 2)
 
     def test_backward_at_zero(self) -> None:
@@ -109,6 +111,25 @@ class TestLinear(unittest.TestCase):
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
+    def test_backward_at_one_dx_3d(self) -> None:
+        """Test the backward pass for dx with upstream gradient being 1 (3d input)."""
+        model = Linear(n_input=3, n_output=9)
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        dx = model.cache["dx"]
+
+        step = 0.01
+        expected_change = step * dx.sum()
+        x = self.data_3d + step
+        out2 = model.forward(x)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=9)
+
     def test_backward_at_one_dw(self) -> None:
         """Test the backward pass for dw with upstream gradient being 1."""
         model = Linear(n_input=3, n_output=2)
@@ -128,6 +149,25 @@ class TestLinear(unittest.TestCase):
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
+    def test_backward_at_one_dw_3d(self) -> None:
+        """Test the backward pass for dw with upstream gradient being 1 (3d input)."""
+        model = Linear(n_input=3, n_output=9)
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        dw = model.cache["dw"]
+
+        step = 0.01
+        expected_change = step * dw.sum()
+        model.w += step
+        out2 = model.forward(self.data_3d)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=9)
+
     def test_backward_at_one_db(self) -> None:
         """Test the backward pass for db with upstream gradient being 1."""
         model = Linear(n_input=3, n_output=2)
@@ -143,6 +183,25 @@ class TestLinear(unittest.TestCase):
         expected_change = step * db.sum()
         model.b += step
         out2 = model.forward(self.data)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=9)
+
+    def test_backward_at_one_db_3d(self) -> None:
+        """Test the backward pass for db with upstream gradient being 1 (3d input)."""
+        model = Linear(n_input=3, n_output=9)
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        db = model.cache["db"]
+
+        step = 0.01
+        expected_change = step * db.sum()
+        model.b += step
+        out2 = model.forward(self.data_3d)
         loss2 = out2.sum()
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
