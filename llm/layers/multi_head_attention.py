@@ -5,6 +5,7 @@ from typing import Optional
 
 import numpy as np
 
+from llm.constants import DType, DEFAULT_DTYPE
 from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 
@@ -19,6 +20,7 @@ class MultiHeadAttention:
         d_v: int = 64,
         h: int = 8,
         masked: bool = False,
+        dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -28,16 +30,17 @@ class MultiHeadAttention:
         self.d_v = d_v
         self.h = h
         self.masked = masked
+        self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
 
         # See here. Gain of 2 is for relu activation but here we have sigmoid for some, linear for others
         # https://pytorch.org/docs/stable/nn.init.html
-        self.w_q = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_k))
-        self.w_k = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_k))
-        self.w_v = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_v))
-        self.w_o = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h * d_v, d_model))
+        self.w_q = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_k)).astype(dtype)
+        self.w_k = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_k)).astype(dtype)
+        self.w_v = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h, d_model, d_v)).astype(dtype)
+        self.w_o = np.random.normal(loc=0, scale=np.sqrt(2 / d_model), size=(h * d_v, d_model)).astype(dtype)
 
         self.w_q_opt = optimizer.get_parameter_optimizer(self.w_q) if optimizer else None
         self.w_k_opt = optimizer.get_parameter_optimizer(self.w_k) if optimizer else None
