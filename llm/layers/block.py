@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy as np
 
+from llm.constants import DType, DEFAULT_DTYPE
 from llm.layers.feed_forward import FeedForward
 from llm.layers.layer_norm import LayerNorm
 from llm.layers.multi_head_attention import MultiHeadAttention
@@ -21,6 +22,7 @@ class Block:
         h: int = 8,
         d_ff: int = 2048,
         masked_attention: bool = False,
+        dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -31,6 +33,7 @@ class Block:
         self.h = h
         self.d_ff = d_ff
         self.masked_attention = masked_attention
+        self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
@@ -41,18 +44,20 @@ class Block:
             d_v=d_v,
             h=h,
             masked=masked_attention,
+            dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
-        self.norm_1 = LayerNorm(n_input=d_model, enable_grad=enable_grad, optimizer=optimizer)
+        self.norm_1 = LayerNorm(n_input=d_model, dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.sublayer_2 = FeedForward(
             n_input=d_model,
             n_hidden=d_ff,
             n_output=d_model,
+            dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
-        self.norm_2 = LayerNorm(n_input=d_model, enable_grad=enable_grad, optimizer=optimizer)
+        self.norm_2 = LayerNorm(n_input=d_model, dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
 
     @property
     def n_params(self) -> int:

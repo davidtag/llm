@@ -16,7 +16,6 @@ Ground-up implementation of LLMs with minimal dependencies
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
 - Support `bias` param for Linear layer
 - Support dtype
-    - Block
     - BlockStack
     - Embedding
     - Transformer
