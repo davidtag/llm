@@ -36,6 +36,13 @@ class TestLayerNorm(unittest.TestCase):
         out = model.forward(self.data)
         self.assertEqual(out.shape, (4, 3))
 
+    def test_forward_3d(self) -> None:
+        """Test the forward pass."""
+        model = LayerNorm(n_input=3)
+
+        out = model.forward(self.data_3d)
+        self.assertEqual(out.shape, (2, 4, 3))
+
     def test_backward_at_zero(self) -> None:
         """Test the backward pass with upstream gradient being 0."""
         model = LayerNorm(n_input=3)
@@ -56,9 +63,30 @@ class TestLayerNorm(unittest.TestCase):
         self.assertTrue(np.all(dgamma == 0))
         self.assertTrue(np.all(dbeta == 0))
 
+    def test_backward_at_zero_3d(self) -> None:
+        """Test the backward pass with upstream gradient being 0 (3d input)."""
+        model = LayerNorm(n_input=3)
+
+        out = model.forward(self.data_3d)
+
+        dout = np.zeros_like(out)
+        model.backward(dout)
+        dx = model.cache["dx"]
+        dgamma = model.cache["dgamma"]
+        dbeta = model.cache["dbeta"]
+
+        self.assertEqual(dx.shape, (2, 4, 3))
+        self.assertEqual(dgamma.shape, (1, 3))
+        self.assertEqual(dbeta.shape, (1, 3))
+
+        self.assertTrue(np.all(dx == 0))
+        self.assertTrue(np.all(dgamma == 0))
+        self.assertTrue(np.all(dbeta == 0))
+
     def test_backward_at_one_dx(self) -> None:
         """Test the backward pass for dx with upstream gradient being 1."""
         model = LayerNorm(n_input=3)
+        model.gamma = np.random.standard_normal((1, 3))  # change gamma to make test non-trivial
 
         out = model.forward(self.data)
         loss = out.sum()
@@ -76,6 +104,32 @@ class TestLayerNorm(unittest.TestCase):
             places=9,
         )
         x = self.data + step
+        out2 = model.forward(x)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=9)
+
+    def test_backward_at_one_dx_3d(self) -> None:
+        """Test the backward pass for dx with upstream gradient being 1 (3d input)."""
+        model = LayerNorm(n_input=3)
+        model.gamma = np.random.standard_normal((1, 3))  # change gamma to make test non-trivial
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        dx = model.cache["dx"]
+
+        step = 0.1
+        expected_change = step * dx.sum()
+        self.assertAlmostEqual(
+            # layer norm is translation invariant to its input
+            expected_change,
+            0,
+            places=9,
+        )
+        x = self.data_3d + step
         out2 = model.forward(x)
         loss2 = out2.sum()
         actual_change = loss2 - loss
@@ -107,6 +161,32 @@ class TestLayerNorm(unittest.TestCase):
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
+    def test_backward_at_one_dgamma_3d(self) -> None:
+        """Test the backward pass for dgamma with upstream gradient being 1 (3d input)."""
+        model = LayerNorm(n_input=3)
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        dgamma = model.cache["dgamma"]
+
+        step = 0.01
+        expected_change = step * dgamma.sum()
+        self.assertAlmostEqual(
+            # gamma multiplies a normalized input, so it's sensitivity to input
+            # parameters is also normalized.
+            expected_change,
+            0,
+            places=9,
+        )
+        model.gamma += step
+        out2 = model.forward(self.data_3d)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=9)
+
     def test_backward_at_one_dbeta(self) -> None:
         """Test the backward pass for dbeta with upstream gradient being 1."""
         model = LayerNorm(n_input=3)
@@ -132,9 +212,35 @@ class TestLayerNorm(unittest.TestCase):
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
 
+    def test_backward_at_one_dbeta_3d(self) -> None:
+        """Test the backward pass for dbeta with upstream gradient being 1 (3d input)."""
+        model = LayerNorm(n_input=3)
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        dbeta = model.cache["dbeta"]
+
+        # beta is directly added to each element of the output, so it's gradient
+        # with a simple additive loss is just the number of data points in each
+        # dimension.
+        expected_dbeta = np.array([[8, 8, 8]])
+        np.testing.assert_array_equal(dbeta, expected_dbeta)
+
+        step = 0.01
+        expected_change = step * dbeta.sum()
+        model.beta += step
+        out2 = model.forward(self.data_3d)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=9)
+
     def test_backward_random_dx(self) -> None:
         """Test the backward pass for dx with random step."""
         model = LayerNorm(n_input=3)
+        model.gamma = np.random.standard_normal((1, 3))  # change gamma to make test non-trivial
 
         out = model.forward(self.data)
         loss = out.sum()
@@ -146,6 +252,26 @@ class TestLayerNorm(unittest.TestCase):
         step = 0.01 * np.random.random(size=self.data.shape)
         expected_change = np.sum(step * dx)
         x = self.data + step
+        out2 = model.forward(x)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=3)
+
+    def test_backward_random_dx_3d(self) -> None:
+        """Test the backward pass for dx with random step (3d input)."""
+        model = LayerNorm(n_input=3)
+        model.gamma = np.random.standard_normal((1, 3))  # change gamma to make test non-trivial
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        dx = model.cache["dx"]
+
+        step = 0.01 * np.random.random(size=self.data_3d.shape)
+        expected_change = np.sum(step * dx)
+        x = self.data_3d + step
         out2 = model.forward(x)
         loss2 = out2.sum()
         actual_change = loss2 - loss
