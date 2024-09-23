@@ -14,7 +14,7 @@ class Embedding:
     def __init__(
         self,
         vocab_size: int,
-        context_window: int,
+        context_size: int,
         d_model: int = 512,
         dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
@@ -22,7 +22,7 @@ class Embedding:
     ) -> None:
         """Initialize the layer."""
         self.vocab_size = vocab_size
-        self.context_window = context_window
+        self.context_size = context_size
         self.d_model = d_model
         self.dtype = dtype
         self.enable_grad = enable_grad
@@ -37,7 +37,7 @@ class Embedding:
         self.position_embedding_matrix = np.random.normal(
             loc=0,
             scale=np.sqrt(2 / d_model),
-            size=(context_window, d_model),
+            size=(context_size, d_model),
         ).astype(dtype)
 
         self.token_embedding_matrix_opt = (
@@ -61,7 +61,7 @@ class Embedding:
         assert input_sequence.ndim == 1
         assert input_sequence.min() >= 0 and input_sequence.max() < self.vocab_size
         n = len(input_sequence)
-        assert n <= self.context_window
+        assert n <= self.context_size
 
         token_embeddings = self.token_embedding_matrix[input_sequence]  # shape = (n, d_model)
         position_embeddings = self.position_embedding_matrix[:n]  # shape = (n, d_model)

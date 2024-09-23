@@ -307,7 +307,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
     def test_train_embedding(self, num_iters: int = 50) -> None:
         """Test that we can train an embedding layer."""
         optimizer = Adam(lr=0.5)
-        model = Embedding(vocab_size=self.C, context_window=self.N, d_model=self.C, optimizer=optimizer)
+        model = Embedding(vocab_size=self.C, context_size=self.N, d_model=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
         initial_loss = float("inf")
@@ -341,7 +341,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
     def test_train_embedding_with_linear(self, num_iters: int = 50) -> None:
         """Test that we can train an embedding layer when stacked with a linear layer."""
         optimizer = Adam(lr=0.1)
-        layer_1 = Embedding(vocab_size=500, context_window=128, d_model=512, optimizer=optimizer)
+        layer_1 = Embedding(vocab_size=500, context_size=128, d_model=512, optimizer=optimizer)
         layer_2 = Linear(n_input=512, n_output=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
@@ -382,7 +382,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
     def test_train_transformer_depth_1(self, num_iters: int = 50) -> None:
         """Test that we can train a Transformer model with depth 1."""
         optimizer = Adam(lr=0.001)
-        model = Transformer(vocab_size=self.C, context_window=self.N, n_blocks=1, optimizer=optimizer)
+        model = Transformer(vocab_size=self.C, context_size=self.N, n_blocks=1, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
         initial_loss = float("inf")
@@ -413,12 +413,12 @@ class TestTrainingEndToEnd(unittest.TestCase):
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=4)
 
-    def test_train_transformer_vocab_size_2(self, num_epochs: int = 10, context_window: int = 16) -> None:
+    def test_train_transformer_vocab_size_2(self, num_epochs: int = 10, context_size: int = 16) -> None:
         """Test that we can train a Transformer model on a small vocab size with predictable pattern."""
         optimizer = Adam(lr=0.03)
         model = Transformer(
             vocab_size=2,
-            context_window=context_window,
+            context_size=context_size,
             n_blocks=1,
             d_model=64,
             d_k=8,
@@ -430,13 +430,13 @@ class TestTrainingEndToEnd(unittest.TestCase):
         loss_fn = CrossEntropyLoss()
 
         training_sequence = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
-        self.assertEqual(len(training_sequence), context_window + 1)
+        self.assertEqual(len(training_sequence), context_size + 1)
 
         initial_loss = float("inf")
         last_loss = float("inf")
 
         for i in range(num_epochs):
-            for j in range(context_window):
+            for j in range(context_size):
                 data = training_sequence[j:-1]
                 targets = training_sequence[(j + 1) :]
 
@@ -446,7 +446,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
 
                 if i == 0 and j == 0:
                     initial_loss = loss
-                if i == num_epochs - 1 and j == context_window - 1:
+                if i == num_epochs - 1 and j == context_size - 1:
                     last_loss = loss
                     break
 

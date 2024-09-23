@@ -15,19 +15,19 @@ class TestEmbedding(unittest.TestCase):
 
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
-        model = Embedding(vocab_size=1000, context_window=256, d_model=512)
+        model = Embedding(vocab_size=1000, context_size=256, d_model=512)
         self.assertEqual(model.n_params, 1000 * 512 + 256 * 512)
 
     def test_forward(self) -> None:
         """Test the forward pass."""
-        model = Embedding(vocab_size=256, context_window=128, d_model=512)
+        model = Embedding(vocab_size=256, context_size=128, d_model=512)
 
         out = model.forward(self.data)
         self.assertEqual(out.shape, (6, 512))
 
     def test_backward_at_zero(self) -> None:
         """Test the backward pass with upstream gradient being 0."""
-        model = Embedding(vocab_size=256, context_window=128, d_model=512)
+        model = Embedding(vocab_size=256, context_size=128, d_model=512)
 
         out = model.forward(self.data)
 
@@ -45,7 +45,7 @@ class TestEmbedding(unittest.TestCase):
 
     def test_backward_at_one(self) -> None:
         """Test the backward pass with upstream gradient being 1."""
-        model = Embedding(vocab_size=256, context_window=128, d_model=512)
+        model = Embedding(vocab_size=256, context_size=128, d_model=512)
 
         out = model.forward(self.data)
 
@@ -75,7 +75,7 @@ class TestEmbedding(unittest.TestCase):
 
     def test_backward_dtoken_random(self) -> None:
         """Test the backward pass for token gradients with random step."""
-        model = Embedding(vocab_size=256, context_window=128, d_model=512)
+        model = Embedding(vocab_size=256, context_size=128, d_model=512)
 
         out = model.forward(self.data)
         loss = out.sum()
@@ -94,7 +94,7 @@ class TestEmbedding(unittest.TestCase):
 
     def test_backward_dposition_random(self) -> None:
         """Test the backward pass for position gradients with random step."""
-        model = Embedding(vocab_size=256, context_window=128, d_model=512)
+        model = Embedding(vocab_size=256, context_size=128, d_model=512)
 
         out = model.forward(self.data)
         loss = out.sum()

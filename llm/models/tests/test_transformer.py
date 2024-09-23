@@ -13,7 +13,7 @@ class TestTransformer(unittest.TestCase):
     def setUp(self) -> None:
         self.data = np.array([0, 2, 7, 2, 9, 4, 11])
         self.model = Transformer(
-            vocab_size=13, context_window=128, n_blocks=2, d_model=10, d_k=17, d_v=37, h=7, d_ff=256
+            vocab_size=13, context_size=128, n_blocks=2, d_model=10, d_k=17, d_v=37, h=7, d_ff=256
         )
 
     def test_n_params(self) -> None:
