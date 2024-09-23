@@ -15,7 +15,6 @@ Ground-up implementation of LLMs with minimal dependencies
         # See Karpathy's "Building makemore part3", 1:07:00
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
 - Support `bias` param for Linear layer
-- Add eps to LayerNorm
 - Support dtype
     - MultiHeadAttention
     - Block

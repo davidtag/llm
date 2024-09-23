@@ -14,12 +14,14 @@ class LayerNorm:
     def __init__(
         self,
         n_input: int,
+        eps: float = 1e-5,
         dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the layer."""
         self.n_input = n_input
+        self.eps = eps
         self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
@@ -44,13 +46,11 @@ class LayerNorm:
 
         x_mean = np.mean(x, axis=ndim - 1, keepdims=True)
         x_var = np.mean(np.square(x - x_mean), axis=ndim - 1, keepdims=True)
-        x_std = np.sqrt(x_var)
+        x_std = np.sqrt(x_var + self.eps)
         if self.n_input == 2:
             # Need random noise to avoid z values all being exactly 1 or -1
             # The standard deviation of a set of 2 values is always 1 or -1
             x_std += 5 * np.random.random(size=(*x.shape[:-1], 1))
-        # TODO(dtag): Add eps.
-        # https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html#torch.nn.LayerNorm
         z = (x - x_mean) / x_std
 
         out = z * self.gamma + self.beta
