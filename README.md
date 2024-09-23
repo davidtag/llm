@@ -51,3 +51,4 @@ Ground-up implementation of LLMs with minimal dependencies
 - Rename context_window to context_length
 - Data Loader & batcher
 - Tokenizer (enc, dec, train)
+- Revisit hack in LayerNorm when n_input==2

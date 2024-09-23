@@ -49,7 +49,7 @@ class LayerNorm:
         x_std = np.sqrt(x_var + self.eps)
         if self.n_input == 2:
             # Need random noise to avoid z values all being exactly 1 or -1
-            # The standard deviation of a set of 2 values is always 1 or -1
+            # The z-scores of a set of 2 values is always 1 or -1
             x_std += 5 * np.random.random(size=(*x.shape[:-1], 1))
         z = (x - x_mean) / x_std
 
