@@ -11,7 +11,7 @@ class TestLayerNorm(unittest.TestCase):
     """Unit tests for LayerNorm."""
 
     def setUp(self) -> None:
-        self.data = np.array(
+        self.data = np.array(  # shape = (4, 3)
             [
                 [-0.80672381, -0.08818247, 0.002],
                 [0.63413982, 1.32233656, 0.332],
@@ -19,14 +19,15 @@ class TestLayerNorm(unittest.TestCase):
                 [1.16085551, -0.15033837, -0.332],
             ]
         )
+        self.data_3d = np.array([self.data, 2 * self.data])  # shape = (2, 4, 3)
 
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
         model = LayerNorm(n_input=3)
-        self.assertEqual(model.n_params, 6)
+        self.assertEqual(model.n_params, 3 + 3)
 
         model = LayerNorm(n_input=32)
-        self.assertEqual(model.n_params, 64)
+        self.assertEqual(model.n_params, 32 + 32)
 
     def test_forward(self) -> None:
         """Test the forward pass."""
