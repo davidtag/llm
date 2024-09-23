@@ -33,8 +33,8 @@ Ground-up implementation of LLMs with minimal dependencies
     #   "layer_1": {"w": ..., "b": ...},
     #   "norm_1": {"gamma": ..., "beta": ...}
     # }
-- Support on-disk parameter dumping and loading: dump_params(file), load_params(file)
-    - Transformer
+- Support on-disk model dumping and loading (factory method): dump_model(file), load_model(file)
+    - Transformer (parameters + settings)
 - Create virtual env and helper scripts
     - Use latest Python version or one just before it
     - Use latest numpy
