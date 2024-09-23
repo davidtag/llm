@@ -5,7 +5,6 @@ Ground-up implementation of LLMs with minimal dependencies
 # TODO
 
 - Fix weight initialization
-    - LayerNorm (use gamma=1, beta=0)
     - MultiHeadAttention
     - Embedding (should embeddings be standard normal?)
 - Diagnose FeedForward training after 1 iter
@@ -18,15 +17,13 @@ Ground-up implementation of LLMs with minimal dependencies
 - Support `bias` param for Linear layer
 - Add eps to LayerNorm
 - Support dtype
-    - LayerNorm
     - MultiHeadAttention
     - Block
     - BlockStack
     - Embedding
     - Transformer
 - Support batching
-    - CrossEntropyLoss  - do next and test train loop
-    - LayerNorm
+    - LayerNorm  - do next and test train loop
     - MultiHeadAttention
     - Block
     - BlockStack
