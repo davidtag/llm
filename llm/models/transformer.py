@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy as np
 
+from llm.constants import DType, DEFAULT_DTYPE
 from llm.layers.block_stack import BlockStack
 from llm.layers.embedding import Embedding
 from llm.layers.linear import Linear
@@ -24,6 +25,7 @@ class Transformer:
         d_v: int = 64,
         h: int = 8,
         d_ff: int = 2048,
+        dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -36,6 +38,7 @@ class Transformer:
         self.d_v = d_v
         self.h = h
         self.d_ff = d_ff
+        self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
 
@@ -43,6 +46,7 @@ class Transformer:
             vocab_size=vocab_size,
             context_window=context_window,
             d_model=d_model,
+            dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
@@ -54,12 +58,14 @@ class Transformer:
             h=h,
             d_ff=d_ff,
             masked_attention=True,
+            dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
         self.unembedding_layer = Linear(
             n_input=d_model,
             n_output=vocab_size,
+            dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
