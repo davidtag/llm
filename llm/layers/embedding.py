@@ -29,16 +29,8 @@ class Embedding:
         self.optimizer = optimizer
         self.cache = {}
 
-        self.token_embedding_matrix = np.random.normal(
-            loc=0,
-            scale=np.sqrt(2 / d_model),
-            size=(vocab_size, d_model),
-        ).astype(dtype)
-        self.position_embedding_matrix = np.random.normal(
-            loc=0,
-            scale=np.sqrt(2 / d_model),
-            size=(context_size, d_model),
-        ).astype(dtype)
+        self.token_embedding_matrix = np.random.standard_normal(size=(vocab_size, d_model)).astype(dtype)
+        self.position_embedding_matrix = np.random.standard_normal(size=(context_size, d_model)).astype(dtype)
 
         self.token_embedding_matrix_opt = (
             optimizer.get_parameter_optimizer(self.token_embedding_matrix) if optimizer else None

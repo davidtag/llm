@@ -6,7 +6,6 @@ Ground-up implementation of LLMs with minimal dependencies
 
 - Fix weight initialization
     - MultiHeadAttention
-    - Embedding (should embeddings be standard normal?)
 - Diagnose FeedForward training after 1 iter
     - Distribution of activations
     - Distribution of gradients
