@@ -19,12 +19,17 @@ class CrossEntropyLoss:
 
     def forward(self, logits: np.ndarray, targets: np.ndarray) -> float:
         """Compute the loss for a set of logits and targets."""
-        assert logits.ndim == 2 and targets.ndim == 1
-        assert logits.shape[0] == targets.shape[0]
+        assert logits.ndim >= 2 and targets.ndim == logits.ndim - 1
+        assert logits.shape[:-1] == targets.shape
 
-        n = logits.shape[0]
-        log_probabilities = log_softmax(logits)
-        loss_elems = log_probabilities[np.arange(n), targets]
+        n_classes = logits.shape[-1]
+        n_predictions = targets.size
+
+        logits_stacked = logits.reshape(n_predictions, n_classes)
+        targets_stacked = targets.reshape(n_predictions)
+
+        log_probabilities = log_softmax(logits_stacked)
+        loss_elems = log_probabilities[np.arange(n_predictions), targets_stacked]
         loss = -np.mean(loss_elems)
 
         if self.enable_grad:
@@ -39,10 +44,17 @@ class CrossEntropyLoss:
         logits = self.cache["logits"]
         targets = self.cache["targets"]
 
-        n = logits.shape[0]
-        I_target = np.zeros_like(logits)
-        I_target[np.arange(n), targets] = 1
-        probabilities = softmax(logits)
-        dlogits = (1 / n) * (probabilities - I_target)
+        n_classes = logits.shape[-1]
+        n_predictions = targets.size
+
+        logits_stacked = logits.reshape(n_predictions, n_classes)
+        targets_stacked = targets.reshape(n_predictions)
+
+        I_target = np.zeros_like(logits_stacked)
+        I_target[np.arange(n_predictions), targets_stacked] = 1
+        probabilities = softmax(logits_stacked)
+        dlogits = (1 / n_predictions) * (probabilities - I_target)
+
+        dlogits = dlogits.reshape(logits.shape)
 
         return dlogits
