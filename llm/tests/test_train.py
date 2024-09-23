@@ -143,6 +143,49 @@ class TestTrainingEndToEnd(unittest.TestCase):
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=2)
 
+    def test_train_with_layer_norm_and_adam_3d(self, num_iters: int = 100) -> None:
+        """Test that we can overfit a small training dataset using a normalization layer (3d input)."""
+        optimizer = Adam(lr=0.01)
+        norm = LayerNorm(n_input=self.D, optimizer=optimizer)
+        model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
+        loss_fn = CrossEntropyLoss()
+
+        data = np.array([self.data, 25 * self.data])
+        targets = np.array([self.targets, self.targets])
+
+        initial_loss = float("inf")
+        last_loss = float("inf")
+
+        for i in range(num_iters):
+            # Forward Pass
+            data_norm = norm.forward(data)
+            logits = model.forward(data_norm)
+            loss = loss_fn.forward(logits, targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_iters - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            norm.backward(model.cache["dx"])
+            model.step()
+            norm.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 0.01)
+
+        # Predictions are Correct
+        data_norm = norm.forward(data)
+        logits = model.forward(data_norm)
+        probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities[0], decimal=2)
+        self.assert_probabilites_match_targets(probabilities[1], decimal=2)
+
     def test_train_multihead_attention(self, num_iters: int = 50) -> None:
         """Test that we can overfit a small training dataset using a multi-head attention layer."""
         optimizer = Adam(lr=0.05)

@@ -22,7 +22,6 @@ Ground-up implementation of LLMs with minimal dependencies
     - Embedding
     - Transformer
 - Support batching
-    - LayerNorm  - do next and test train loop
     - MultiHeadAttention
     - Block
     - BlockStack
