@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy as np
 
+from llm.constants import DType, DEFAULT_DTYPE
 from llm.optimizers import Optimizer
 
 
@@ -15,6 +16,7 @@ class Embedding:
         vocab_size: int,
         context_window: int,
         d_model: int = 512,
+        dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -22,6 +24,7 @@ class Embedding:
         self.vocab_size = vocab_size
         self.context_window = context_window
         self.d_model = d_model
+        self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
@@ -30,12 +33,12 @@ class Embedding:
             loc=0,
             scale=np.sqrt(2 / d_model),
             size=(vocab_size, d_model),
-        )
+        ).astype(dtype)
         self.position_embedding_matrix = np.random.normal(
             loc=0,
             scale=np.sqrt(2 / d_model),
             size=(context_window, d_model),
-        )
+        ).astype(dtype)
 
         self.token_embedding_matrix_opt = (
             optimizer.get_parameter_optimizer(self.token_embedding_matrix) if optimizer else None
