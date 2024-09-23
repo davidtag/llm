@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy as np
 
+from llm.constants import DType, DEFAULT_DTYPE
 from llm.optimizers import Optimizer
 
 
@@ -13,17 +14,19 @@ class LayerNorm:
     def __init__(
         self,
         n_input: int,
+        dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the layer."""
         self.n_input = n_input
+        self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
 
-        self.gamma = np.random.normal(loc=0, scale=np.sqrt(2 / n_input), size=(1, n_input))
-        self.beta = np.random.normal(loc=0, scale=np.sqrt(2 / n_input), size=(1, n_input))
+        self.gamma = np.ones(shape=(1, n_input), dtype=dtype)
+        self.beta = np.zeros(shape=(1, n_input), dtype=dtype)
 
         self.gamma_opt = optimizer.get_parameter_optimizer(self.gamma) if optimizer else None
         self.beta_opt = optimizer.get_parameter_optimizer(self.beta) if optimizer else None

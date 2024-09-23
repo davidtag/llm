@@ -104,9 +104,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=4)  # probs ~0.9999
 
-    def test_train_with_layer_norm_and_adam(self, num_iters: int = 50) -> None:
+    def test_train_with_layer_norm_and_adam(self, num_iters: int = 75) -> None:
         """Test that we can overfit a small training dataset using a normalization layer."""
-        optimizer = Adam(lr=0.5)
+        optimizer = Adam(lr=0.01)
         norm = LayerNorm(n_input=self.D, optimizer=optimizer)
         model = FeedForward(n_input=self.D, n_hidden=32, n_output=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
@@ -338,7 +338,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
 
     def test_train_transformer_depth_1(self, num_iters: int = 50) -> None:
         """Test that we can train a Transformer model with depth 1."""
-        optimizer = Adam(lr=0.01)
+        optimizer = Adam(lr=0.001)
         model = Transformer(vocab_size=self.C, context_window=self.N, n_blocks=1, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
