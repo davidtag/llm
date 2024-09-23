@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy as np
 
+from llm.constants import DType, DEFAULT_DTYPE
 from llm.layers.block import Block
 from llm.optimizers import Optimizer
 
@@ -20,6 +21,7 @@ class BlockStack:
         h: int = 8,
         d_ff: int = 2048,
         masked_attention: bool = False,
+        dtype: DType = DEFAULT_DTYPE,
         enable_grad: bool = True,
         optimizer: Optional[Optimizer] = None,
     ) -> None:
@@ -31,6 +33,7 @@ class BlockStack:
         self.d_v = d_v
         self.h = h
         self.d_ff = d_ff
+        self.dtype = dtype
         self.enable_grad = enable_grad
         self.optimizer = optimizer
         self.cache = {}
@@ -43,6 +46,7 @@ class BlockStack:
                 h=h,
                 d_ff=d_ff,
                 masked_attention=masked_attention,
+                dtype=dtype,
                 enable_grad=enable_grad,
                 optimizer=optimizer,
             )
