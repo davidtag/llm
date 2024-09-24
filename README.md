@@ -42,6 +42,7 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
 - Create virtual env and helper scripts
     - Use latest Python version or one just before it
     - Use latest numpy
+        - add copy=False to all reshape()s
     - Add requirements files
     - Add test runner
 - Data Loader & batcher
