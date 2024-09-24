@@ -6,6 +6,10 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
 
 - Fix weight initialization
     - MultiHeadAttention
+- Implement pre-norm formulation:
+    - See Karpathy's "building GPT from scratch" video ~1:30:00
+    - Update forward/backward in Block
+    - Add norm layer before final project layer in Transformer
 - Diagnose FeedForward training after 1 iter
     - Distribution of activations
     - Distribution of gradients
@@ -42,4 +46,7 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
     - Add test runner
 - Data Loader & batcher
 - Tokenizer (enc, dec, train)
+- Dropout layer for training deeper networks and avoiding overfitting
+    - See Karpathy's "building GPT from scratch" video ~1:40:00 and also Transformer/GPT-1 papers
 - Revisit hack in LayerNorm when n_input==2
+- Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
