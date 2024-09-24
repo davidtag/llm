@@ -1,5 +1,5 @@
 # llm
-Ground-up implementation of LLMs with minimal dependencies
+Ground-up implementation of LLMs with NumPy as the only dependency.
 
 
 # TODO
