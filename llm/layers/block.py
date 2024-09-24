@@ -68,7 +68,7 @@ class Block:
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        assert x.ndim == 2 and x.shape[-1] == self.d_model
+        assert x.ndim >= 2 and x.shape[-1] == self.d_model
 
         h1 = self.sublayer_1.forward(x)
         a1 = x + h1
