@@ -54,19 +54,27 @@ class MultiHeadAttention:
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        # TODO(dtag): Support x.shape = (B, T, d_model)
-        # To x_reshape = x[:, np.newaxis, :, :] or x.reshape(B, 1, -T, d_model) to allow for the matmul
-        # below to work
-        assert x.ndim == 2 and x.shape[-1] == self.d_model
+        assert x.ndim >= 2 and x.shape[-1] == self.d_model  # shape = (*B, T, d_model)
 
-        N = x.shape[0]
+        T = x.shape[-2]
+        batch_dims = x.shape[:-2]  # (*B). May be empty
+        batch_axes = tuple(np.arange(len(batch_dims)))  # (0, 1, ..., num_batch_dims - 1). May be empty.
+        head_axis = -3
 
-        Q = np.matmul(x, self.w_q)  # shape = (h, N, d_k)
-        K = np.matmul(x, self.w_k)  # shape = (h, N, d_k)
-        V = np.matmul(x, self.w_v)  # shape = (h, N, d_v)
+        # Add a dimension to x for easier broadcasting across the h heads
+        x_expanded = np.expand_dims(x, axis=head_axis)  # shape = (*B, 1, T, d_model)
 
+        # Project into the query, key, and value space
+        Q = np.matmul(x_expanded, self.w_q)  # shape = (*B, h, T, d_k)
+        K = np.matmul(x_expanded, self.w_k)  # shape = (*B, h, T, d_k)
+        V = np.matmul(x_expanded, self.w_v)  # shape = (*B, h, T, d_v)
+
+        # Compute the attention weights
         scale = 1 / np.sqrt(self.d_k)
-        logits = scale * np.matmul(Q, np.transpose(K, axes=[0, 2, 1]))  # shape = (h, N, N)
+        logits = scale * np.matmul(  # shape = (*B, h, T, T)
+            Q,
+            np.transpose(K, axes=(*batch_axes, head_axis, -1, -2)),  # only transpose last 2 dims
+        )
         if self.masked:
             # The output of the attention head is a weighted average of the value vectors
             # i.e., for each head h, the rows of the matrix V[h, :, :].
@@ -76,16 +84,26 @@ class MultiHeadAttention:
             # This means the weights associated with entries j > i need to be 0. This correspons
             # to a mask where all upper-triangular entries are 0. Moreover, to set the weight to
             # 0, we set the logits to -inf.
-            row_indices, column_indices = np.triu_indices(N, k=1)  # k=1 because diagonal isn't masked
-            logits[:, row_indices, column_indices] = -np.inf
-        weights = softmax(logits)  # shape = (h, N, N)
-        head = np.matmul(weights, V)  # shape = (h, N, d_v)
+            row_indices, column_indices = np.triu_indices(T, k=1)  # k=1 because diagonal isn't masked
+            logits[..., row_indices, column_indices] = -np.inf
+        weights = softmax(logits)  # shape = (*B, h, T, T)
 
-        heads = np.split(head, indices_or_sections=self.h, axis=0)  # List[(1, N, d_v)] of length h
-        heads_squeezed = [head.reshape(N, self.d_v) for head in heads]  # List[(N, d_v)] of length h
-        concat = np.hstack(heads_squeezed)  # shape = (N, h * d_v)
+        # Compute the attention heads in parallel
+        head = np.matmul(weights, V)  # shape = (*B, h, T, d_v)
 
-        out = np.matmul(concat, self.w_o)  # size = (N, d_model)
+        # Concatenate the heads
+        heads = np.split(  # List[(*B, 1, T, d_v)] of length h
+            head,
+            indices_or_sections=self.h,
+            axis=head_axis,
+        )
+        heads_squeezed = [  # List[(*B, T, d_v)] length h
+            head.reshape(*batch_dims, T, self.d_v) for head in heads
+        ]
+        concat = np.concatenate(heads_squeezed, axis=-1)  # shape = (*B, T, h * d_v). Will copy.
+
+        # Project back into the model dimension
+        out = np.matmul(concat, self.w_o)  # size = (*B, T, d_model)
 
         if self.enable_grad:
             self.cache["x"] = x
@@ -100,45 +118,79 @@ class MultiHeadAttention:
     def backward(self, dout: np.ndarray) -> None:
         """Compute the layer gradients given the upstream gradient."""
         assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
-        x = self.cache["x"]  # shape = (N, d_model)
-        Q = self.cache["Q"]  # shape = (h, N, d_k)
-        K = self.cache["K"]  # shape = (h, N, d_k)
-        V = self.cache["V"]  # shape = (h, N, d_v)
-        weights = self.cache["weights"]  # shape = (h, N, N)
-        concat = self.cache["concat"]  # shape = (N, h * d_v)
-        assert dout.shape == x.shape  # shape = (N, d_model)
+        x = self.cache["x"]  # shape = (*B, T, d_model)
+        Q = self.cache["Q"]  # shape = (*B, h, T, d_k)
+        K = self.cache["K"]  # shape = (*B, h, T, d_k)
+        V = self.cache["V"]  # shape = (*B, h, T, d_v)
+        weights = self.cache["weights"]  # shape = (*B, h, T, T)
+        concat = self.cache["concat"]  # shape = (*B, T, h * d_v)
+        assert dout.shape == x.shape  # shape = (*B, T, d_model)
 
-        dw_o = np.matmul(np.transpose(concat), dout)  # shape = (h * d_v, d_model)
-        dconcat = np.matmul(dout, np.transpose(self.w_o))  # shape = (N, h * d_v)
+        batch_dims = x.shape[:-2]  # (*B). May be empty
+        batch_axes = tuple(np.arange(len(batch_dims)))  # (0, 1, ..., num_batch_dims - 1). May be empty.
+        head_axis = -3
 
-        dheads_squeezed = np.hsplit(dconcat, indices_or_sections=self.h)  # List[(N, d_v)] of length h
-        dhead = np.stack(dheads_squeezed, axis=0)  # shape = (h, N, d_v)
+        # Add a dimension to x for easier broadcasting across the h heads
+        x_expanded = np.expand_dims(x, axis=head_axis)  # shape = (*B, 1, T, d_model)
 
-        dV = np.matmul(np.transpose(weights, axes=[0, 2, 1]), dhead)  # shape = (h, N, d_v)
-        dweights = np.matmul(dhead, np.transpose(V, axes=[0, 2, 1]))  # shape = (h, N, N)
+        # Propagate through the projection layer
+        dw_o = np.matmul(  # shape = (h * d_v, d_model)
+            np.transpose(concat, axes=(*batch_axes, -1, -2)),  # only transpose last 2 dims
+            dout,
+        ).sum(batch_axes)
+        dconcat = np.matmul(dout, np.transpose(self.w_o))  # shape = (*B, T, h * d_v)
 
+        # De-concatenate the gradients. Will lead to a copy.
+        dheads_squeezed = np.split(  # List[(*B, T, d_v)] of length h
+            dconcat,
+            indices_or_sections=self.h,
+            axis=-1,
+        )
+        dhead = np.stack(dheads_squeezed, axis=head_axis)  # shape = (*B, h, T, d_v)
+
+        # Propagate through the attention head
+        dV = np.matmul(  # shape = (*B, h, T, d_v)
+            np.transpose(weights, axes=(*batch_axes, head_axis, -1, -2)),  # only transpose last 2 dims
+            dhead,
+        )
+        dweights = np.matmul(  # shape = (*B, h, T, T)
+            dhead,
+            np.transpose(V, axes=(*batch_axes, head_axis, -1, -2)),  # only transpose last 2 dims
+        )
+
+        # Propagate through the attention weights
         # NOTE: because dlogits is calculated by multiplying by weights and the effect of the mask is to zero
         # out the weights, the effect of the mask is implicitly captured when computing dlogits; i.e., the
         # mask zero's out the effect of the upper-triangular logits, so the derivative of the loss with
         # respect to these entries should be 0, and the formula below does just that. This is why there's
         # no special-case handling for self.masked here.
-        dlogits = weights * (
-            dweights - np.sum(dweights * weights, axis=2, keepdims=True)
-        )  # shape = (h, N, N)
-
+        dlogits = weights * (  # shape = (*B, h, T, T)
+            dweights - np.sum(dweights * weights, axis=-1, keepdims=True)
+        )
         scale = 1 / np.sqrt(self.d_k)
-        dQ = scale * np.matmul(dlogits, K)  # shape = (h, N, d_k)
-        dK = scale * np.matmul(np.transpose(dlogits, axes=[0, 2, 1]), Q)  # shape = (h, N, d_k)
+        dQ = scale * np.matmul(  # shape = (*B, h, T, d_k)
+            dlogits,
+            K,
+        )
+        dK = scale * np.matmul(  # shape = (*B, h, T, d_k)
+            np.transpose(dlogits, axes=(*batch_axes, head_axis, -1, -2)),  # only transpose last 2 dims
+            Q,
+        )
 
-        dw_q = np.matmul(np.transpose(x), dQ)  # shape = (h, d_model, d_k)
-        dw_k = np.matmul(np.transpose(x), dK)  # shape = (h, d_model, d_k)
-        dw_v = np.matmul(np.transpose(x), dV)  # shape = (h, d_model, d_v)
-
-        dx_from_Q = np.matmul(dQ, np.transpose(self.w_q, axes=[0, 2, 1]))  # shape = (h, N, d_model)
-        dx_from_K = np.matmul(dK, np.transpose(self.w_k, axes=[0, 2, 1]))  # shape = (h, N, d_model)
-        dx_from_V = np.matmul(dV, np.transpose(self.w_v, axes=[0, 2, 1]))  # shape = (h, N, d_model)
-
-        dx = dx_from_Q.sum(axis=0) + dx_from_K.sum(axis=0) + dx_from_V.sum(axis=0)  # shape = (N, d_model)
+        # Propagate through the the query, key, and value space projections
+        x_expanded_transpose = np.transpose(x_expanded, axes=(*batch_axes, head_axis, -1, -2))
+        dw_q = np.matmul(x_expanded_transpose, dQ).sum(axis=batch_axes)  # shape = (h, d_model, d_k)
+        dw_k = np.matmul(x_expanded_transpose, dK).sum(axis=batch_axes)  # shape = (h, d_model, d_k)
+        dw_v = np.matmul(x_expanded_transpose, dV).sum(axis=batch_axes)  # shape = (h, d_model, d_v)
+        dx_from_Q = np.matmul(dQ, np.transpose(self.w_q, axes=(0, 2, 1)))  # shape = (*B, h, T, d_model)
+        dx_from_K = np.matmul(dK, np.transpose(self.w_k, axes=(0, 2, 1)))  # shape = (*B, h, T, d_model)
+        dx_from_V = np.matmul(dV, np.transpose(self.w_v, axes=(0, 2, 1)))  # shape = (*B, h, T, d_model)
+        dx = (
+            # shape = (*B, T, d_model)
+            dx_from_Q.sum(axis=head_axis)
+            + dx_from_K.sum(axis=head_axis)
+            + dx_from_V.sum(axis=head_axis)
+        )
 
         self.cache["dx"] = dx
         self.cache["dw_q"] = dw_q
