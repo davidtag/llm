@@ -4,8 +4,6 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
 
 # TODO
 
-- Fix weight initialization
-    - MultiHeadAttention
 - Implement pre-norm formulation:
     - See Karpathy's "building GPT from scratch" video ~1:30:00
     - Update forward/backward in Block
@@ -19,7 +17,6 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
 - Support `bias` param for Linear layer
 - Support batching
-    - MultiHeadAttention
     - Block
     - BlockStack
     - Embedding
