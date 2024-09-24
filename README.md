@@ -17,7 +17,6 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
 - Support `bias` param for Linear layer
 - Support batching
-    - BlockStack
     - Embedding
     - Transformer
 - Support in-memory parameter dumping and loading: get_params() -> dict, set_params(dict)

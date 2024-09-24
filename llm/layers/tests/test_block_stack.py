@@ -7,13 +7,12 @@ import numpy as np
 from llm.layers.block_stack import BlockStack
 
 
-# TODO(dtag): Test masked_attention=True
 class TestBlockStack(unittest.TestCase):
     """Unit tests for BlockStack."""
 
     def setUp(self) -> None:
         np.random.seed(31415926)
-        self.data = np.array(
+        self.data = np.array(  # shape = (4, 3)
             [
                 [-0.80672381, -0.08818247, 0.002],
                 [0.63413982, 1.32233656, 0.332],
@@ -21,6 +20,7 @@ class TestBlockStack(unittest.TestCase):
                 [1.16085551, -0.15033837, -0.332],
             ]
         )
+        self.data_3d = np.array([self.data, 2 * self.data])  # shape = (2, 4, 3)
 
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
@@ -50,6 +50,13 @@ class TestBlockStack(unittest.TestCase):
         out = model.forward(self.data)
         self.assertEqual(out.shape, (4, 3))
 
+    def test_forward_3d(self) -> None:
+        """Test the forward pass (3d input)."""
+        model = BlockStack(n_blocks=5, d_model=3, masked_attention=True)
+
+        out = model.forward(self.data_3d)
+        self.assertEqual(out.shape, (2, 4, 3))
+
     def test_backward_at_zero(self) -> None:
         """Test the backward pass with upstream gradient being 0."""
         model = BlockStack(n_blocks=5, d_model=3)
@@ -61,6 +68,20 @@ class TestBlockStack(unittest.TestCase):
         dx = model.cache["dx"]
 
         self.assertEqual(dx.shape, (4, 3))
+
+        self.assertTrue(np.all(dx == 0))
+
+    def test_backward_at_zero_3d(self) -> None:
+        """Test the backward pass with upstream gradient being 0 (3d input)."""
+        model = BlockStack(n_blocks=5, d_model=3, masked_attention=True)
+
+        out = model.forward(self.data_3d)
+
+        dout = np.zeros_like(out)
+        model.backward(dout)
+        dx = model.cache["dx"]
+
+        self.assertEqual(dx.shape, (2, 4, 3))
 
         self.assertTrue(np.all(dx == 0))
 
@@ -97,6 +118,25 @@ class TestBlockStack(unittest.TestCase):
         step = 0.01 * np.random.random(size=self.data.shape)
         expected_change = np.sum(step * dx)
         x = self.data + step
+        out2 = model.forward(x)
+        loss2 = out2.sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=2)
+
+    def test_backward_random_dx_3d(self) -> None:
+        """Test the backward pass for dx with random step (3d input)."""
+        model = BlockStack(n_blocks=2, d_model=3)
+
+        out = model.forward(self.data_3d)
+        loss = out.sum()
+
+        dout = np.ones_like(out)  # derivative of loss is 1 for each element
+        model.backward(dout)
+        dx = model.cache["dx"]
+
+        step = 0.01 * np.random.random(size=self.data_3d.shape)
+        expected_change = np.sum(step * dx)
+        x = self.data_3d + step
         out2 = model.forward(x)
         loss2 = out2.sum()
         actual_change = loss2 - loss
