@@ -66,5 +66,5 @@ class TestTransformer(unittest.TestCase):
         """Test the generate method."""
         output = self.model.generate(self.data, max_tokens=5)
         self.assertTrue(output.shape, (5,))
-        self.assertGreaterEqual(min(output), 0)
-        self.assertLess(max(output), 13)
+        self.assertGreaterEqual(np.min(output), 0)
+        self.assertLess(np.max(output), 13)
