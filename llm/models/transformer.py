@@ -6,9 +6,9 @@ import numpy as np
 
 from llm.constants import DType, DEFAULT_DTYPE
 from llm.layers.block_stack import BlockStack
-from llm.layers.embedding import Embedding
 from llm.layers.linear import Linear
 from llm.layers.layer_norm import LayerNorm
+from llm.layers.text_embedding import Embedding
 from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 

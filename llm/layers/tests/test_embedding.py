@@ -1,10 +1,10 @@
-"""Unit tests for embedding.py."""
+"""Unit tests for text_embedding.py."""
 
 import unittest
 
 import numpy as np
 
-from llm.layers.embedding import Embedding
+from llm.layers.text_embedding import Embedding
 
 
 class TestEmbedding(unittest.TestCase):
