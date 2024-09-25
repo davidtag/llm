@@ -38,7 +38,7 @@ class Block:
         self.optimizer = optimizer
         self.cache = {}
 
-        self.sublayer_1 = MultiHeadAttention(
+        self.attention = MultiHeadAttention(
             d_model=d_model,
             d_k=d_k,
             d_v=d_v,
@@ -49,7 +49,7 @@ class Block:
             optimizer=optimizer,
         )
         self.norm_1 = LayerNorm(n_input=d_model, dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
-        self.sublayer_2 = FeedForward(
+        self.ffn = FeedForward(
             n_input=d_model,
             n_hidden=d_ff,
             n_output=d_model,
@@ -62,20 +62,18 @@ class Block:
     @property
     def n_params(self) -> int:
         """The number of parameters in the layer."""
-        return (
-            self.sublayer_1.n_params + self.norm_1.n_params + self.sublayer_2.n_params + self.norm_2.n_params
-        )
+        return self.attention.n_params + self.norm_1.n_params + self.ffn.n_params + self.norm_2.n_params
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
         assert x.ndim >= 2 and x.shape[-1] == self.d_model
 
         n1 = self.norm_1.forward(x)
-        a1 = self.sublayer_1.forward(n1)
+        a1 = self.attention.forward(n1)
         o1 = x + a1
 
         n2 = self.norm_2.forward(o1)
-        a2 = self.sublayer_2.forward(n2)
+        a2 = self.ffn.forward(n2)
         o2 = o1 + a2
 
         return o2
@@ -87,16 +85,16 @@ class Block:
         do2 = dout
 
         da2 = do2
-        self.sublayer_2.backward(da2)
-        dn2 = self.sublayer_2.cache["dx"]
+        self.ffn.backward(da2)
+        dn2 = self.ffn.cache["dx"]
         self.norm_2.backward(dn2)
         do1_residual = self.norm_2.cache["dx"]
 
         do1 = do2 + do1_residual
 
         da1 = do1
-        self.sublayer_1.backward(da1)
-        dn1 = self.sublayer_1.cache["dx"]
+        self.attention.backward(da1)
+        dn1 = self.attention.cache["dx"]
         self.norm_1.backward(dn1)
         dx_residual = self.norm_1.cache["dx"]
 
@@ -110,6 +108,6 @@ class Block:
         assert self.optimizer, "Cannot take an optimization step with optimizer=None"
 
         self.norm_2.step()
-        self.sublayer_2.step()
+        self.ffn.step()
         self.norm_1.step()
-        self.sublayer_1.step()
+        self.attention.step()
