@@ -297,3 +297,25 @@ class TestLayerNorm(unittest.TestCase):
         loss2 = out2.sum()
         actual_change = loss2 - loss
         self.assertAlmostEqual(actual_change, expected_change, places=9)
+
+    def test_backward_random_gradient_and_step_dx_3d(self) -> None:
+        """Test the backward pass for dx with random gradient and step (3d input)."""
+        model = LayerNorm(n_input=3)
+        model.gamma = np.random.standard_normal((1, 3))
+        model.beta = np.random.standard_normal((1, 3))
+        weight = np.random.standard_normal((3, 1))
+
+        out = model.forward(self.data_3d)
+        loss = np.matmul(out, weight).sum()
+
+        dout = np.ones_like(out) * weight.T
+        model.backward(dout)
+        dx = model.cache["dx"]
+
+        step = 0.01 * np.random.random(size=self.data_3d.shape)
+        expected_change = np.sum(step * dx)
+        x = self.data_3d + step
+        out2 = model.forward(x)
+        loss2 = np.matmul(out2, weight).sum()
+        actual_change = loss2 - loss
+        self.assertAlmostEqual(actual_change, expected_change, places=3)
