@@ -37,7 +37,7 @@ class TestLayerNorm(unittest.TestCase):
         self.assertEqual(out.shape, (4, 3))
 
     def test_forward_3d(self) -> None:
-        """Test the forward pass."""
+        """Test the forward pass (3d input)."""
         model = LayerNorm(n_input=3)
 
         out = model.forward(self.data_3d)
