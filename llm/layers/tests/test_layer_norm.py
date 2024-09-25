@@ -138,6 +138,7 @@ class TestLayerNorm(unittest.TestCase):
     def test_backward_at_one_dgamma(self) -> None:
         """Test the backward pass for dgamma with upstream gradient being 1."""
         model = LayerNorm(n_input=3)
+        model.gamma = np.random.standard_normal((1, 3))  # change gamma to make test non-trivial
 
         out = model.forward(self.data)
         loss = out.sum()
@@ -164,6 +165,7 @@ class TestLayerNorm(unittest.TestCase):
     def test_backward_at_one_dgamma_3d(self) -> None:
         """Test the backward pass for dgamma with upstream gradient being 1 (3d input)."""
         model = LayerNorm(n_input=3)
+        model.gamma = np.random.standard_normal((1, 3))  # change gamma to make test non-trivia
 
         out = model.forward(self.data_3d)
         loss = out.sum()
