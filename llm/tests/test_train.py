@@ -447,8 +447,8 @@ class TestTrainingEndToEnd(unittest.TestCase):
 
         for i in range(num_epochs):
             for j in range(context_size):
-                data = training_sequence[j:-1]
-                targets = training_sequence[(j + 1) :]
+                data = np.expand_dims(training_sequence[j:-1], axis=0)
+                targets = np.expand_dims(training_sequence[(j + 1) :], axis=0)
 
                 # Forward Pass
                 logits = model.forward(data)
