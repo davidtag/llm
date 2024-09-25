@@ -42,10 +42,8 @@ class LayerNorm:
         """Compute the layer output for a given input."""
         assert x.shape[-1] == self.n_input
 
-        ndim = x.ndim
-
-        x_mean = np.mean(x, axis=ndim - 1, keepdims=True)
-        x_var = np.mean(np.square(x - x_mean), axis=ndim - 1, keepdims=True)
+        x_mean = np.mean(x, axis=-1, keepdims=True)
+        x_var = np.mean(np.square(x - x_mean), axis=-1, keepdims=True)
         x_std = np.sqrt(x_var + self.eps)
         if self.n_input == 2:
             # Need random noise to avoid z values all being exactly 1 or -1
@@ -71,8 +69,8 @@ class LayerNorm:
         ndim = z.ndim
         sum_axes = tuple(np.arange(ndim - 1))
 
-        dgamma = np.sum(z * dout, axis=sum_axes, keepdims=True).reshape(1, self.n_input)
         dbeta = np.sum(dout, axis=sum_axes, keepdims=True).reshape(1, self.n_input)
+        dgamma = np.sum(dout * z, axis=sum_axes, keepdims=True).reshape(1, self.n_input)
         dx = (
             (
                 self.n_input * dout * self.gamma
