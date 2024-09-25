@@ -11,7 +11,12 @@ class TestTransformer(unittest.TestCase):
     """Unit tests for Transformer."""
 
     def setUp(self) -> None:
-        self.data = np.array([0, 2, 7, 2, 9, 4, 11])
+        self.data = np.array(  # shape = (2, 7)
+            [
+                [3, 2, 9, 1, 8, 4, 1],
+                [0, 2, 7, 2, 9, 4, 9],
+            ]
+        )
         self.model = Transformer(
             vocab_size=13, context_size=128, n_blocks=2, d_model=10, d_k=17, d_v=37, h=7, d_ff=256
         )
@@ -41,7 +46,7 @@ class TestTransformer(unittest.TestCase):
     def test_forward(self) -> None:
         """Test the forward pass."""
         out = self.model.forward(self.data)
-        self.assertEqual(out.shape, (7, 13))
+        self.assertEqual(out.shape, (2, 7, 13))
 
     def test_backward_at_zero(self) -> None:
         """Test the backward pass with upstream gradient being 0."""
@@ -57,14 +62,14 @@ class TestTransformer(unittest.TestCase):
 
     def test_predict(self) -> None:
         """Test the predict method."""
-        probs = self.model.predict(self.data)
+        probs = self.model.predict(self.data[0])
         self.assertEqual(probs.shape, (13,))  # probability distribution over the vocab
         self.assertTrue(np.all(probs > 0))
         self.assertAlmostEqual(probs.sum(), 1)
 
     def test_generate(self) -> None:
         """Test the generate method."""
-        output = self.model.generate(self.data, max_tokens=5)
+        output = self.model.generate(self.data[0], max_tokens=5)
         self.assertTrue(output.shape, (5,))
         self.assertGreaterEqual(np.min(output), 0)
         self.assertLess(np.max(output), 13)

@@ -1,3 +1,4 @@
+# pylint: disable=C0103
 """Implementation of a Transformer model architecture."""
 
 from typing import Optional
@@ -87,22 +88,23 @@ class Transformer:
             + self.unembedding_layer.n_params
         )
 
-    def forward(self, input_sequence: np.ndarray) -> np.ndarray:
+    def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        assert input_sequence.ndim == 1  # TODO(dtag): Accept a batch dimension
-        assert input_sequence.min() >= 0 and input_sequence.max() < self.vocab_size
+        assert x.ndim == 2  # shape = (B, T)
 
-        raw_embedding = self.embedding_layer.forward(input_sequence)  # shape = (n, d_model)
-        refined_embedding = self.decoder.forward(raw_embedding)  # shape = (n, d_model)
-        normed_embedding = self.final_norm.forward(refined_embedding)  # shape = (n, d_model)
-        logits = self.unembedding_layer.forward(normed_embedding)  # shape = (n, vocab_size)
+        raw_embedding = self.embedding_layer.forward(x)  # shape = (B, T, d_model)
+        refined_embedding = self.decoder.forward(raw_embedding)  # shape = (B, T, d_model)
+        normed_embedding = self.final_norm.forward(refined_embedding)  # shape = (B, T, d_model)
+        logits = self.unembedding_layer.forward(normed_embedding)  # shape = (B, T, vocab_size)
 
         return logits
 
     def backward(self, dout: np.ndarray) -> None:
         """Compute the layer gradients given the upstream gradient."""
         assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
-        assert dout.shape == (self.embedding_layer.cache["input_sequence"].shape[0], self.vocab_size)
+        x = self.embedding_layer.cache["x"]
+        B, T = x.shape
+        assert dout.shape == (B, T, self.vocab_size)
 
         dlogits = dout
         self.unembedding_layer.backward(dlogits)
@@ -124,13 +126,16 @@ class Transformer:
 
     def predict(self, input_sequence: np.ndarray) -> np.ndarray:
         """Generate a probability distribution over the next token for a given input sequence."""
-        logits = self.forward(input_sequence)
-        next_token_logits = logits[-1]
+        assert input_sequence.ndim == 1
+        x = np.expand_dims(input_sequence, axis=0)  # add batch dimension
+        logits = self.forward(x)
+        next_token_logits = logits[0, -1]
         probabilities = softmax(next_token_logits)
         return probabilities
 
     def generate(self, start_sequence: np.ndarray, max_tokens: int = 5, is_random: bool = True) -> np.ndarray:
         """Generate an output sequence based on predicted next token probabilities."""
+        assert start_sequence.ndim == 1
         current_sequence = start_sequence.copy()
         output_sequence = []
 
