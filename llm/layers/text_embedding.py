@@ -1,3 +1,4 @@
+# pylint: disable=C0103
 """Implementation of a learned embedding layer."""
 
 from typing import Optional
@@ -48,28 +49,28 @@ class TextEmbedding:
         """The number of parameters in the layer."""
         return self.token_embedding_matrix.size + self.position_embedding_matrix.size
 
-    def forward(self, input_sequence: np.ndarray) -> np.ndarray:
+    def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        assert input_sequence.ndim == 1
-        assert input_sequence.min() >= 0 and input_sequence.max() < self.vocab_size
-        n = len(input_sequence)
-        assert n <= self.context_size
+        assert x.ndim == 2
+        assert x.min() >= 0 and x.max() < self.vocab_size
+        _, T = x.shape  # (B, T)
+        assert T <= self.context_size
 
-        token_embeddings = self.token_embedding_matrix[input_sequence]  # shape = (n, d_model)
-        position_embeddings = self.position_embedding_matrix[:n]  # shape = (n, d_model)
-        out = token_embeddings + position_embeddings
+        token_embeddings = self.token_embedding_matrix[x]  # shape = (B, T, d_model)
+        position_embeddings = self.position_embedding_matrix[:T]  # shape = (T, d_model)
+        out = token_embeddings + position_embeddings  # shape = (B, T, d_model)
 
         if self.enable_grad:
-            self.cache["input_sequence"] = input_sequence
+            self.cache["x"] = x
 
         return out
 
     def backward(self, dout: np.ndarray) -> None:
         """Compute the layer gradients given the upstream gradient."""
         assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
-        input_sequence = self.cache["input_sequence"]
-        n = len(input_sequence)
-        assert dout.shape == (n, self.d_model)
+        x = self.cache["x"]
+        B, T = x.shape
+        assert dout.shape == (B, T, self.d_model)
 
         dtoken_embedding_matrix = self.cache["dtoken_embedding_matrix"]
         dposition_embedding_matrix = self.cache["dposition_embedding_matrix"]
@@ -78,10 +79,11 @@ class TextEmbedding:
         dtoken_embedding_matrix[:] = 0
         dposition_embedding_matrix[:] = 0
 
-        for i, row in enumerate(dout):
-            dtoken_embedding_matrix[input_sequence[i]] += row
+        for b in range(B):
+            for t in range(T):
+                dtoken_embedding_matrix[x[b, t]] += dout[b, t]
 
-        dposition_embedding_matrix[:n] = dout
+        dposition_embedding_matrix[:T] = dout.sum(axis=0)
 
         self.cache["dtoken_embedding_matrix"] = dtoken_embedding_matrix
         self.cache["dposition_embedding_matrix"] = dposition_embedding_matrix

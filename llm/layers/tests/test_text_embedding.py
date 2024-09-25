@@ -11,7 +11,12 @@ class TestTextEmbedding(unittest.TestCase):
     """Unit tests for TextEmbedding."""
 
     def setUp(self) -> None:
-        self.data = np.array([0, 13, 19, 17, 19, 255])
+        self.data = np.array(  # shape = (2, 6)
+            [
+                [0, 13, 19, 17, 19, 255],
+                [13, 19, 17, 19, 255, 1],
+            ]
+        )
 
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
@@ -23,7 +28,7 @@ class TestTextEmbedding(unittest.TestCase):
         model = TextEmbedding(vocab_size=256, context_size=128, d_model=512)
 
         out = model.forward(self.data)
-        self.assertEqual(out.shape, (6, 512))
+        self.assertEqual(out.shape, (2, 6, 512))
 
     def test_backward_at_zero(self) -> None:
         """Test the backward pass with upstream gradient being 0."""
@@ -58,18 +63,19 @@ class TestTextEmbedding(unittest.TestCase):
         # Token Embedding Matrix
         # -> Input sequence elements have gradients equal to # of times vocab items appears in input
         self.assertTrue(np.all(dtoken_embedding_matrix[0] == 1))
-        self.assertTrue(np.all(dtoken_embedding_matrix[13] == 1))
-        self.assertTrue(np.all(dtoken_embedding_matrix[17] == 1))
-        self.assertTrue(np.all(dtoken_embedding_matrix[19] == 2))
-        self.assertTrue(np.all(dtoken_embedding_matrix[255] == 1))
+        self.assertTrue(np.all(dtoken_embedding_matrix[1] == 1))
+        self.assertTrue(np.all(dtoken_embedding_matrix[13] == 2))
+        self.assertTrue(np.all(dtoken_embedding_matrix[17] == 2))
+        self.assertTrue(np.all(dtoken_embedding_matrix[19] == 4))
+        self.assertTrue(np.all(dtoken_embedding_matrix[255] == 2))
         # -> Other entries have no gradients
         self.assertTrue(np.all(dtoken_embedding_matrix[2] == 0))
         self.assertTrue(np.all(dtoken_embedding_matrix[16] == 0))
         self.assertTrue(np.all(dtoken_embedding_matrix[137] == 0))
 
         # Position Embedding Matrix
-        # -> All positions up to the size of the input have gradient of 1
-        self.assertTrue(np.all(dposition_embedding_matrix[:6] == 1))
+        # -> All positions up to the size of the input have gradient of 2
+        self.assertTrue(np.all(dposition_embedding_matrix[:6] == 2))
         # -> All positions after it have gradeint 0 because they don't contribute to the loss
         self.assertTrue(np.all(dposition_embedding_matrix[6:] == 0))
 
