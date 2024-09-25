@@ -48,7 +48,7 @@ class LayerNorm:
         if self.n_input == 2:
             # Need random noise to avoid z values all being exactly 1 or -1
             # The z-scores of a set of 2 values is always 1 or -1
-            x_std += 5 * np.random.random(size=(*x.shape[:-1], 1))
+            x_std += 5 * np.random.random(size=x_std.shape)
         z = (x - x_mean) / x_std
 
         out = z * self.gamma + self.beta
