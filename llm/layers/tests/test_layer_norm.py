@@ -312,6 +312,12 @@ class TestLayerNorm(unittest.TestCase):
         model.backward(dout)
         dx = model.cache["dx"]
 
+        dx_mean = dx.sum(axis=-1)  # This is always true
+        np.testing.assert_almost_equal(dx_mean, np.zeros_like(dx_mean))
+        dx_std = dx.std(axis=-1)
+        with self.assertRaises(AssertionError):
+            np.testing.assert_almost_equal(dx_std, np.zeros_like(dx_std))
+
         step = 0.01 * np.random.random(size=self.data_3d.shape)
         expected_change = np.sum(step * dx)
         x = self.data_3d + step
