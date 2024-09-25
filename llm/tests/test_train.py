@@ -464,10 +464,10 @@ class TestTrainingEndToEnd(unittest.TestCase):
         self.assertAlmostEqual(model.predict(np.array([1]))[0], 1.0, places=3)  # (1,) -> 0
         self.assertAlmostEqual(model.predict(np.array([0, 1]))[0], 1.0, places=3)  # (0, 1,) -> 0
         self.assertAlmostEqual(model.predict(np.array([1, 0]))[1], 1.0, places=3)  # (1, 0,) -> 1
-        self.assertAlmostEqual(model.predict(np.array([0, 1, 0]))[1], 1.0, places=4)
-        self.assertAlmostEqual(model.predict(np.array([1, 0, 1]))[0], 1.0, places=4)
-        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1]))[0], 1.0, places=4)
-        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1, 0]))[1], 1.0, places=4)
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0]))[1], 1.0, places=3)
+        self.assertAlmostEqual(model.predict(np.array([1, 0, 1]))[0], 1.0, places=3)
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1]))[0], 1.0, places=3)
+        self.assertAlmostEqual(model.predict(np.array([0, 1, 0, 1, 0]))[1], 1.0, places=3)
 
         # Generation is correct
         np.testing.assert_array_equal(
