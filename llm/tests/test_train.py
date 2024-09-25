@@ -391,13 +391,16 @@ class TestTrainingEndToEnd(unittest.TestCase):
         model = Transformer(vocab_size=self.C, context_size=self.N, n_blocks=1, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
+        data = np.array([self.targets])
+        targets = np.array([self.targets])
+
         initial_loss = float("inf")
         last_loss = float("inf")
 
         for i in range(num_iters):
             # Forward Pass
-            logits = model.forward(self.targets)
-            loss = loss_fn.forward(logits, self.targets)
+            logits = model.forward(data)
+            loss = loss_fn.forward(logits, targets)
 
             if i == 0:
                 initial_loss = loss
@@ -415,8 +418,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
         self.assertLess(last_loss, 1e-3)
 
         # Predictions are Correct
-        logits = model.forward(self.targets)
+        logits = model.forward(data)
         probabilities = softmax(logits)
+        probabilities = probabilities[0]
         self.assert_probabilites_match_targets(probabilities, decimal=4)
 
     def test_train_transformer_vocab_size_2(self, num_epochs: int = 20, context_size: int = 16) -> None:
