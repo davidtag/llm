@@ -6,4 +6,4 @@ from .feed_forward import FeedForward
 from .layer_norm import LayerNorm
 from .linear import Linear
 from .multi_head_attention import MultiHeadAttention
-from .text_embedding import Embedding
+from .text_embedding import TextEmbedding

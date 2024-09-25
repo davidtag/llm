@@ -8,7 +8,7 @@ from llm.constants import DType, DEFAULT_DTYPE
 from llm.optimizers import Optimizer
 
 
-class Embedding:
+class TextEmbedding:
     """A learned embedding layer for a fixed vocab size & context window."""
 
     def __init__(

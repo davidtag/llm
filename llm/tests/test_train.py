@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 
 from llm.optimizers import Adam, StochasticGradientDescent
-from llm.layers import Block, BlockStack, Embedding, FeedForward, LayerNorm, Linear, MultiHeadAttention
+from llm.layers import Block, BlockStack, FeedForward, LayerNorm, Linear, MultiHeadAttention, TextEmbedding
 from llm.loss import CrossEntropyLoss
 from llm.models import Transformer
 from llm.utils.math import softmax
@@ -304,10 +304,10 @@ class TestTrainingEndToEnd(unittest.TestCase):
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=2)
 
-    def test_train_embedding(self, num_iters: int = 50) -> None:
-        """Test that we can train an embedding layer."""
+    def test_train_text_embedding(self, num_iters: int = 50) -> None:
+        """Test that we can train a text embedding layer."""
         optimizer = Adam(lr=0.5)
-        model = Embedding(vocab_size=self.C, context_size=self.N, d_model=self.C, optimizer=optimizer)
+        model = TextEmbedding(vocab_size=self.C, context_size=self.N, d_model=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 
         initial_loss = float("inf")
@@ -338,10 +338,10 @@ class TestTrainingEndToEnd(unittest.TestCase):
         probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=4)
 
-    def test_train_embedding_with_linear(self, num_iters: int = 50) -> None:
-        """Test that we can train an embedding layer when stacked with a linear layer."""
+    def test_train_text_embedding_with_linear(self, num_iters: int = 50) -> None:
+        """Test that we can train a text embedding layer when stacked with a linear layer."""
         optimizer = Adam(lr=0.1)
-        layer_1 = Embedding(vocab_size=500, context_size=128, d_model=512, optimizer=optimizer)
+        layer_1 = TextEmbedding(vocab_size=500, context_size=128, d_model=512, optimizer=optimizer)
         layer_2 = Linear(n_input=512, n_output=self.C, optimizer=optimizer)
         loss_fn = CrossEntropyLoss()
 

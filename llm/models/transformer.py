@@ -8,7 +8,7 @@ from llm.constants import DType, DEFAULT_DTYPE
 from llm.layers.block_stack import BlockStack
 from llm.layers.linear import Linear
 from llm.layers.layer_norm import LayerNorm
-from llm.layers.text_embedding import Embedding
+from llm.layers.text_embedding import TextEmbedding
 from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 
@@ -43,7 +43,7 @@ class Transformer:
         self.enable_grad = enable_grad
         self.optimizer = optimizer
 
-        self.embedding_layer = Embedding(
+        self.embedding_layer = TextEmbedding(
             vocab_size=vocab_size,
             context_size=context_size,
             d_model=d_model,
