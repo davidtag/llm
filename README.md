@@ -4,10 +4,6 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
 
 # TODO
 
-- Implement pre-norm formulation:
-    - See Karpathy's "building GPT from scratch" video ~1:30:00
-    - Update forward/backward in Block
-    - Add norm layer before final project layer in Transformer
 - Diagnose FeedForward training after 1 iter
     - Distribution of activations
     - Distribution of gradients
