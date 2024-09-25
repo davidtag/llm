@@ -70,13 +70,13 @@ class Block:
         """Compute the layer output for a given input."""
         assert x.ndim >= 2 and x.shape[-1] == self.d_model
 
-        h1 = self.sublayer_1.forward(x)
-        a1 = x + h1
-        o1 = self.norm_1.forward(a1)
+        n1 = self.norm_1.forward(x)
+        a1 = self.sublayer_1.forward(n1)
+        o1 = x + a1
 
-        h2 = self.sublayer_2.forward(o1)
-        a2 = o1 + h2
-        o2 = self.norm_2.forward(a2)
+        n2 = self.norm_2.forward(o1)
+        a2 = self.sublayer_2.forward(n2)
+        o2 = o1 + a2
 
         return o2
 
@@ -85,18 +85,22 @@ class Block:
         assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
 
         do2 = dout
-        self.norm_2.backward(do2)
-        da2 = self.norm_2.cache["dx"]
-        dh2 = da2
-        self.sublayer_2.backward(dh2)
 
-        do1 = da2 + self.sublayer_2.cache["dx"]
-        self.norm_1.backward(do1)
-        da1 = self.norm_1.cache["dx"]
-        dh1 = da1
-        self.sublayer_1.backward(dh1)
+        da2 = do2
+        self.sublayer_2.backward(da2)
+        dn2 = self.sublayer_2.cache["dx"]
+        self.norm_2.backward(dn2)
+        do1_residual = self.norm_2.cache["dx"]
 
-        dx = da1 + self.sublayer_1.cache["dx"]
+        do1 = do2 + do1_residual
+
+        da1 = do1
+        self.sublayer_1.backward(da1)
+        dn1 = self.sublayer_1.cache["dx"]
+        self.norm_1.backward(dn1)
+        dx_residual = self.norm_1.cache["dx"]
+
+        dx = do1 + dx_residual
 
         self.cache["dx"] = dx
 
