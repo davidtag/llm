@@ -496,7 +496,7 @@ class TestTrainingEndToEnd(unittest.TestCase):
         context_size: int = 16,
         batch_size: int = 32,
     ) -> None:
-        """Test that we can train a Transformer model on in a batched way."""
+        """Test that we can train a Transformer model in a batched way."""
         optimizer = Adam(lr=0.006)
         model = Transformer(
             vocab_size=2,
