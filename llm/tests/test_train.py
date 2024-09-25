@@ -1,6 +1,7 @@
 # pylint: disable=invalid-name
 """A set of integration tests of various layers/losses/model/optimizers, testing training end-to-end."""
 
+from typing import Tuple
 import unittest
 
 import numpy as np
@@ -486,5 +487,65 @@ class TestTrainingEndToEnd(unittest.TestCase):
         )
         np.testing.assert_array_equal(
             model.generate(np.array([0, 1, 0, 1, 0, 1, 0, 1, 0]), max_tokens=10, is_random=False),
+            np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
+        )
+
+    def test_train_transformer_batched(
+        self,
+        num_epochs: int = 20,
+        context_size: int = 16,
+        batch_size: int = 32,
+    ) -> None:
+        """Test that we can train a Transformer model on in a batched way."""
+        optimizer = Adam(lr=0.006)
+        model = Transformer(
+            vocab_size=2,
+            context_size=context_size,
+            n_blocks=6,
+            d_model=64,
+            d_k=8,
+            d_v=8,
+            h=8,
+            d_ff=256,
+            optimizer=optimizer,
+        )
+        loss_fn = CrossEntropyLoss()
+
+        training_sequence = np.array([0, 1] * 100)
+
+        def get_batch() -> Tuple[np.ndarray, np.ndarray]:
+            idxs = np.random.randint(low=0, high=len(training_sequence) - context_size, size=batch_size)
+            data = np.stack([training_sequence[i : i + context_size] for i in idxs])
+            targets = np.stack([training_sequence[i + 1 : i + 1 + context_size] for i in idxs])
+            return data, targets
+
+        initial_loss = float("inf")
+        last_loss = float("inf")
+
+        for i in range(num_epochs):
+            data, targets = get_batch()
+
+            # Forward Pass
+            logits = model.forward(data)
+            loss = loss_fn.forward(logits, targets)
+
+            if i == 0:
+                initial_loss = loss
+            if i == num_epochs - 1:
+                last_loss = loss
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            model.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 0.1)
+
+        # Generation is correct
+        np.testing.assert_array_equal(
+            model.generate(np.array([0]), max_tokens=10, is_random=False),
             np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
         )
