@@ -67,10 +67,10 @@ class LayerNorm:
         assert dout.shape == z.shape  # z is the same shape as x
 
         ndim = z.ndim
-        sum_axes = tuple(np.arange(ndim - 1))
+        batch_axes = tuple(np.arange(ndim - 1))
 
-        dbeta = np.sum(dout, axis=sum_axes, keepdims=True).reshape(1, self.n_input)
-        dgamma = np.sum(dout * z, axis=sum_axes, keepdims=True).reshape(1, self.n_input)
+        dbeta = np.sum(dout, axis=batch_axes, keepdims=True).reshape(1, self.n_input)
+        dgamma = np.sum(dout * z, axis=batch_axes, keepdims=True).reshape(1, self.n_input)
         dx = (
             (
                 self.n_input * dout * self.gamma
