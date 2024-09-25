@@ -38,6 +38,7 @@ class Block:
         self.optimizer = optimizer
         self.cache = {}
 
+        self.norm_1 = LayerNorm(n_input=d_model, dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.attention = MultiHeadAttention(
             d_model=d_model,
             d_k=d_k,
@@ -48,7 +49,7 @@ class Block:
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
-        self.norm_1 = LayerNorm(n_input=d_model, dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
+        self.norm_2 = LayerNorm(n_input=d_model, dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.ffn = FeedForward(
             n_input=d_model,
             n_hidden=d_ff,
@@ -57,12 +58,11 @@ class Block:
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
-        self.norm_2 = LayerNorm(n_input=d_model, dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
 
     @property
     def n_params(self) -> int:
         """The number of parameters in the layer."""
-        return self.attention.n_params + self.norm_1.n_params + self.ffn.n_params + self.norm_2.n_params
+        return self.norm_1.n_params + self.attention.n_params + self.norm_2.n_params + self.ffn.n_params
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
