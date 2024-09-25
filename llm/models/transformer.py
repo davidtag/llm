@@ -8,6 +8,7 @@ from llm.constants import DType, DEFAULT_DTYPE
 from llm.layers.block_stack import BlockStack
 from llm.layers.embedding import Embedding
 from llm.layers.linear import Linear
+from llm.layers.layer_norm import LayerNorm
 from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 
@@ -62,6 +63,12 @@ class Transformer:
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
+        self.final_norm = LayerNorm(
+            n_input=d_model,
+            dtype=dtype,
+            enable_grad=enable_grad,
+            optimizer=optimizer,
+        )
         self.unembedding_layer = Linear(
             n_input=d_model,
             n_output=vocab_size,
@@ -73,7 +80,12 @@ class Transformer:
     @property
     def n_params(self) -> int:
         """The number of parameters in the layer."""
-        return self.embedding_layer.n_params + self.decoder.n_params + self.unembedding_layer.n_params
+        return (
+            self.embedding_layer.n_params
+            + self.decoder.n_params
+            + self.final_norm.n_params
+            + self.unembedding_layer.n_params
+        )
 
     def forward(self, input_sequence: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
@@ -82,7 +94,8 @@ class Transformer:
 
         raw_embedding = self.embedding_layer.forward(input_sequence)  # shape = (n, d_model)
         refined_embedding = self.decoder.forward(raw_embedding)  # shape = (n, d_model)
-        logits = self.unembedding_layer.forward(refined_embedding)  # shape = (n, vocab_size)
+        normed_embedding = self.final_norm.forward(refined_embedding)  # shape = (n, d_model)
+        logits = self.unembedding_layer.forward(normed_embedding)  # shape = (n, vocab_size)
 
         return logits
 
@@ -93,7 +106,9 @@ class Transformer:
 
         dlogits = dout
         self.unembedding_layer.backward(dlogits)
-        drefined_embedding = self.unembedding_layer.cache["dx"]
+        dnormed_embedding = self.unembedding_layer.cache["dx"]
+        self.final_norm.backward(dnormed_embedding)
+        drefined_embedding = self.final_norm.cache["dx"]
         self.decoder.backward(drefined_embedding)
         draw_embedding = self.decoder.cache["dx"]
         self.embedding_layer.backward(draw_embedding)

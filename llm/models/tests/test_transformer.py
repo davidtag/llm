@@ -32,8 +32,9 @@ class TestTransformer(unittest.TestCase):
             # LayerNorm
             + 10 * 2
         )
+        final_norm_params = 10 + 10
         unembedding_params = 10 * 13 + 13
-        total_params = embedding_params + block_stack_params + unembedding_params
+        total_params = embedding_params + block_stack_params + final_norm_params + unembedding_params
 
         self.assertEqual(self.model.n_params, total_params)
 
