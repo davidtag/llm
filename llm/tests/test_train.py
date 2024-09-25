@@ -415,11 +415,11 @@ class TestTrainingEndToEnd(unittest.TestCase):
 
     def test_train_transformer_vocab_size_2(self, num_epochs: int = 10, context_size: int = 16) -> None:
         """Test that we can train a Transformer model on a small vocab size with predictable pattern."""
-        optimizer = Adam(lr=0.03)
+        optimizer = Adam(lr=0.004)
         model = Transformer(
             vocab_size=2,
             context_size=context_size,
-            n_blocks=1,
+            n_blocks=6,
             d_model=64,
             d_k=8,
             d_v=8,
