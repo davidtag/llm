@@ -11,7 +11,6 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
     - Should FeedForward have normalization layer before activation?
         # See Karpathy's "Building makemore part3", 1:07:00
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
-- Support `bias` param for Linear layer
 - Support batching
     - Embedding
     - Transformer
