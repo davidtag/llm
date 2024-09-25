@@ -9,7 +9,7 @@ from llm.optimizers import Optimizer
 
 
 class TextEmbedding:
-    """A learned embedding layer for a fixed vocab size & context window."""
+    """A learned text embedding layer for a fixed vocab size & context window."""
 
     def __init__(
         self,
