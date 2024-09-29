@@ -8,6 +8,7 @@ PyTorch or Tensorflow.
 
 # TODO
 
+- Develop a simple Embedding class and refactor TextEmbedding to use 2 of them (token + position)
 - Diagnose FeedForward training after 1 iter
     - Distribution of activations
     - Distribution of gradients
@@ -42,3 +43,5 @@ PyTorch or Tensorflow.
     - See Karpathy's "building GPT from scratch" video ~1:40:00 and also Transformer/GPT-1 papers
 - Revisit hack in LayerNorm when n_input==2
 - Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
+- Make script to download all data assets:
+    https://ocw.mit.edu/ans7870/6/6.006/s08/lecturenotes/files/t8.shakespeare.txt
