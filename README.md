@@ -1,6 +1,10 @@
 # llm
 Ground-up implementation of LLMs with NumPy as the only dependency.
 
+The purpose of this repo is educational - explore the main concepts of LLMs without relying on
+3rd party packages for the heavy lifting. In particular, the computation of gradients (i.e., the
+"backward pass") is done manually, instead of relying on autograd systems, like the ones in
+PyTorch or Tensorflow.
 
 # TODO
 
