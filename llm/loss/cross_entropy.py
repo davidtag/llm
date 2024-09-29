@@ -17,7 +17,7 @@ class CrossEntropyLoss:
         self.enable_grad = enable_grad
         self.cache = {}
 
-    def forward(self, logits: np.ndarray, targets: np.ndarray) -> np.float_:
+    def forward(self, logits: np.ndarray, targets: np.ndarray) -> np.float64:
         """Compute the loss for a set of logits and targets."""
         assert logits.ndim >= 2 and targets.ndim == logits.ndim - 1
         assert logits.shape[:-1] == targets.shape
