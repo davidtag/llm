@@ -1,16 +1,23 @@
 """."""
 
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 from concurrent.futures import Executor, ProcessPoolExecutor
+import heapq
 import os
 import time
 from typing import Dict, Optional, Sequence, Tuple
 
+import dataclasses
 import pprint
 import numpy as np
 from numpy.typing import NDArray
 
-from llm.tokenizers.helpers import merge_inplace  # , get_pairwise_token_frequencies
+from llm.tokenizers.helpers import (
+    merge_inplace,
+    merge_inplace_and_update_frequencies,
+    merge_inplace_and_update_frequencies_and_heap,
+    TokenPairElement,
+)
 
 Token = np.int32
 TokenPair = Tuple[Token, Token]
@@ -21,9 +28,9 @@ Vocab = Dict[Token, str]
 MAX_TOKEN_VALUE = 1_000_000
 
 
-def get_pairwise_frequencies_sequential(byte_sequence: Sequence[Token]) -> Dict[TokenPair, int]:
+def get_pairwise_frequencies_sequential(byte_sequence: Sequence[Token]) -> defaultdict[TokenPair, int]:
     """Compute the frequency of bigram tokens in the provided sequence."""
-    freq: Dict[TokenPair, int] = {}
+    freq: defaultdict[TokenPair, int] = defaultdict(int)
 
     # n = len(byte_sequence)
     # for i in range(n - 1):
@@ -34,7 +41,7 @@ def get_pairwise_frequencies_sequential(byte_sequence: Sequence[Token]) -> Dict[
 
     for c_1, c_2 in zip(byte_sequence[:-1], byte_sequence[1:]):
         pair = (c_1, c_2)
-        freq[pair] = freq.get(pair, 0) + 1
+        freq[pair] += 1
 
     return freq
 
@@ -110,13 +117,13 @@ def _get_pairwise_frequencies(
 def get_pairwise_token_frequencies(
     token_sequence: NDArray[np.int32],
     max_only: bool = False,
-) -> Dict[TokenPair, int]:
+) -> defaultdict[TokenPair, int]:
     """Compute the frequency of bigram tokens in the provided sequence.
 
     If `max_only=True`, only include the token pair with the highest frequency,
     including ties, in the output.
     """
-    freq: Dict[TokenPair, int] = {}
+    freq: defaultdict[TokenPair, int] = defaultdict(int)
 
     bit_shift = 16  # TODO(dtag): Only allows 65k tokens
 
@@ -144,6 +151,42 @@ def get_pairwise_token_frequencies(
             freq[pair] = count
 
     return freq
+
+
+def get_pairwise_token_frequencies_and_heap(
+    token_sequence: NDArray[np.int32],
+) -> Tuple[Dict[TokenPair, TokenPairElement], list[TokenPairElement]]:
+    """Compute the frequency of bigram tokens in the provided sequence.
+
+    If `max_only=True`, only include the token pair with the highest frequency,
+    including ties, in the output.
+    """
+    freq: Dict[TokenPair, TokenPairElement] = {}
+    heap: list[TokenPairElement] = []
+
+    bit_shift = 16  # TODO(dtag): Only allows 65k tokens
+
+    # Determine all unique pairs using bit packing
+    # Lower `shift` bits are the second token, with upper bits the first token
+    y = np.left_shift(token_sequence[:-1], bit_shift) + token_sequence[1:]
+    unique_values, counts = np.unique(y, return_counts=True)
+
+    # Efficiently unpack them
+    # TODO(dtag): You can avoid doing this for all inputs in the case of max_only=True
+    first_tokens = np.right_shift(unique_values, bit_shift)
+    mask_upper_bits = (1 << bit_shift) - 1
+    second_tokens = np.bitwise_and(unique_values, mask_upper_bits)
+
+    # Package the frequencies
+    for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
+        pair = (token_1, token_2)
+        heap_elem = TokenPairElement(neg_count=-count, pair=pair)
+        heap.append(heap_elem)
+        freq[pair] = heap_elem
+
+    heapq.heapify(heap)
+
+    return freq, heap
 
 
 # def merge_inplace(
@@ -237,6 +280,158 @@ class BasicTokenizer:
 
         return merges
 
+    def train2(
+        self,
+        text: bytes,
+        num_merges: int,
+        verbose: bool = False,
+    ) -> MergeList:
+        """."""
+        print("--------------")
+        byte_sequence = np.array(list(text), dtype=np.int32)
+        print("----")
+
+        merges = MergeList()
+        next_token = np.int32(self.NUM_BASE_TOKENS)
+
+        frequencies = get_pairwise_token_frequencies(byte_sequence, max_only=False)
+        # frequencies = get_pairwise_frequencies_sequential(byte_sequence)
+
+        for i in range(num_merges):
+            time_0 = time.monotonic()
+
+            # print(f"{len(frequencies)=}")
+            time_1 = time.monotonic()
+
+            # Decide what to merge, if we can. We only merge pairs occuring atleast twice
+            next_pair = max(
+                frequencies.keys(),
+                key=lambda pair, freq=frequencies: (freq[pair], -pair[0], -pair[1]),
+            )
+            target_merges = frequencies[next_pair]
+            # print(f"{target_merges=}")
+            assert target_merges >= 0
+            if target_merges < 2:
+                break
+            time_2 = time.monotonic()
+
+            # Merge it
+            byte_sequence = merge_inplace_and_update_frequencies(
+                input_sequence=byte_sequence,
+                pair=next_pair,
+                output_token=next_token,
+                num_merges=target_merges,
+                frequencies=frequencies,
+            )
+            time_3 = time.monotonic()
+
+            # Update vocab
+            merges[next_pair] = next_token
+            self.vocab[next_token] = self.vocab[next_pair[0]] + self.vocab[next_pair[1]]
+            next_token += 1
+            time_4 = time.monotonic()
+
+            if verbose:
+                t_freq = time_1 - time_0
+                t_max = time_2 - time_1
+                t_merge = time_3 - time_2
+                t_total = time_4 - time_0
+                print(
+                    f" {i + 1:6}/{num_merges} : "
+                    f"Stats=[{t_freq=:.3f},{t_max=:.3f},{t_merge=:.3f},{t_total=:.3f}] "
+                    "Merged: "
+                    f"[{self.decode([next_pair[0]])}][{self.decode([next_pair[1]])}] -> [{next_token}]. "
+                    f"freq={target_merges}. len={len(byte_sequence)}"
+                )
+
+        return merges
+
+    def train3(
+        self,
+        text: bytes,
+        num_merges: int,
+        verbose: bool = False,
+    ) -> MergeList:
+        """."""
+        print("--------------")
+        byte_sequence = np.array(list(text), dtype=np.int32)
+        print("----")
+
+        merges = MergeList()
+        next_token = np.int32(self.NUM_BASE_TOKENS)
+
+        frequencies, heap = get_pairwise_token_frequencies_and_heap(byte_sequence)
+        print(len(frequencies), len(heap), heap[0])
+
+        for i in range(num_merges):
+            time_0 = time.monotonic()
+
+            if len(heap) / len(frequencies) > 2:
+                new_heap = [item for item in heap if not item.ignore]
+                heapq.heapify(new_heap)
+                heap = new_heap
+                assert len(heap) == len(new_heap)
+                print("!!CLEANNING")
+            # print(f"{len(frequencies)=}")
+            time_1 = time.monotonic()
+
+            # Decide what to merge, if we can. We only merge pairs occuring atleast twicem
+            # print(len(heap))
+            min_elem = heap[0]
+            while min_elem.ignore:
+                heapq.heappop(heap)
+                min_elem = heap[0]
+            target_merges = -min_elem.neg_count
+            next_pair = min_elem.pair
+            assert min_elem is frequencies[next_pair]
+            assert target_merges >= 0
+            if target_merges < 2:
+                break
+            time_2 = time.monotonic()
+
+            # Merge it
+            # if i == 5451:
+            #     print(f"{target_merges=}")
+            #     freq_check = get_pairwise_frequencies_sequential(byte_sequence)
+            #     print(f"{freq_check[next_pair]=}")
+            #     import pdb
+
+            #     pdb.set_trace()
+            # freq_check = get_pairwise_token_frequencies(byte_sequence, max_only=True)
+            # assert freq_check[next_pair] == target_merges
+
+            byte_sequence = merge_inplace_and_update_frequencies_and_heap(
+                input_sequence=byte_sequence,
+                pair=next_pair,
+                output_token=next_token,
+                num_merges=target_merges,
+                frequencies=frequencies,
+                heap=heap,
+            )
+            time_3 = time.monotonic()
+
+            # Update vocab
+            merges[next_pair] = next_token
+            self.vocab[next_token] = self.vocab[next_pair[0]] + self.vocab[next_pair[1]]
+            next_token += 1
+            time_4 = time.monotonic()
+
+            if verbose:
+                t_freq = time_1 - time_0
+                t_max = time_2 - time_1
+                t_merge = time_3 - time_2
+                t_total = time_4 - time_0
+                print(
+                    f" {i + 1:6}/{num_merges} : "
+                    f"Stats=[{t_freq=:.3f},{t_max=:.3f},{t_merge=:.3f},{t_total=:.3f}] "
+                    "Merged: "
+                    # f"[{self.decode([next_pair[0]])}][{self.decode([next_pair[1]])}] -> [{next_token}]. "
+                    f"[{next_pair[0]}][{next_pair[1]}] -> [{next_token}]. "
+                    f"freq={target_merges}. len={len(byte_sequence)}"
+                )
+
+        return merges
+
     @staticmethod
     def merge(input_sequence: Sequence[Token], pair: TokenPair, output_token: Token) -> Sequence[Token]:
         """Replace all occurences of `pair` in `input_sequence` with `output_token`."""
@@ -306,6 +501,25 @@ class BasicTokenizer:
             current_sequence = np.asarray(current_sequence, dtype=np.int32, copy=False)
         return current_sequence
 
+    def encode2(self, text: str) -> NDArray[np.int32]:
+        """Convert text to a series of tokens."""
+        current_sequence = np.array(list(text), dtype=np.int32)
+        frequencies = get_pairwise_token_frequencies(current_sequence, max_only=False)
+
+        for token_pair, replacement in self.merges.items():
+            target_merges = frequencies.get(token_pair, 0)
+            if target_merges == 0:
+                continue
+
+            current_sequence = merge_inplace_and_update_frequencies(
+                input_sequence=current_sequence,
+                pair=token_pair,
+                output_token=replacement,
+                num_merges=target_merges,
+                frequencies=frequencies,
+            )
+        return current_sequence
+
     def decode(self, tokens: Sequence[Token]) -> str:
         """Convert a series of tokens to text."""
         output = "".join(self.vocab[token] for token in tokens)
@@ -319,13 +533,21 @@ def main():
         text = f.read()
         print(len(text))
     tokenizer = BasicTokenizer()
-    merges = tokenizer.train(text, num_merges=1000, verbose=True)
+    merges = tokenizer.train3(text, num_merges=2000, verbose=True)
     # pprint.pprint(merges)
 
     trained_tokenizer = BasicTokenizer(merges=merges)
-    pprint.pprint(trained_tokenizer.vocab)
-    # encoded = trained_tokenizer.encode(text)
-    # print(len(encoded), len(encoded) / len(text))
+    # pprint.pprint(trained_tokenizer.vocab)
+    print("-----")
+    # sample_text = "Some sample text".encode("utf-8")
+    sample_text = text[:1_048_576]
+    time_0 = time.monotonic()
+    encoded = trained_tokenizer.encode2(sample_text)
+    encoding_time = time.monotonic() - time_0
+    print(f"{encoding_time=:.3f}")
+    print(len(encoded), len(encoded) / len(sample_text))
+    print(encoded[:10])
+    print("-----")
     # decoded = trained_tokenizer.decode(encoded)
     # print(decoded)
 
