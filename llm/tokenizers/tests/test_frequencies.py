@@ -1,6 +1,7 @@
 """Unit tests for frequencies.pyx."""
 
 import abc
+import heapq
 from typing import Callable, Mapping, Tuple
 import unittest
 
@@ -131,6 +132,48 @@ class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
             assert heap_node.ignore is False
             freq[pair] = heap_node.count
         return freq
+
+    def test_small_sequence(self) -> None:
+        """Test frequency on a small input sequence"""
+        tokens = np.array([0, 0, 1, 0, 2, 1, 0], dtype=TokenDtype)
+        # Raw frequencies:
+        # {
+        #     (0, 0): 1,
+        #     (0, 1): 1,
+        #     (1, 0): 2,
+        #     (0, 2): 1,
+        #     (2, 1): 1,
+        # }
+        pair_to_node, heap = get_pairwise_token_frequencies_and_heap_numpy(tokens)
+        self.assertEqual(len(pair_to_node), len(heap))
+
+        # Test the min_node
+        min_node = heapq.heappop(heap)
+        self.assertEqual(min_node.count, 2)
+        self.assertEqual(min_node.pair, (1, 0))
+        self.assertIs(pair_to_node[(1, 0)], min_node)
+
+        # Check for correct tie-break ordering among remaining nodes
+        node_1 = heapq.heappop(heap)
+        node_2 = heapq.heappop(heap)
+        node_3 = heapq.heappop(heap)
+        node_4 = heapq.heappop(heap)
+        self.assertEqual(len(heap), 0)
+
+        self.assertEqual(node_1.count, 1)
+        self.assertEqual(node_2.count, 1)
+        self.assertEqual(node_3.count, 1)
+        self.assertEqual(node_4.count, 1)
+
+        self.assertEqual(node_1.pair, (0, 0))
+        self.assertEqual(node_2.pair, (0, 1))
+        self.assertEqual(node_3.pair, (0, 2))
+        self.assertEqual(node_4.pair, (2, 1))
+
+        self.assertIs(pair_to_node[(0, 0)], node_1)
+        self.assertIs(pair_to_node[(0, 1)], node_2)
+        self.assertIs(pair_to_node[(0, 2)], node_3)
+        self.assertIs(pair_to_node[(2, 1)], node_4)
 
 
 #########################################################################################
