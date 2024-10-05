@@ -83,6 +83,9 @@ def get_pairwise_token_frequencies_numpy_maxonly(
     """Compute the token frequencies using numpy broadcast, filtered for max-freq only."""
     freq: defaultdict[TokenPair, int] = defaultdict(int)
 
+    if tokens.shape[0] <= 1:
+        return freq
+
     # Determine all unique pairs using bit packing
     y = tokens[:-1] * _MAX_NUM_TOKENS + tokens[1:]
     unique_values, counts = np.unique(y, return_counts=True)
@@ -143,6 +146,9 @@ def get_pairwise_token_frequencies_numpy_bitshift_maxonly(
     only allows for tokens up to 2^16 = 65536.
     """
     freq: defaultdict[TokenPair, int] = defaultdict(int)
+
+    if tokens.shape[0] <= 1:
+        return freq
 
     # Determine all unique pairs using bit packing
     # Upper half bits are the first token, with lower half bits the second token
