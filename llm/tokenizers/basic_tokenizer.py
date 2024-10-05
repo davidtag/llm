@@ -533,21 +533,19 @@ def main():
         text = f.read()
         print(len(text))
     tokenizer = BasicTokenizer()
-    merges = tokenizer.train3(text, num_merges=2000, verbose=True)
+    merges = tokenizer.train3(text, num_merges=1200, verbose=True)
     # pprint.pprint(merges)
 
     trained_tokenizer = BasicTokenizer(merges=merges)
     # pprint.pprint(trained_tokenizer.vocab)
-    print("-----")
     # sample_text = "Some sample text".encode("utf-8")
-    sample_text = text[:1_048_576]
-    time_0 = time.monotonic()
-    encoded = trained_tokenizer.encode2(sample_text)
-    encoding_time = time.monotonic() - time_0
-    print(f"{encoding_time=:.3f}")
-    print(len(encoded), len(encoded) / len(sample_text))
-    print(encoded[:10])
-    print("-----")
+    for i in range(10):
+        print("Encoding...")
+        start = time.monotonic()
+        out = trained_tokenizer.encode2(text)
+        end = time.monotonic()
+        duration = end - start
+        print(f"Done encoding: {len(text)} -> {len(out)}. {duration:.3f}s")
     # decoded = trained_tokenizer.decode(encoded)
     # print(decoded)
 
