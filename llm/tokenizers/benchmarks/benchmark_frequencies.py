@@ -51,7 +51,7 @@ class Profile:
 
 def main() -> None:
     """Run the benchmark."""
-    print("-- Running benchmakr for frequencies.pyx ---------------------------------------")
+    print("-- Running benchmark for frequencies.pyx ---------------------------------------")
     tokens_1mb = np.random.randint(low=0, high=256, size=1024 * 1024).astype(dtype=np.uint32)
     num_runs = 10
     methods = [
