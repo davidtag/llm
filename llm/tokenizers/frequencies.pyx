@@ -12,8 +12,9 @@ from numpy.typing import NDArray
 
 
 ctypedef uint32_t Token
-ctypedef Token[::1] TokenSequenece  # typed memory view. contiguous C-order memory.
 ctypedef (Token, Token) TokenPair
+ctypedef Token[::1] TokenSequenece  # typed memory view. contiguous C-order memory.
+NumpyTokenSequence = NDArray[np.uint32]
 
 
 def get_pairwise_token_frequencies_sequential_pure_python(
@@ -55,7 +56,7 @@ cdef int _MAX_NUM_TOKENS = 1_000_000
 
 
 def get_pairwise_token_frequencies_numpy(
-    tokens: NDArray[np.uint32],
+    tokens: NumpyTokenSequence,
 ) -> defaultdict[TokenPair, int]:
     """Compute the token frequencies using numpy broadcast."""
     freq: defaultdict[TokenPair, int] = defaultdict(int)
@@ -77,7 +78,7 @@ def get_pairwise_token_frequencies_numpy(
 
 
 def get_pairwise_token_frequencies_numpy_maxonly(
-    tokens: NDArray[np.uint32],
+    tokens: NumpyTokenSequence,
 ) -> defaultdict[TokenPair, int]:
     """Compute the token frequencies using numpy broadcast, filtered for max-freq only."""
     freq: defaultdict[TokenPair, int] = defaultdict(int)
@@ -107,7 +108,7 @@ cdef Token MASK_UPPER_BITS = (1 << _BIT_SHIFT) - 1
 
 
 def get_pairwise_token_frequencies_numpy_bitshift(
-    tokens: NDArray[np.uint32],
+    tokens: NumpyTokenSequence,
 ) -> defaultdict[TokenPair, int]:
     """Compute the token frequencies using numpy broadcast with bitshift.
 
@@ -134,7 +135,7 @@ def get_pairwise_token_frequencies_numpy_bitshift(
 
 
 def get_pairwise_token_frequencies_numpy_bitshift_maxonly(
-    tokens: NDArray[np.uint32],
+    tokens: NumpyTokenSequence,
 ) -> defaultdict[TokenPair, int]:
     """Compute the token frequencies using numpy broadcast with bitshift, filtered for max-freq only.
 
@@ -194,7 +195,7 @@ cdef class TokenPairNode:
 
 
 def get_pairwise_token_frequencies_and_heap_numpy(
-    tokens: NDArray[np.uint32],
+    tokens: NumpyTokenSequence,
 ) -> Tuple[
         dict[TokenPair, TokenPairNode],
         list[TokenPairNode],
