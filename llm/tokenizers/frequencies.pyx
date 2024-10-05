@@ -91,8 +91,8 @@ def get_pairwise_token_frequencies_numpy_maxonly(
     unique_values, counts = np.unique(y, return_counts=True)
 
     # Determine the max count and all it's occurences
-    max_count_idxs = np.argmax(counts, keepdims=True)
-    max_count = counts[max_count_idxs[0]]
+    max_count = np.max(counts)
+    max_count_idxs = np.argwhere(counts == max_count).reshape(-1, copy=False)
 
     # Efficiently unpack them
     first_tokens = np.floor_divide(unique_values[max_count_idxs], _MAX_NUM_TOKENS)
@@ -156,8 +156,8 @@ def get_pairwise_token_frequencies_numpy_bitshift_maxonly(
     unique_values, counts = np.unique(y, return_counts=True)
 
     # Determine the max count and all it's occurences
-    max_count_idxs = np.argmax(counts, keepdims=True)
-    max_count = counts[max_count_idxs[0]]
+    max_count = np.max(counts)
+    max_count_idxs = np.argwhere(counts == max_count).reshape(-1, copy=False)
 
     # Efficiently unpack them
     first_tokens = np.right_shift(unique_values[max_count_idxs], _BIT_SHIFT)
