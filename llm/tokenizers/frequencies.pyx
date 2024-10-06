@@ -218,10 +218,23 @@ cdef class TokenPairNode:
     def ignore(self, bint ignore) -> None:
         self.ignore = ignore
 
+    def __eq__(self, other: TokenPairNode) -> bool:
+        return (
+            self.count == other.count
+            and self.pair == other.pair
+            and self.ignore == other.ignore
+        )
+
     def __lt__(self, other: TokenPairNode) -> bool:
         self_order = (-self.count, self.pair[0], self.pair[1])
         other_order = (-other.count, other.pair[0], other.pair[1])
         return  self_order <  other_order
+
+    def __str__(self) -> str:
+        return f"TokenPairNode(count={self.count}, pair={self.pair}, ignore={self.ignore})"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 def get_pairwise_token_frequencies_and_heap_numpy(
