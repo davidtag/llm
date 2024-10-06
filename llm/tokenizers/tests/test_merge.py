@@ -6,6 +6,9 @@ import unittest
 import numpy as np
 from numpy.typing import NDArray
 
+from llm.tokenizers.frequencies import (
+    get_pairwise_token_frequencies_sequential_pure_python,
+)
 from llm.tokenizers.merge import (
     merge_inplace,
     merge_inplace_and_update_frequencies,
@@ -276,3 +279,18 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
             (3, 11): 1,
         }
         self.assertDictEqual(frequencies, expected_frequencies)
+
+    def test_random_sequence(self) -> None:
+        """Test implementation parity with naive version on a random sequence."""
+        tokens = np.random.randint(low=0, high=1000, size=10_000).astype(TokenDtype)
+        frequencies = get_pairwise_token_frequencies_sequential_pure_python(tokens)
+        out_tokens = merge_inplace_and_update_frequencies(
+            tokens,
+            7,
+            7,
+            9,
+            expected_num_merges=max(frequencies.values()),
+            frequencies=frequencies,
+        )
+        post_frequencies = get_pairwise_token_frequencies_sequential_pure_python(out_tokens)
+        self.assertDictEqual(post_frequencies, frequencies)
