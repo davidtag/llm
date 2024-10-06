@@ -1,7 +1,7 @@
 """Various library methods for computing pairwise statistics over token sequences."""
 from libc.stdint cimport uint32_t
 
-from llm.tokenizers.stdtoken cimport Token, TokenSequenece, TokenPair, TokenPairNode
+from llm.tokenizers.stdtoken cimport token_t, TokenSequenece, TokenPair, TokenPairNode
 
 from collections import defaultdict
 import dataclasses
@@ -39,7 +39,7 @@ def get_pairwise_token_frequencies_sequential_cython(
 
     cdef Py_ssize_t n = tokens.shape[0]
     cdef Py_ssize_t i
-    cdef Token token_1, token_2
+    cdef token_t token_1, token_2
 
     for i in range(n - 1):
         token_1 = tokens[i]
@@ -105,7 +105,7 @@ def get_pairwise_token_frequencies_numpy_maxonly(
 
 
 cdef int _BIT_SHIFT = 16
-cdef Token MASK_UPPER_BITS = (1 << _BIT_SHIFT) - 1
+cdef token_t MASK_UPPER_BITS = (1 << _BIT_SHIFT) - 1
 
 
 def get_pairwise_token_frequencies_numpy_bitshift(

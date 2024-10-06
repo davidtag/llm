@@ -7,7 +7,7 @@ cdef class TokenPair:
     storing these objects in a Python dict, as compared to a regular tuple.
     """
 
-    def __cinit__(self, Token first, Token second):
+    def __cinit__(self, token_t first, token_t second):
         self.first = first
         self.second = second
 
@@ -23,13 +23,9 @@ cdef class TokenPairNode:
 
     def __cinit__(
         self,
-        Token first,
-        Token second,
+        token_t first,
+        token_t second,
         int count,
-        # note: I needed to accept these as separate args because when accepting a TokenPair, I
-        # get a [-Wmaybe-uninitialized] compiler warning on the generated Cython code.
-        #Token token_1,
-        #Token token_2,
         bint ignore = False
     ):
         self.first = first
@@ -47,19 +43,19 @@ cdef class TokenPairNode:
         self.count = count
 
     @property
-    def first(self) -> Token:
+    def first(self) -> token_t:
         return self.first
 
     @first.setter
-    def first(self, Token first) -> None:
+    def first(self, token_t first) -> None:
         self.first = first
 
     @property
-    def second(self) -> Token:
+    def second(self) -> token_t:
         return self.second
 
     @second.setter
-    def second(self, Token second) -> None:
+    def second(self, token_t second) -> None:
         self.second = second
 
     @property

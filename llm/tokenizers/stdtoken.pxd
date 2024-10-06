@@ -3,17 +3,17 @@
 from libc.stdint cimport uint32_t
 
 
-ctypedef uint32_t Token
-ctypedef Token[::1] TokenSequenece  # typed memory view. contiguous C-order memory.
+ctypedef uint32_t token_t
+ctypedef token_t[::1] TokenSequenece  # typed memory view. contiguous C-order memory.
 
 
 cdef class TokenPair:
-    cdef Token first
-    cdef Token second
+    cdef token_t first
+    cdef token_t second
 
 
 cdef class TokenPairNode:
-    cdef Token first
-    cdef Token second
+    cdef token_t first
+    cdef token_t second
     cdef int count
     cdef bint ignore
