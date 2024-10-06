@@ -8,6 +8,12 @@ ctypedef Token[::1] TokenSequenece  # typed memory view. contiguous C-order memo
 
 
 cdef class TokenPair:
-
     cdef Token first
     cdef Token second
+
+
+cdef class TokenPairNode:
+    cdef Token first
+    cdef Token second
+    cdef int count
+    cdef bint ignore
