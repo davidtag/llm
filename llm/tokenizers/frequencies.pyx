@@ -1,7 +1,7 @@
 """Various library methods for computing pairwise statistics over token sequences."""
 from libc.stdint cimport uint32_t
 
-from llm.tokenizers.stdtoken cimport Token, TokenSequenece
+from llm.tokenizers.stdtoken cimport Token, TokenSequenece, TokenPair
 
 from collections import defaultdict
 import dataclasses
@@ -13,7 +13,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 
-ctypedef (Token, Token) TokenPair
 NumpyTokenSequence = NDArray[np.uint32]
 
 
@@ -41,12 +40,11 @@ def get_pairwise_token_frequencies_sequential_cython(
     cdef Py_ssize_t n = tokens.shape[0]
     cdef Py_ssize_t i
     cdef Token token_1, token_2
-    cdef TokenPair pair
 
     for i in range(n - 1):
         token_1 = tokens[i]
         token_2 = tokens[i + 1]
-        pair = (token_1, token_2)
+        pair = TokenPair(token_1, token_2)
         freq[pair] += 1
 
     return freq
@@ -71,7 +69,7 @@ def get_pairwise_token_frequencies_numpy(
 
     # Package the frequencies
     for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
-        pair = (token_1, token_2)
+        pair = TokenPair(token_1, token_2)
         freq[pair] = count
 
     return freq
@@ -100,7 +98,7 @@ def get_pairwise_token_frequencies_numpy_maxonly(
 
     # Package the frequencies
     for token_1, token_2 in zip(first_tokens, second_tokens, strict=True):
-        pair = (token_1, token_2)
+        pair = TokenPair(token_1, token_2)
         freq[pair] = max_count
 
     return freq
@@ -131,7 +129,7 @@ def get_pairwise_token_frequencies_numpy_bitshift(
 
     # Package the frequencies
     for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
-        pair = (token_1, token_2)
+        pair = TokenPair(token_1, token_2)
         freq[pair] = count
 
     return freq
@@ -165,7 +163,7 @@ def get_pairwise_token_frequencies_numpy_bitshift_maxonly(
 
     # Package the frequencies
     for token_1, token_2 in zip(first_tokens, second_tokens, strict=True):
-        pair = (token_1, token_2)
+        pair = TokenPair(token_1, token_2)
         freq[pair] = max_count
 
     return freq
@@ -177,21 +175,27 @@ cdef class TokenPairNode:
     Implements `<` comparison to order by max-count, with tie-breaking by token values in ascending order.
     """
 
+    cdef Token first
+    cdef Token second
     cdef int count
-    cdef TokenPair pair
+    #cdef (Token, Token) pair
     cdef bint ignore
 
     def __cinit__(
         self,
+        Token first,
+        Token second,
         int count,
         # note: I needed to accept these as separate args because when accepting a TokenPair, I
         # get a [-Wmaybe-uninitialized] compiler warning on the generated Cython code.
-        Token token_1,
-        Token token_2,
+        #Token token_1,
+        #Token token_2,
         bint ignore = False
     ):
+        self.first = first
+        self.second = second
         self.count = count
-        self.pair = (token_1, token_2)
+        #self.pair = (token_1, token_2)
         self.ignore = ignore
 
     @property
@@ -203,12 +207,29 @@ cdef class TokenPairNode:
         self.count = count
 
     @property
-    def pair(self) -> Tuple[int, int]:
-        return self.pair
+    def first(self) -> Token:
+        return self.first
+
+    @first.setter
+    def first(self, Token first) -> None:
+        self.first = first
+
+    @property
+    def second(self) -> Token:
+        return self.second
+
+    @second.setter
+    def second(self, Token second) -> None:
+        self.second = second
+
+    @property
+    def pair(self) -> TokenPair:
+        return TokenPair(self.first, self.second)
 
     @pair.setter
-    def pair(self, pair: Tuple[int, int]) -> None:
-        self.pair = (pair[0], pair[1])
+    def pair(self, pair: TokenPair) -> None:
+        self.first = pair.first
+        self.second = pair.second
 
     @property
     def ignore(self) -> bool:
@@ -220,18 +241,19 @@ cdef class TokenPairNode:
 
     def __eq__(self, other: TokenPairNode) -> bool:
         return (
-            self.count == other.count
-            and self.pair == other.pair
+            self.first == other.first
+            and self.second == other.second
+            and self.count == other.count
             and self.ignore == other.ignore
         )
 
     def __lt__(self, other: TokenPairNode) -> bool:
-        self_order = (-self.count, self.pair[0], self.pair[1])
-        other_order = (-other.count, other.pair[0], other.pair[1])
+        self_order = (-self.count, self.first, self.second)
+        other_order = (-other.count, other.first, other.second)
         return  self_order <  other_order
 
     def __str__(self) -> str:
-        return f"TokenPairNode(count={self.count}, pair={self.pair}, ignore={self.ignore})"
+        return f"TokenPairNode(first={self.first}, second={self.second}, count={self.count}, ignore={self.ignore})"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -257,8 +279,8 @@ def get_pairwise_token_frequencies_and_heap_numpy(
 
     # Package the frequencies
     for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
-        pair = (token_1, token_2)
-        heap_node = TokenPairNode(count=count, token_1=token_1, token_2=token_2)
+        pair = TokenPair(token_1, token_2)
+        heap_node = TokenPairNode(token_1, token_2, count)
         heap.append(heap_node)
         freq[pair] = heap_node
 
