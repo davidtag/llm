@@ -12,11 +12,11 @@ cdef class TokenPair:
         self.second = second
 
     @property
-    def first(self) -> token_t:
+    def first(self) -> int:
         return self.first
 
     @property
-    def second(self) -> token_t:
+    def second(self) -> int:
         return self.second
 
     def __str__(self) -> str:
