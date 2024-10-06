@@ -4,7 +4,12 @@ import numpy
 
 setup(
     ext_modules=cythonize(
-        ["llm/tokenizers/helpers.pyx", "llm/tokenizers/frequencies.pyx", "llm/tokenizers/merge.pyx"],
+        [
+            "llm/tokenizers/helpers.pyx",
+            "llm/tokenizers/frequencies.pyx",
+            "llm/tokenizers/merge.pyx",
+            "llm/tokenizers/stdtoken.pyx",
+        ],
         compiler_directives={
             # "boundscheck": False,
             # "wraparound": False,
