@@ -1,19 +1,19 @@
 """Various library methods for computing pairwise statistics over token sequences."""
-import cython
 from libc.stdint cimport uint32_t
+
+from llm.tokenizers.stdtoken cimport Token, TokenSequenece
 
 from collections import defaultdict
 import dataclasses
 import heapq
 from typing import Tuple
 
+import cython
 import numpy as np
 from numpy.typing import NDArray
 
 
-ctypedef uint32_t Token
 ctypedef (Token, Token) TokenPair
-ctypedef Token[::1] TokenSequenece  # typed memory view. contiguous C-order memory.
 NumpyTokenSequence = NDArray[np.uint32]
 
 
