@@ -370,7 +370,7 @@ class BasicTokenizer:
                 new_heap = [item for item in heap if not item.ignore]
                 heapq.heapify(new_heap)
                 heap = new_heap
-                assert len(heap) == len(new_heap)
+                assert len(heap) == len(frequencies)
                 print("!!CLEANNING")
             # print(f"{len(frequencies)=}")
             time_1 = time.monotonic()
