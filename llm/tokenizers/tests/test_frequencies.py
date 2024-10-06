@@ -38,25 +38,25 @@ class FrequencyCommonBaseTest(abc.ABC):
         raise NotImplementedError
 
     def test_empty_input(self) -> None:
-        """Test frequency on an empty input"""
+        """Test frequency on an empty input."""
         tokens = np.array([], dtype=TokenDtype)
         freq = self._call(tokens)
         self.assertDictEqual(freq, {})
 
     def test_single_token(self) -> None:
-        """Test frequency on a single-token input"""
+        """Test frequency on a single-token input."""
         tokens = np.array([0], dtype=TokenDtype)
         freq = self._call(tokens)
         self.assertDictEqual(freq, {})
 
     def test_two_tokens(self) -> None:
-        """Test frequency on a 2-token input"""
+        """Test frequency on a 2-token input."""
         tokens = np.array([0, 0], dtype=TokenDtype)
         freq = self._call(tokens)
         self.assertDictEqual(freq, {(0, 0): 1})
 
     def test_repeated_tokens(self) -> None:
-        """Test frequency on a 2-token input"""
+        """Test frequency on a 2-token input."""
         tokens = np.array([9, 9, 9, 9, 9, 9, 9, 9], dtype=TokenDtype)
         freq = self._call(tokens)
         self.assertDictEqual(freq, {(9, 9): 7})
@@ -71,7 +71,7 @@ class AllFrequencyBaseTest(FrequencyCommonBaseTest):
     """Common tests for all implementations returning full-frequency maps."""
 
     def test_small_sequence(self) -> None:
-        """Test frequency on a small input sequence"""
+        """Test frequency on a small input sequence."""
         tokens = np.array([0, 0, 1, 0, 2, 1, 0], dtype=TokenDtype)
         freq = self._call(tokens)
         self.assertDictEqual(
@@ -134,7 +134,7 @@ class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
         return freq
 
     def test_small_sequence(self) -> None:
-        """Test frequency on a small input sequence"""
+        """Test frequency on a small input sequence."""
         tokens = np.array([0, 0, 1, 0, 2, 1, 0], dtype=TokenDtype)
         # Raw frequencies:
         # {
@@ -185,7 +185,7 @@ class MaxOnlyFrequencyBaseTest(FrequencyCommonBaseTest):
     """Common tests for all implementations returning max-only frequency maps."""
 
     def test_small_sequence(self) -> None:
-        """Test frequency on a small input sequence"""
+        """Test frequency on a small input sequence."""
         tokens = np.array([0, 0, 1, 0, 2, 1, 0], dtype=TokenDtype)
         freq = self._call(tokens)
         self.assertDictEqual(
@@ -196,7 +196,7 @@ class MaxOnlyFrequencyBaseTest(FrequencyCommonBaseTest):
         )
 
     def test_small_sequence_with_ties(self) -> None:
-        """Test frequency on a small input sequence"""
+        """Test frequency on a small input sequence."""
         tokens = np.array([0, 0, 1, 0, 2, 1], dtype=TokenDtype)
         freq = self._call(tokens)
         self.assertDictEqual(
