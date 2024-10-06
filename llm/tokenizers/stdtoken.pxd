@@ -4,7 +4,7 @@ from libc.stdint cimport uint32_t
 
 
 ctypedef uint32_t token_t
-ctypedef token_t[::1] TokenSequenece  # typed memory view. contiguous C-order memory.
+ctypedef token_t[::1] token_sequence_t  # typed memory view. contiguous C-order memory.
 
 
 cdef class TokenPair:

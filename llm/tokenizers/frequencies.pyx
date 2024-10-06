@@ -1,7 +1,7 @@
 """Various library methods for computing pairwise statistics over token sequences."""
 from libc.stdint cimport uint32_t
 
-from llm.tokenizers.stdtoken cimport token_t, TokenSequenece, TokenPair, TokenPairNode
+from llm.tokenizers.stdtoken cimport token_t, token_sequence_t, TokenPair, TokenPairNode
 
 from collections import defaultdict
 import dataclasses
@@ -32,7 +32,7 @@ def get_pairwise_token_frequencies_sequential_pure_python(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def get_pairwise_token_frequencies_sequential_cython(
-    TokenSequenece tokens,
+    token_sequence_t tokens,
 ) -> defaultdict[TokenPair, int]:
     """Compute the token frequencies using a sequential scan in Cython."""
     freq: defaultdict[TokenPair, int] = defaultdict(int)
