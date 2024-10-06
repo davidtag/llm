@@ -7,7 +7,11 @@ cdef class TokenPair:
     storing these objects in a Python dict, as compared to a regular tuple.
     """
 
-    def __cinit__(self, token_t first, token_t second):
+    def __cinit__(
+        self,
+        token_t first,
+        token_t second
+    ):
         self.first = first
         self.second = second
 
@@ -28,59 +32,44 @@ cdef class TokenPair:
 
 
 cdef class TokenPairNode:
-    """A single node in a min-heap, representing a TokenPair and it's frequency in a TokenSequence.
+    """A single node in a min-heap, representing a TokenPair and it's frequency in a token sequence.
 
     Implements `<` comparison to order by max-count, with tie-breaking by token values in ascending order.
 
     We store the TokenPair data directly in-line to avoid Python object overhead.
-    TODO(dtag): define a new struct to avoid this code duplication.
     """
 
     def __cinit__(
         self,
         token_t first,
         token_t second,
-        int count,
+        int32_t count,
         bint ignore = False
     ):
         self.first = first
         self.second = second
         self.count = count
-        #self.pair = (token_1, token_2)
         self.ignore = ignore
+
+    @property
+    def first(self) -> int:
+        return self.first
+
+    @property
+    def second(self) -> int:
+        return self.second
+
+    @property
+    def pair(self) -> TokenPair:
+        return TokenPair(self.first, self.second)
 
     @property
     def count(self) -> int:
         return self.count
 
     @count.setter
-    def count(self, int count) -> None:
+    def count(self, int32_t count) -> None:
         self.count = count
-
-    @property
-    def first(self) -> token_t:
-        return self.first
-
-    @first.setter
-    def first(self, token_t first) -> None:
-        self.first = first
-
-    @property
-    def second(self) -> token_t:
-        return self.second
-
-    @second.setter
-    def second(self, token_t second) -> None:
-        self.second = second
-
-    @property
-    def pair(self) -> TokenPair:
-        return TokenPair(self.first, self.second)
-
-    @pair.setter
-    def pair(self, pair: TokenPair) -> None:
-        self.first = pair.first
-        self.second = pair.second
 
     @property
     def ignore(self) -> bool:
@@ -104,7 +93,11 @@ cdef class TokenPairNode:
         return  self_order <  other_order
 
     def __str__(self) -> str:
-        return f"TokenPairNode(first={self.first}, second={self.second}, count={self.count}, ignore={self.ignore})"
+        return (
+            "TokenPairNode("
+            f"first={self.first}, second={self.second}, count={self.count}, ignore={self.ignore}"
+            ")"
+        )
 
     def __repr__(self) -> str:
         return self.__str__()
