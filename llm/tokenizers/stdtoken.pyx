@@ -1,15 +1,30 @@
 """Data types for handling tokenization."""
 
 cdef class TokenPair:
-    """Stores a pair of tokens.
+    """Stores an immutable pair of tokens.
 
-    Requires about 1/2 as much memory and runs in 1/2 the time when construction and
+    Requires about 1/2 as much memory and runs in 1/2 the time when constructing and
     storing these objects in a Python dict, as compared to a regular tuple.
     """
 
     def __cinit__(self, token_t first, token_t second):
         self.first = first
         self.second = second
+
+    @property
+    def first(self) -> token_t:
+        return self.first
+
+    @property
+    def second(self) -> token_t:
+        return self.second
+
+    def __str__(self) -> str:
+        return f"TokenPair(first={self.first}, second={self.second})"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
 
 
 cdef class TokenPairNode:

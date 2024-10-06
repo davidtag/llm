@@ -1,6 +1,6 @@
 """Data types for handling tokenization."""
 
-from libc.stdint cimport uint32_t
+from libc.stdint cimport uint32_t, int32_t
 
 
 ctypedef uint32_t token_t
@@ -15,5 +15,5 @@ cdef class TokenPair:
 cdef class TokenPairNode:
     cdef token_t first
     cdef token_t second
-    cdef int count
+    cdef int32_t count
     cdef bint ignore
