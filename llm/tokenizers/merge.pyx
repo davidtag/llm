@@ -2,8 +2,13 @@
 import cython
 from libc.stdint cimport uint32_t
 
+import heapq
+
 import numpy as np
 from numpy.typing import NDArray
+
+# TODO(dtag): Move to common .pxd file to support compile-time type checks
+from llm.tokenizers.frequencies import TokenPairNode
 
 # TODO(dtag): Move to common .pxd file
 ctypedef uint32_t Token
@@ -198,5 +203,101 @@ def merge_inplace_and_update_frequencies(
             keys_to_delete.add(key)
     for key in keys_to_delete:
         del frequencies[key]
+
+    return tokens[:new_size]
+
+
+def _update_freq_and_heap(
+    frequencies: dict[TokenPair, TokenPairNode],
+    heap: list[TokenPairNode],
+    pair: Tuple[int, int],  # TODO(dtag): Create a cdef class for TokenPair
+    int diff,
+):
+    """Update the count of `pair` in `frequencies` and `heap` by `diff`."""
+    maybe_heap_elem = frequencies.get(pair, None)
+    if maybe_heap_elem is not None:
+        # This pair already exists. To minimize heap operations at the expense of some extra memory,
+        # we leave the existing node but mark it ignored, and create a new one. Client code needs
+        # to inspect the ignore field of pop()ed nodes before using.
+        maybe_heap_elem.ignore = True
+
+        new_count = maybe_heap_elem.count + diff
+        if new_count == 0:
+            del frequencies[pair]
+        else:
+            heap_node = TokenPairNode(count=new_count, token_1=pair[0], token_2=pair[1])
+            heapq.heappush(heap, heap_node)
+            frequencies[pair] = heap_node
+
+    else:
+        # First time seeing this pair. Create a node for it.
+        heap_node = TokenPairNode(count=diff, token_1=pair[0], token_2=pair[1])
+        heapq.heappush(heap, heap_node)
+        frequencies[pair] = heap_node
+
+
+def merge_inplace_and_update_frequencies_and_heap(
+    tokens: NumpyTokenSequence,
+    Token token_1,
+    Token token_2,
+    Token output_token,
+    int expected_num_merges,
+    frequencies: dict[TokenPair, TokenPairNode],
+    heap: list[TokenPairNode],
+) -> NumpyTokenSequence:
+    """Replace all occurences of `(token_1, token_2)` with `output_token` in-place.
+
+    Additionally, update `frequencies` and `heap` to reflect the merges performed
+
+    Returns: the new effective size of `tokens`
+    """
+    # TODO(dtag): static initialize these initialize these and pass-in for better memory efficiency and latency
+    prefix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
+    suffix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
+
+    new_size, num_prefix, num_suffix = _c_merge_inplace_and_report_neighbors(
+        tokens,
+        token_1,
+        token_2,
+        output_token,
+        prefix_neighbors,
+        suffix_neighbors
+    )
+
+    effective_num_merges = len(tokens) - new_size
+    assert effective_num_merges <= expected_num_merges
+    assert effective_num_merges == expected_num_merges or token_1 == token_2
+
+    prefix_values, prefix_counts = np.unique(prefix_neighbors[:num_prefix], return_counts=True)
+    suffix_values, suffix_counts = np.unique(suffix_neighbors[:num_suffix], return_counts=True)
+
+    pair = (token_1, token_2)
+    if len(heap) > 0:
+        min_elem = heapq.heappop(heap)  # pop min element before further operations
+        assert min_elem.pair == pair
+        assert min_elem is frequencies[pair]
+        del frequencies[pair]
+
+    for prefix, count in zip(prefix_values, prefix_counts, strict=True):
+        if prefix == output_token:  # successive merges. special-casing handled with suffix tokens
+            pass
+        else:
+            _update_freq_and_heap(frequencies, heap, (prefix, token_1), -count)
+            _update_freq_and_heap(frequencies, heap, (prefix, output_token), +count)
+
+    for suffix, count in zip(suffix_values, suffix_counts, strict=False):
+        if suffix == output_token:  # successive merges
+            _update_freq_and_heap(frequencies, heap, (token_2, token_1), -count)
+            _update_freq_and_heap(frequencies, heap, (output_token, output_token), +count)
+        else:
+            _update_freq_and_heap(frequencies, heap, (token_2, suffix), -count)
+            _update_freq_and_heap(frequencies, heap, (output_token, suffix), +count)
+
+    # Target pair may have been recreated if token_1==token_2
+    if pair in frequencies:
+        node = frequencies[pair]
+        assert node.count < 0
+        node.ignore = True
+        del frequencies[pair]
 
     return tokens[:new_size]
