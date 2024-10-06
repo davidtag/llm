@@ -198,13 +198,25 @@ cdef class TokenPairNode:
     def count(self) -> int:
         return self.count
 
+    @count.setter
+    def count(self, int count) -> None:
+        self.count = count
+
     @property
     def pair(self) -> Tuple[int, int]:
         return self.pair
 
+    @pair.setter
+    def pair(self, pair: Tuple[int, int]) -> None:
+        self.pair = (pair[0], pair[1])
+
     @property
     def ignore(self) -> bool:
         return self.ignore
+
+    @ignore.setter
+    def ignore(self, bint ignore) -> None:
+        self.ignore = ignore
 
     def __lt__(self, other: TokenPairNode) -> bool:
         self_order = (-self.count, self.pair[0], self.pair[1])
