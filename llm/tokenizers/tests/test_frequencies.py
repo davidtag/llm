@@ -6,7 +6,6 @@ from typing import Callable, Mapping, Tuple
 import unittest
 
 import numpy as np
-from numpy.typing import NDArray
 
 from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_sequential_pure_python,
@@ -17,10 +16,7 @@ from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_numpy_bitshift_maxonly,
     get_pairwise_token_frequencies_and_heap_numpy,
 )
-
-
-TokenDtype = np.uint32
-NumpyTokenSequence = NDArray[TokenDtype]
+from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
 
 
 #########################################################################################

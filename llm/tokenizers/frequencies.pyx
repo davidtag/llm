@@ -10,10 +10,8 @@ from typing import Tuple
 
 import cython
 import numpy as np
-from numpy.typing import NDArray
 
-
-NumpyTokenSequence = NDArray[np.uint32]
+from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
 
 
 def get_pairwise_token_frequencies_sequential_pure_python(
