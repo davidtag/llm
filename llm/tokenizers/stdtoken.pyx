@@ -1,5 +1,4 @@
-"""Data types for handling tokenization."""
-
+"""Cython data types for handling tokenization."""
 
 cdef class TokenPair:
     """Stores an immutable pair of tokens.

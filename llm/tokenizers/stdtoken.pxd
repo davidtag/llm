@@ -1,4 +1,4 @@
-"""Data types for handling tokenization."""
+"""Cython data types for handling tokenization."""
 
 from libc.stdint cimport uint32_t, int32_t
 
