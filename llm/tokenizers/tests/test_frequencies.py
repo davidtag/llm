@@ -35,7 +35,7 @@ class FrequencyCommonBaseTest(abc.ABC):
         raise NotImplementedError
 
     def _convert_token_pair_to_tuple(self, pair: TokenPair) -> Tuple[int, int]:
-        return (pair.first, pair.second)  # allows for easier comparison
+        return (pair.first, pair.second)
 
     def _convert_token_pair_dict_to_tuple_dict(
         self, freq: Mapping[TokenPair, int]
@@ -136,10 +136,10 @@ class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
         pair_to_node, _ = get_pairwise_token_frequencies_and_heap_numpy(tokens)
         freq = {}
-        for pair, heap_node in pair_to_node.items():
-            assert heap_node.pair == pair
-            assert heap_node.deleted is False
-            freq[self._convert_token_pair_to_tuple(pair)] = heap_node.count
+        for pair, node in pair_to_node.items():
+            assert node.pair == pair
+            assert node.deleted is False
+            freq[self._convert_token_pair_to_tuple(pair)] = node.count
         return freq
 
     def test_small_sequence(self) -> None:
