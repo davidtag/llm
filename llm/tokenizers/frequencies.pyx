@@ -2,7 +2,7 @@
 
 from libc.stdint cimport uint32_t
 
-from llm.tokenizers.stdtoken cimport token_t, token_sequence_t, TokenPair, TokenPairNode
+from llm.tokenizers.stdtoken cimport token_t, token_sequence_t, TokenPair, TokenPairNode, MAX_TOKEN_VALUE
 
 from collections import defaultdict
 import dataclasses
@@ -49,9 +49,6 @@ def get_pairwise_token_frequencies_sequential_cython(
     return freq
 
 
-cdef int _MAX_NUM_TOKENS = 1_000_000
-
-
 def get_pairwise_token_frequencies_numpy(
     tokens: NumpyTokenSequence,
 ) -> defaultdict[TokenPair, int]:
@@ -59,12 +56,12 @@ def get_pairwise_token_frequencies_numpy(
     freq: defaultdict[TokenPair, int] = defaultdict(int)
 
     # Determine all unique pairs using bit packing
-    y = tokens[:-1] * _MAX_NUM_TOKENS + tokens[1:]
+    y = tokens[:-1] * MAX_TOKEN_VALUE + tokens[1:]
     unique_values, counts = np.unique(y, return_counts=True)
 
     # Efficiently unpack them
-    first_tokens = np.floor_divide(unique_values, _MAX_NUM_TOKENS)
-    second_tokens = np.mod(unique_values, _MAX_NUM_TOKENS)
+    first_tokens = np.floor_divide(unique_values, MAX_TOKEN_VALUE)
+    second_tokens = np.mod(unique_values, MAX_TOKEN_VALUE)
 
     # Package the frequencies
     for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
@@ -84,7 +81,7 @@ def get_pairwise_token_frequencies_numpy_maxonly(
         return freq
 
     # Determine all unique pairs using bit packing
-    y = tokens[:-1] * _MAX_NUM_TOKENS + tokens[1:]
+    y = tokens[:-1] * MAX_TOKEN_VALUE + tokens[1:]
     unique_values, counts = np.unique(y, return_counts=True)
 
     # Determine the max count and all it's occurences
@@ -92,8 +89,8 @@ def get_pairwise_token_frequencies_numpy_maxonly(
     max_count_idxs = np.argwhere(counts == max_count).reshape(-1, copy=False)
 
     # Efficiently unpack them
-    first_tokens = np.floor_divide(unique_values[max_count_idxs], _MAX_NUM_TOKENS)
-    second_tokens = np.mod(unique_values[max_count_idxs], _MAX_NUM_TOKENS)
+    first_tokens = np.floor_divide(unique_values[max_count_idxs], MAX_TOKEN_VALUE)
+    second_tokens = np.mod(unique_values[max_count_idxs], MAX_TOKEN_VALUE)
 
     # Package the frequencies
     for token_1, token_2 in zip(first_tokens, second_tokens, strict=True):
@@ -179,12 +176,12 @@ def get_pairwise_token_frequencies_and_heap_numpy(
     heap: list[TokenPairNode] = []
 
     # Determine all unique pairs using bit packing
-    y = tokens[:-1] * _MAX_NUM_TOKENS + tokens[1:]
+    y = tokens[:-1] * MAX_TOKEN_VALUE + tokens[1:]
     unique_values, counts = np.unique(y, return_counts=True)
 
     # Efficiently unpack them
-    first_tokens = np.floor_divide(unique_values, _MAX_NUM_TOKENS)
-    second_tokens = np.mod(unique_values, _MAX_NUM_TOKENS)
+    first_tokens = np.floor_divide(unique_values, MAX_TOKEN_VALUE)
+    second_tokens = np.mod(unique_values, MAX_TOKEN_VALUE)
 
     # Package the frequencies
     for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
