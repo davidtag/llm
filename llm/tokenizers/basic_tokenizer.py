@@ -68,6 +68,8 @@ def _train(text: bytes, num_merges: int, verbose: bool = True) -> MergeList:
         while node.deleted:
             heapq.heappop(heap)
             node = heap[0]
+        if node.count < 2:
+            break
         tokens = merge_inplace_and_update_frequencies_and_heap(
             tokens=tokens,
             token_1=node.first,
