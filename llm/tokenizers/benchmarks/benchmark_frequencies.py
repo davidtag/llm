@@ -1,4 +1,4 @@
-"""Bechmarks for frequencies.pyx."""
+"""Benchmarks for frequencies.pyx."""
 
 import numpy as np
 

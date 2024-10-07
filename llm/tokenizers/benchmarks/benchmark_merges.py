@@ -1,4 +1,4 @@
-"""Bechmarks for merges.pyx."""
+"""Benchmarks for interplay of frequencies.pyx and merge.pyx."""
 
 import heapq
 
