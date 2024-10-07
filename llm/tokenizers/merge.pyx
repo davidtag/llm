@@ -81,13 +81,12 @@ cdef (Py_ssize_t, Py_ssize_t, Py_ssize_t) _c_merge_inplace_and_report_neighbors(
     Additionally, fills `prefix_neighbors` and `suffix_neighbors` with the tokens immediately
     before and after the merged tokens in the input sequence.
 
-    Returns: the new effective size of `tokens`
+    Returns: the new effective size of `tokens` and the number of prefix and suffix tokens
     """
     cdef Py_ssize_t n = tokens.shape[0]
     cdef Py_ssize_t read_index = 0
     cdef Py_ssize_t write_index = 0
 
-    cdef Py_ssize_t num_merges = 0
     cdef Py_ssize_t num_prefix = 0
     cdef Py_ssize_t num_suffix = 0
     cdef bint previous_tokens_merged = False
@@ -98,7 +97,6 @@ cdef (Py_ssize_t, Py_ssize_t, Py_ssize_t) _c_merge_inplace_and_report_neighbors(
             and tokens[read_index] == token_1
             and tokens[read_index + 1] == token_2
         ):
-
             # TODO(dtag): Gan speed this up by special-casing first & last token to avoid
             # a bunch of conditional branches and jump instructions
             if read_index >= 1:  # there exists a prefix
@@ -124,7 +122,6 @@ cdef (Py_ssize_t, Py_ssize_t, Py_ssize_t) _c_merge_inplace_and_report_neighbors(
                 num_suffix += 1
 
             previous_tokens_merged = True
-            num_merges += 1
             tokens[write_index] = output_token
             read_index += 2
         else:
@@ -135,7 +132,6 @@ cdef (Py_ssize_t, Py_ssize_t, Py_ssize_t) _c_merge_inplace_and_report_neighbors(
         write_index += 1
 
     return (write_index, num_prefix, num_suffix)
-
 
 
 def merge_inplace_and_update_frequencies(
