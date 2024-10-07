@@ -1,7 +1,8 @@
 """Cython data types for handling tokenization."""
 
 # To support efficient hashing of TokenPair, we define a maximum value so that a pair
-# of token values can be uniquely represented by an integer. This is EXClusive.
+# of token values can be uniquely represented by an integer. Token values should be in
+# [0, 1, ..., TOKEN_VALUE_UBOUND - 1].
 cdef uint32_t TOKEN_VALUE_UBOUND = 1_000_000
 
 
@@ -9,7 +10,7 @@ cdef class TokenPair:
     """Stores an immutable pair of tokens.
 
     Requires about 1/2 as much memory and runs in 1/2 the time when constructing and
-    storing these objects in a Python dict, as compared to a regular tuple.
+    storing these objects in a Python dict, as compared to a regular tuple of 2 integers.
     """
 
     def __cinit__(
