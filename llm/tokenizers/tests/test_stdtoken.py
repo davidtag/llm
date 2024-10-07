@@ -42,6 +42,18 @@ class TestTokenPair(unittest.TestCase):
         # equality is based on values, not id
         self.assertIsNot(pair1, pair2)
 
+    def test_lt(self) -> None:
+        """Test the lt operator."""
+        pair1 = TokenPair(100, 200)
+        pair2 = TokenPair(100, 200)
+        pair3 = TokenPair(200, 100)
+
+        self.assertFalse(pair1 < pair2)
+        self.assertFalse(pair2 < pair1)
+
+        self.assertTrue(pair1 < pair3)
+        self.assertFalse(pair3 < pair1)
+
     def test_hash(self) -> None:
         """Test the hash implementations."""
         pair1 = TokenPair(100, 200)

@@ -33,6 +33,9 @@ cdef class TokenPair:
     def __eq__(self, other: TokenPair) -> bool:
         return self._unique == other._unique
 
+    def __lt__(self, other: TokenPair) -> bool:
+        return self._unique < other._unique
+
     def __hash__(self) -> int:
         return self._unique
 
