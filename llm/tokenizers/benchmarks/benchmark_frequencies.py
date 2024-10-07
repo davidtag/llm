@@ -12,12 +12,13 @@ from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_numpy_bitshift_maxonly,
     get_pairwise_token_frequencies_and_heap_numpy,
 )
+from llm.tokenizers.pytoken import TokenDtype
 
 
 def main() -> None:
     """Run the benchmark."""
     print("-- Running benchmark for frequencies.pyx ---------------------------------------")
-    tokens_1mb = np.random.randint(low=0, high=256, size=1024 * 1024).astype(dtype=np.uint32)
+    tokens_1mb = np.random.randint(low=0, high=256, size=1024 * 1024).astype(dtype=TokenDtype)
     num_runs = 10
     methods = [
         get_pairwise_token_frequencies_sequential_pure_python,
