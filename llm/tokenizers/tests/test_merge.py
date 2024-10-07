@@ -16,7 +16,7 @@ from llm.tokenizers.merge import (
     merge_inplace_and_update_frequencies,
     merge_inplace_and_update_frequencies_and_heap,
 )
-from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
+from llm.tokenizers.pytoken import TokenDtype
 from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
 
 
