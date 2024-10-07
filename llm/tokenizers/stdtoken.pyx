@@ -56,12 +56,12 @@ cdef class TokenPairNode:
         token_t first,
         token_t second,
         int32_t count,
-        bint ignore = False
+        bint deleted = False
     ):
         self.first = first
         self.second = second
         self.count = count
-        self.ignore = ignore
+        self.deleted = deleted
 
     @property
     def first(self) -> int:
@@ -84,19 +84,19 @@ cdef class TokenPairNode:
         self.count = count
 
     @property
-    def ignore(self) -> bool:
-        return self.ignore
+    def deleted(self) -> bool:
+        return self.deleted
 
-    @ignore.setter
-    def ignore(self, bint ignore) -> None:
-        self.ignore = ignore
+    @deleted.setter
+    def deleted(self, bint deleted) -> None:
+        self.deleted = deleted
 
     def __eq__(self, other: TokenPairNode) -> bool:
         return (
             self.first == other.first
             and self.second == other.second
             and self.count == other.count
-            and self.ignore == other.ignore
+            and self.deleted == other.deleted
         )
 
     def __lt__(self, other: TokenPairNode) -> bool:
@@ -107,7 +107,7 @@ cdef class TokenPairNode:
     def __str__(self) -> str:
         return (
             "TokenPairNode("
-            f"first={self.first}, second={self.second}, count={self.count}, ignore={self.ignore}"
+            f"first={self.first}, second={self.second}, count={self.count}, deleted={self.deleted}"
             ")"
         )
 

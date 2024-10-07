@@ -20,4 +20,4 @@ cdef class TokenPairNode:
     cdef token_t first
     cdef token_t second
     cdef int32_t count
-    cdef bint ignore
+    cdef bint deleted
