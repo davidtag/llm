@@ -1,18 +1,15 @@
 """Various library methods for computing pairwise statistics over token sequences."""
 
-from libc.stdint cimport uint32_t
-
 from llm.tokenizers.stdtoken cimport token_t, token_sequence_t, TokenPair, TokenPairNode, TOKEN_VALUE_UBOUND
 
 from collections import defaultdict
-import dataclasses
 import heapq
 from typing import Tuple
 
 import cython
 import numpy as np
 
-from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
+from llm.tokenizers.pytoken import NumpyTokenSequence
 
 
 def get_pairwise_token_frequencies_sequential_pure_python(
