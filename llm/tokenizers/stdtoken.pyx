@@ -1,8 +1,8 @@
 """Cython data types for handling tokenization."""
 
 # To support efficient hashing of TokenPair, we define a maximum value so that a pair
-# of token values can be uniquely represented by an integer.
-cdef uint32_t MAX_TOKEN_VALUE = 1_000_000
+# of token values can be uniquely represented by an integer. This is EXClusive.
+cdef uint32_t TOKEN_VALUE_UBOUND = 1_000_000
 
 
 cdef class TokenPair:
@@ -19,7 +19,7 @@ cdef class TokenPair:
     ):
         self.first = first
         self.second = second
-        self._unique = self.first * MAX_TOKEN_VALUE + self.second
+        self._unique = self.first * TOKEN_VALUE_UBOUND + self.second
 
     @property
     def first(self) -> int:
