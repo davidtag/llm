@@ -185,9 +185,9 @@ def get_pairwise_token_frequencies_and_heap_numpy(
     # Package the frequencies
     for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
         pair = TokenPair(token_1, token_2)
-        heap_node = TokenPairNode(token_1, token_2, count)
-        heap.append(heap_node)
-        freq[pair] = heap_node
+        node = TokenPairNode(token_1, token_2, count=count)
+        heap.append(node)
+        freq[pair] = node
 
     heapq.heapify(heap)
 
