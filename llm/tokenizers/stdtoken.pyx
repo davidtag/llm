@@ -1,12 +1,15 @@
 """Cython data types for handling tokenization."""
 
+# To support efficient hashing of TokenPair, we define a maximum value so that a pair
+# of token values can be uniquely represented by an integer.
+cdef uint32_t MAX_TOKEN_VALUE = 1_000_000
+
+
 cdef class TokenPair:
     """Stores an immutable pair of tokens.
 
     Requires about 1/2 as much memory and runs in 1/2 the time when constructing and
     storing these objects in a Python dict, as compared to a regular tuple.
-
-    Because it is immutable, it is hashable.
     """
 
     def __cinit__(
@@ -16,6 +19,7 @@ cdef class TokenPair:
     ):
         self.first = first
         self.second = second
+        self._unique = self.first * MAX_TOKEN_VALUE + self.second
 
     @property
     def first(self) -> int:
@@ -24,6 +28,12 @@ cdef class TokenPair:
     @property
     def second(self) -> int:
         return self.second
+
+    def __eq__(self, other: TokenPair) -> bool:
+        return self._unique == other._unique
+
+    def __hash__(self) -> int:
+        return self._unique
 
     def __str__(self) -> str:
         return f"TokenPair(first={self.first}, second={self.second})"

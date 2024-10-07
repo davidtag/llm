@@ -10,6 +10,7 @@ ctypedef token_t[::1] token_sequence_t  # typed memoryview, in contiguous C-orde
 cdef class TokenPair:
     cdef token_t first
     cdef token_t second
+    cdef token_t _unique
 
 
 cdef class TokenPairNode:

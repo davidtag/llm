@@ -17,6 +17,7 @@ from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_and_heap_numpy,
 )
 from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
+from llm.tokenizers.stdtoken import TokenPair
 
 
 #########################################################################################
@@ -32,6 +33,15 @@ class FrequencyCommonBaseTest(abc.ABC):
     @abc.abstractmethod
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
         raise NotImplementedError
+
+    def _convert_token_pair_to_tuple(self, pair: TokenPair) -> Tuple[int, int]:
+        return (pair.first, pair.second)  # allows for easier comparison
+
+    def _convert_token_pair_dict_to_tuple_dict(
+        self, freq: Mapping[TokenPair, int]
+    ) -> Mapping[Tuple[int, int], int]:
+        out = {self._convert_token_pair_to_tuple(key): val for key, val in freq.items()}
+        return out
 
     def test_empty_input(self) -> None:
         """Test frequency on an empty input."""
@@ -100,21 +110,24 @@ class TestSequentialCython(AllFrequencyBaseTest, unittest.TestCase):
     """Unit tests for get_pairwise_token_frequencies_sequential_cython()."""
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
-        return get_pairwise_token_frequencies_sequential_cython(tokens)
+        freq = get_pairwise_token_frequencies_sequential_cython(tokens)
+        return self._convert_token_pair_dict_to_tuple_dict(freq)
 
 
 class TestNumpy(AllFrequencyBaseTest, unittest.TestCase):
     """Unit tests for get_pairwise_token_frequencies_numpy()."""
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
-        return get_pairwise_token_frequencies_numpy(tokens)
+        freq = get_pairwise_token_frequencies_numpy(tokens)
+        return self._convert_token_pair_dict_to_tuple_dict(freq)
 
 
 class TestNumpyBitShift(AllFrequencyBaseTest, unittest.TestCase):
     """Unit tests for get_pairwise_token_frequencies_numpy_bitshift()."""
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
-        return get_pairwise_token_frequencies_numpy_bitshift(tokens)
+        freq = get_pairwise_token_frequencies_numpy_bitshift(tokens)
+        return self._convert_token_pair_dict_to_tuple_dict(freq)
 
 
 class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
@@ -126,7 +139,7 @@ class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
         for pair, heap_node in pair_to_node.items():
             assert heap_node.pair == pair
             assert heap_node.ignore is False
-            freq[pair] = heap_node.count
+            freq[self._convert_token_pair_to_tuple(pair)] = heap_node.count
         return freq
 
     def test_small_sequence(self) -> None:
@@ -146,8 +159,8 @@ class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
         # Test the min_node
         min_node = heapq.heappop(heap)
         self.assertEqual(min_node.count, 2)
-        self.assertEqual(min_node.pair, (1, 0))
-        self.assertIs(pair_to_node[(1, 0)], min_node)
+        self.assertEqual(min_node.pair, TokenPair(1, 0))
+        self.assertIs(pair_to_node[TokenPair(1, 0)], min_node)
 
         # Check for correct tie-break ordering among remaining nodes
         node_1 = heapq.heappop(heap)
@@ -161,15 +174,15 @@ class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
         self.assertEqual(node_3.count, 1)
         self.assertEqual(node_4.count, 1)
 
-        self.assertEqual(node_1.pair, (0, 0))
-        self.assertEqual(node_2.pair, (0, 1))
-        self.assertEqual(node_3.pair, (0, 2))
-        self.assertEqual(node_4.pair, (2, 1))
+        self.assertEqual(node_1.pair, TokenPair(0, 0))
+        self.assertEqual(node_2.pair, TokenPair(0, 1))
+        self.assertEqual(node_3.pair, TokenPair(0, 2))
+        self.assertEqual(node_4.pair, TokenPair(2, 1))
 
-        self.assertIs(pair_to_node[(0, 0)], node_1)
-        self.assertIs(pair_to_node[(0, 1)], node_2)
-        self.assertIs(pair_to_node[(0, 2)], node_3)
-        self.assertIs(pair_to_node[(2, 1)], node_4)
+        self.assertIs(pair_to_node[TokenPair(0, 0)], node_1)
+        self.assertIs(pair_to_node[TokenPair(0, 1)], node_2)
+        self.assertIs(pair_to_node[TokenPair(0, 2)], node_3)
+        self.assertIs(pair_to_node[TokenPair(2, 1)], node_4)
 
 
 #########################################################################################
@@ -220,11 +233,13 @@ class TestNumpyMaxOnly(MaxOnlyFrequencyBaseTest, unittest.TestCase):
     """Unit tests for get_pairwise_token_frequencies_numpy_maxonly()."""
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
-        return get_pairwise_token_frequencies_numpy_maxonly(tokens)
+        freq = get_pairwise_token_frequencies_numpy_maxonly(tokens)
+        return self._convert_token_pair_dict_to_tuple_dict(freq)
 
 
 class TestNumpyBitShiftMaxOnly(MaxOnlyFrequencyBaseTest, unittest.TestCase):
     """Unit tests for get_pairwise_token_frequencies_numpy_bitshift_maxonly()."""
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
-        return get_pairwise_token_frequencies_numpy_bitshift_maxonly(tokens)
+        freq = get_pairwise_token_frequencies_numpy_bitshift_maxonly(tokens)
+        return self._convert_token_pair_dict_to_tuple_dict(freq)
