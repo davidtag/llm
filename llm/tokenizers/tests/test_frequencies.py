@@ -138,7 +138,7 @@ class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
         freq = {}
         for pair, heap_node in pair_to_node.items():
             assert heap_node.pair == pair
-            assert heap_node.ignore is False
+            assert heap_node.deleted is False
             freq[self._convert_token_pair_to_tuple(pair)] = heap_node.count
         return freq
 
