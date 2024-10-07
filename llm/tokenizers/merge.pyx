@@ -186,13 +186,6 @@ def merge_inplace_and_update_frequencies(
     if pair in frequencies:
         del frequencies[pair]
 
-    keys_to_delete = set()
-    for key, val in frequencies.items():
-        if val == 0:
-            keys_to_delete.add(key)
-    for key in keys_to_delete:
-        del frequencies[key]
-
     return tokens[:new_size]
 
 

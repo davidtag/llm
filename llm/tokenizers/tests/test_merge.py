@@ -186,7 +186,8 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
             TokenPair(3, 7): 1,
             TokenPair(1, 9): 1,
         }
-        self.assertDictEqual(frequencies, expected_frequencies)
+        cleaned_frequencies = {key: val for key, val in frequencies.items() if val != 0}
+        self.assertDictEqual(cleaned_frequencies, expected_frequencies)
 
     def test_contiguous_merges(self) -> None:
         """Test correct frequency updates when there are successive merges."""
@@ -212,7 +213,8 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
             TokenPair(9, 9): 1,
             TokenPair(9, 4): 1,
         }
-        self.assertDictEqual(frequencies, expected_frequencies)
+        cleaned_frequencies = {key: val for key, val in frequencies.items() if val != 0}
+        self.assertDictEqual(cleaned_frequencies, expected_frequencies)
 
     def test_contiguous_merges_boundary(self) -> None:
         """Test correct frequency updates when there are successive merges."""
@@ -279,7 +281,8 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
             TokenPair(10, 3): 1,
             TokenPair(3, 11): 1,
         }
-        self.assertDictEqual(frequencies, expected_frequencies)
+        cleaned_frequencies = {key: val for key, val in frequencies.items() if val != 0}
+        self.assertDictEqual(cleaned_frequencies, expected_frequencies)
 
     def test_random_sequence(self) -> None:
         """Test implementation parity with naive version on a random sequence."""
@@ -297,9 +300,10 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         )
         final_length = len(frequencies)
         self.assertNotEqual(initial_length, final_length)
+        cleaned_frequencies = {key: val for key, val in frequencies.items() if val != 0}
 
         post_frequencies = get_pairwise_token_frequencies_sequential_cython(out_tokens)
-        self.assertDictEqual(post_frequencies, frequencies)
+        self.assertDictEqual(cleaned_frequencies, post_frequencies)
 
 
 class TestMergeInPlaceAndUpdateFrequenciesAndHeap(unittest.TestCase):
