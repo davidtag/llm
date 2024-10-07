@@ -6,11 +6,9 @@ import unittest
 import heapq
 
 import numpy as np
-from numpy.typing import NDArray
 
 from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_sequential_pure_python,
-    TokenPairNode,
     get_pairwise_token_frequencies_and_heap_numpy,
 )
 from llm.tokenizers.merge import (
@@ -18,10 +16,8 @@ from llm.tokenizers.merge import (
     merge_inplace_and_update_frequencies,
     merge_inplace_and_update_frequencies_and_heap,
 )
-
-
-TokenDtype = np.uint32
-NumpyTokenSequence = NDArray[TokenDtype]
+from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
+from llm.tokenizers.stdtoken import TokenPairNode
 
 
 class TestMergeInPlace(unittest.TestCase):

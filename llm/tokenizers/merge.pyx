@@ -1,31 +1,24 @@
 """Various library methods for performing BPE merge operations."""
-import cython
-from libc.stdint cimport uint32_t
+
+from llm.tokenizers.stdtoken cimport token_t, token_sequence_t, TokenPair, TokenPairNode
 
 import heapq
 
+import cython
 import numpy as np
 from numpy.typing import NDArray
 
-# TODO(dtag): Move to common .pxd file to support compile-time type checks
-from llm.tokenizers.frequencies import TokenPairNode
-
-# TODO(dtag): Move to common .pxd file
-ctypedef uint32_t Token
-ctypedef (Token, Token) TokenPair
-ctypedef Token[::1] TokenSequenece  # typed memory view. contiguous C-order memory.
-TokenDtype = np.uint32
-NumpyTokenSequence = NDArray[TokenDtype]
+from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
 
 
 @cython.nogil
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef Py_ssize_t _c_merge_inplace(
-    TokenSequenece tokens,
-    Token token_1,
-    Token token_2,
-    Token output_token,
+    token_sequence_t tokens,
+    token_t token_1,
+    token_t token_2,
+    token_t output_token,
 ):
     """Replace all occurences of `(token_1, token_2)` with `output_token` in-place.
 
@@ -54,9 +47,9 @@ cdef Py_ssize_t _c_merge_inplace(
 
 def merge_inplace(
     tokens: NumpyTokenSequence,
-    Token token_1,
-    Token token_2,
-    Token output_token,
+    token_t token_1,
+    token_t token_2,
+    token_t output_token,
 ) -> NumpyTokenSequence:
     """Replace all occurences of `(token_1, token_2)` with `output_token` in-place.
 
@@ -76,12 +69,12 @@ def merge_inplace(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef (Py_ssize_t, Py_ssize_t, Py_ssize_t) _c_merge_inplace_and_report_neighbors(
-    TokenSequenece tokens,
-    Token token_1,
-    Token token_2,
-    Token output_token,
-    TokenSequenece prefix_neighbors,
-    TokenSequenece suffix_neighbors,
+    token_sequence_t tokens,
+    token_t token_1,
+    token_t token_2,
+    token_t output_token,
+    token_sequence_t prefix_neighbors,
+    token_sequence_t suffix_neighbors,
 ):
     """Replace all occurences of `(token_1, token_2)` with `output_token` in-place.
 
@@ -147,9 +140,9 @@ cdef (Py_ssize_t, Py_ssize_t, Py_ssize_t) _c_merge_inplace_and_report_neighbors(
 
 def merge_inplace_and_update_frequencies(
     tokens: NumpyTokenSequence,
-    Token token_1,
-    Token token_2,
-    Token output_token,
+    token_t token_1,
+    token_t token_2,
+    token_t output_token,
     int expected_num_merges,
     frequencies: defaultdict[TokenPair, int],
 ) -> NumpyTokenSequence:
@@ -218,8 +211,8 @@ def _update_freq_and_heap(
     if maybe_heap_elem is not None:
         # This pair already exists. To minimize heap operations at the expense of some extra memory,
         # we leave the existing node but mark it ignored, and create a new one. Client code needs
-        # to inspect the ignore field of pop()ed nodes before using.
-        maybe_heap_elem.ignore = True
+        # to inspect the deleted field of pop()ed nodes before using.
+        maybe_heap_elem.deleted = True
 
         new_count = maybe_heap_elem.count + diff
         if new_count == 0:
@@ -238,9 +231,9 @@ def _update_freq_and_heap(
 
 def merge_inplace_and_update_frequencies_and_heap(
     tokens: NumpyTokenSequence,
-    Token token_1,
-    Token token_2,
-    Token output_token,
+    token_t token_1,
+    token_t token_2,
+    token_t output_token,
     int expected_num_merges,
     frequencies: dict[TokenPair, TokenPairNode],
     heap: list[TokenPairNode],
@@ -297,7 +290,7 @@ def merge_inplace_and_update_frequencies_and_heap(
     if pair in frequencies:
         node = frequencies[pair]
         assert node.count < 0
-        node.ignore = True
+        node.deleted = True
         del frequencies[pair]
 
     return tokens[:new_size]
