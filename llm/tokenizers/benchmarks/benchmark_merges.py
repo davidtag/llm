@@ -73,7 +73,7 @@ def _merge_and_update_freq_inplace_with_heap(tokens: NumpyTokenSequence, num_mer
 
 def main() -> None:
     """Run the benchmark."""
-    print("-- Running benchmark for merges.pyx ---------------------------------------")
+    print("-- Running benchmark for interplay of frequencies.pyx and merge.pyx -----------------------------")
     tokens_1mb = np.random.randint(low=0, high=256, size=1024 * 1024).astype(dtype=TokenDtype)
     num_runs = 1
     num_merges = 500
