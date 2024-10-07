@@ -8,7 +8,7 @@ import heapq
 import numpy as np
 
 from llm.tokenizers.frequencies import (
-    get_pairwise_token_frequencies_sequential_pure_python,
+    get_pairwise_token_frequencies_sequential_cython,
     get_pairwise_token_frequencies_and_heap_numpy,
 )
 from llm.tokenizers.merge import (
@@ -149,7 +149,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
             3,
             3,
             9,
-            expected_num_merges=1,
+            expected_num_merges=2,
             frequencies=frequencies,
         )
         expected = np.array([9, 3], dtype=TokenDtype)
@@ -283,17 +283,22 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
 
     def test_random_sequence(self) -> None:
         """Test implementation parity with naive version on a random sequence."""
-        tokens = np.random.randint(low=0, high=1000, size=10_000).astype(TokenDtype)
-        frequencies = get_pairwise_token_frequencies_sequential_pure_python(tokens)
+        tokens = np.random.randint(low=0, high=100, size=10_000).astype(TokenDtype)
+        frequencies = get_pairwise_token_frequencies_sequential_cython(tokens)
+        initial_length = len(frequencies)
+        max_freq_pair = max(frequencies.keys(), key=lambda pair: frequencies[pair])
         out_tokens = merge_inplace_and_update_frequencies(
             tokens,
-            7,
-            7,
-            9,
-            expected_num_merges=max(frequencies.values()),
+            max_freq_pair.first,
+            max_freq_pair.second,
+            101,
+            expected_num_merges=frequencies[max_freq_pair],
             frequencies=frequencies,
         )
-        post_frequencies = get_pairwise_token_frequencies_sequential_pure_python(out_tokens)
+        final_length = len(frequencies)
+        self.assertNotEqual(initial_length, final_length)
+
+        post_frequencies = get_pairwise_token_frequencies_sequential_cython(out_tokens)
         self.assertDictEqual(post_frequencies, frequencies)
 
 
