@@ -1,8 +1,9 @@
 """Unit tests for stdtoken.pyx."""
 
+import heapq
 import unittest
 
-from llm.tokenizers.stdtoken import TokenPair
+from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
 
 
 class TestTokenPair(unittest.TestCase):
@@ -15,7 +16,7 @@ class TestTokenPair(unittest.TestCase):
         self.assertEqual(pair.second, 200)
 
     def test_setters_are_disabled(self) -> None:
-        """Test that the datat type is immutable."""
+        """Test that the data type is immutable."""
         pair = TokenPair(100, 200)
         with self.assertRaises(AttributeError):
             pair.first = 300
@@ -85,3 +86,110 @@ class TestTokenPair(unittest.TestCase):
         """Test string serialization."""
         pair = TokenPair(100, 200)
         self.assertEqual(str(pair), "TokenPair(first=100, second=200)")
+
+
+class TestTokenPairNode(unittest.TestCase):
+    """Unit tests for TokenPairNode."""
+
+    def test_getters(self) -> None:
+        """Test getters for fields."""
+        node = TokenPairNode(100, 200, count=13)
+        self.assertEqual(node.first, 100)
+        self.assertEqual(node.second, 200)
+        self.assertEqual(node.pair, TokenPair(100, 200))
+        self.assertEqual(node.count, 13)
+        self.assertEqual(node.deleted, False)
+
+    def test_setters(self) -> None:
+        """Test that certain fields are immutable while others aren't."""
+        node = TokenPairNode(100, 200, count=13)
+        with self.assertRaises(AttributeError):
+            node.first = 300
+        with self.assertRaises(AttributeError):
+            node.second = 300
+
+        self.assertEqual(node.count, 13)
+        node.count = 40
+        self.assertEqual(node.count, 40)
+
+        self.assertEqual(node.deleted, False)
+        node.deleted = True
+        self.assertEqual(node.deleted, True)
+
+    def test_eq(self) -> None:
+        """Test the equality operator."""
+        node1 = TokenPairNode(100, 200, count=13)
+        node2 = TokenPairNode(100, 200, count=13)
+        node3 = TokenPairNode(200, 100, count=13)
+        node4 = TokenPairNode(200, 100, count=13, deleted=True)
+
+        # Forward equality
+        self.assertEqual(node1, node2)
+        self.assertNotEqual(node1, node3)
+        self.assertNotEqual(node1, node4)
+        self.assertNotEqual(node2, node3)
+        self.assertNotEqual(node2, node4)
+        self.assertNotEqual(node3, node4)
+
+        # Backward equality
+        self.assertEqual(node2, node1)
+        self.assertNotEqual(node3, node1)
+        self.assertNotEqual(node4, node1)
+        self.assertNotEqual(node3, node2)
+        self.assertNotEqual(node4, node2)
+        self.assertNotEqual(node4, node3)
+
+        # equality is based on values, not id
+        self.assertIsNot(node1, node2)
+
+    def test_not_hashable(self) -> None:
+        """Test that TokenPairNode is not hashable."""
+        node = TokenPairNode(100, 200, count=13)
+        with self.assertRaises(TypeError):
+            _ = set([node])
+        with self.assertRaises(TypeError):
+            _ = {node: 1}
+
+    def test_lt_by_count(self) -> None:
+        """Test that nodes with higher count are ordered first."""
+        node1 = TokenPairNode(100, 200, count=13)
+        node2 = TokenPairNode(400, 500, count=53)
+        self.assertLess(node2, node1)  # higher count orders
+
+    def test_lt_tiebreak_with_pair(self) -> None:
+        """Test that nodes with equal count tie-break by pair values."""
+        node1 = TokenPairNode(100, 200, count=13)
+        node2 = TokenPairNode(400, 500, count=13)
+        self.assertLess(node1, node2)  # higher count orders
+
+    def test_sort(self) -> None:
+        """Test ability to sort nodes."""
+        node1 = TokenPairNode(100, 200, count=13)
+        node2 = TokenPairNode(400, 500, count=13)
+        node3 = TokenPairNode(400, 500, count=53)
+
+        node_list = [node1, node2, node3]
+        sorted_nodes = sorted(node_list)
+        self.assertListEqual(sorted_nodes, [node3, node1, node2])
+
+    def test_heapify(self) -> None:
+        """Test the ability to store nodes in a heap."""
+        node1 = TokenPairNode(100, 200, count=13)
+        node2 = TokenPairNode(400, 500, count=13)
+        node3 = TokenPairNode(400, 500, count=53)
+
+        heap = [node1, node2, node3]
+        heapq.heapify(heap)
+
+        min_node_1 = heapq.heappop(heap)
+        min_node_2 = heapq.heappop(heap)
+        min_node_3 = heapq.heappop(heap)
+
+        self.assertIs(min_node_1, node3)
+        self.assertIs(min_node_2, node1)
+        self.assertIs(min_node_3, node2)
+
+    def test_str(self) -> None:
+        """Test string serialization."""
+        pair = TokenPairNode(100, 200, count=13, deleted=True)
+        self.assertEqual(str(pair), "TokenPairNode(first=100, second=200, count=13, deleted=True)")
