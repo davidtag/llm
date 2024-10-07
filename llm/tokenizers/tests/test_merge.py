@@ -17,7 +17,7 @@ from llm.tokenizers.merge import (
     merge_inplace_and_update_frequencies_and_heap,
 )
 from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
-from llm.tokenizers.stdtoken import TokenPairNode
+from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
 
 
 class TestMergeInPlace(unittest.TestCase):
@@ -124,7 +124,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         """Test merging a single pair."""
         in_tokens = np.array([0, 0], dtype=TokenDtype)
         frequencies = defaultdict(int)
-        frequencies[(0, 0)] = 1
+        frequencies[TokenPair(0, 0)] = 1
         out_tokens = merge_inplace_and_update_frequencies(
             in_tokens,
             0,
@@ -143,7 +143,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         """Test merging occurs from left-to-right when multiple merges are possible."""
         in_tokens = np.array([3, 3, 3], dtype=TokenDtype)
         frequencies = defaultdict(int)
-        frequencies[(3, 3)] = 2
+        frequencies[TokenPair(3, 3)] = 2
         out_tokens = merge_inplace_and_update_frequencies(
             in_tokens,
             3,
@@ -156,17 +156,17 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         np.testing.assert_array_equal(out_tokens, expected)
         self.assertIs(out_tokens.base, in_tokens)
         self.assertIs(in_tokens.base, None)
-        self.assertDictEqual(frequencies, {(9, 3): 1})
+        self.assertDictEqual(frequencies, {TokenPair(9, 3): 1})
 
     def test_multiple_merge_targets(self) -> None:
         """Test merging occurs correctly when there are multiple merges."""
         in_tokens = np.array([7, 7, 7, 1, 3, 7, 1, 7, 7], dtype=TokenDtype)
         frequencies = defaultdict(int)
-        frequencies[(7, 7)] = 3
-        frequencies[(7, 1)] = 2
-        frequencies[(1, 3)] = 1
-        frequencies[(3, 7)] = 1
-        frequencies[(1, 7)] = 1
+        frequencies[TokenPair(7, 7)] = 3
+        frequencies[TokenPair(7, 1)] = 2
+        frequencies[TokenPair(1, 3)] = 1
+        frequencies[TokenPair(3, 7)] = 1
+        frequencies[TokenPair(1, 7)] = 1
         out_tokens = merge_inplace_and_update_frequencies(
             in_tokens,
             7,
@@ -180,11 +180,11 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         self.assertIs(out_tokens.base, in_tokens)
         self.assertIs(in_tokens.base, None)
         expected_frequencies = {
-            (9, 7): 1,
-            (7, 1): 2,
-            (1, 3): 1,
-            (3, 7): 1,
-            (1, 9): 1,
+            TokenPair(9, 7): 1,
+            TokenPair(7, 1): 2,
+            TokenPair(1, 3): 1,
+            TokenPair(3, 7): 1,
+            TokenPair(1, 9): 1,
         }
         self.assertDictEqual(frequencies, expected_frequencies)
 
@@ -192,9 +192,9 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         """Test correct frequency updates when there are successive merges."""
         in_tokens = np.array([3, 7, 7, 7, 7, 4], dtype=TokenDtype)
         frequencies = defaultdict(int)
-        frequencies[(3, 7)] = 1
-        frequencies[(7, 7)] = 3
-        frequencies[(7, 4)] = 1
+        frequencies[TokenPair(3, 7)] = 1
+        frequencies[TokenPair(7, 7)] = 3
+        frequencies[TokenPair(7, 4)] = 1
         out_tokens = merge_inplace_and_update_frequencies(
             in_tokens,
             7,
@@ -208,9 +208,9 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         self.assertIs(out_tokens.base, in_tokens)
         self.assertIs(in_tokens.base, None)
         expected_frequencies = {
-            (3, 9): 1,
-            (9, 9): 1,
-            (9, 4): 1,
+            TokenPair(3, 9): 1,
+            TokenPair(9, 9): 1,
+            TokenPair(9, 4): 1,
         }
         self.assertDictEqual(frequencies, expected_frequencies)
 
@@ -218,7 +218,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         """Test correct frequency updates when there are successive merges."""
         in_tokens = np.array([7, 7, 7, 7], dtype=TokenDtype)
         frequencies = defaultdict(int)
-        frequencies[(7, 7)] = 3
+        frequencies[TokenPair(7, 7)] = 3
         out_tokens = merge_inplace_and_update_frequencies(
             in_tokens,
             7,
@@ -232,7 +232,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         self.assertIs(out_tokens.base, in_tokens)
         self.assertIs(in_tokens.base, None)
         expected_frequencies = {
-            (9, 9): 1,
+            TokenPair(9, 9): 1,
         }
         self.assertDictEqual(frequencies, expected_frequencies)
 
@@ -240,11 +240,11 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         """Test corretness after stacked merges."""
         in_tokens = np.array([7, 7, 7, 1, 3, 7, 1, 7, 7], dtype=TokenDtype)
         frequencies = defaultdict(int)
-        frequencies[(7, 7)] = 3
-        frequencies[(7, 1)] = 2
-        frequencies[(1, 3)] = 1
-        frequencies[(3, 7)] = 1
-        frequencies[(1, 7)] = 1
+        frequencies[TokenPair(7, 7)] = 3
+        frequencies[TokenPair(7, 1)] = 2
+        frequencies[TokenPair(1, 3)] = 1
+        frequencies[TokenPair(3, 7)] = 1
+        frequencies[TokenPair(1, 7)] = 1
         o1 = merge_inplace_and_update_frequencies(  # [9, 7, 1, 3, 7, 1, 9]
             in_tokens,
             7,
@@ -275,9 +275,9 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         self.assertIs(out_tokens.base, in_tokens)
         self.assertIs(in_tokens.base, None)
         expected_frequencies = {
-            (9, 10): 1,
-            (10, 3): 1,
-            (3, 11): 1,
+            TokenPair(9, 10): 1,
+            TokenPair(10, 3): 1,
+            TokenPair(3, 11): 1,
         }
         self.assertDictEqual(frequencies, expected_frequencies)
 

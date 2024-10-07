@@ -171,18 +171,18 @@ def merge_inplace_and_update_frequencies(
         if prefix == output_token:  # successive merges. special-casing handled with suffix tokens
             pass
         else:
-            frequencies[(prefix, token_1)] -= count
-            frequencies[(prefix, output_token)] += count
+            frequencies[TokenPair(prefix, token_1)] -= count
+            frequencies[TokenPair(prefix, output_token)] += count
 
     for suffix, count in zip(suffix_values, suffix_counts, strict=False):
         if suffix == output_token:  # successive merges
-            frequencies[(token_2, token_1)] -= count
-            frequencies[(output_token, output_token)] += count
+            frequencies[TokenPair(token_2, token_1)] -= count
+            frequencies[TokenPair(output_token, output_token)] += count
         else:
-            frequencies[(token_2, suffix)] -= count
-            frequencies[(output_token, suffix)] += count
+            frequencies[TokenPair(token_2, suffix)] -= count
+            frequencies[TokenPair(output_token, suffix)] += count
 
-    pair = (token_1, token_2)
+    pair = TokenPair(token_1, token_2)
     if pair in frequencies:
         del frequencies[pair]
 
