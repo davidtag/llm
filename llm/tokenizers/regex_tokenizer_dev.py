@@ -215,19 +215,19 @@ def _merge(tokens: list[int], pair: tuple[int, int], replacement: int) -> list[i
     return newids
 
 
-def _bpe(tokens: list[int], merges: MergeDict) -> list[int]:
+def _bpe(tokens: list[int], merges_dict: MergeDict) -> list[int]:
     while len(tokens) > 2:
         freq = get_pairwise_token_frequencies_sequential_pure_python(tokens)
-        merge_pair = min(freq.keys(), key=lambda p: merges.get(p, float("inf")))
-        if merge_pair not in merges:
+        merge_pair = min(freq.keys(), key=lambda p: merges_dict.get(p, float("inf")))
+        if merge_pair not in merges_dict:
             break
-        replacement = merges[merge_pair]
+        replacement = merges_dict[merge_pair]
         tokens = _merge(tokens, merge_pair, replacement)
     return tokens
 
 
 def _encode(
-    text: str, pattern: regex.Pattern, merges: MergeDict, reverse_vocab: ReverseVocabulary
+    text: str, pattern: regex.Pattern, merges_dict: MergeDict, reverse_vocab: ReverseVocabulary
 ) -> list[int]:
     tokens: list[int] = []
     bpe_cache: dict[bytes, list[int]] = {}  # for a serving system, can be an LRU cache
@@ -251,7 +251,7 @@ def _encode(
                 tokens.extend(maybe_cached_tokens)
             else:
                 piece_tokens = list(piece_bytes)
-                merged_piece_tokens = _bpe(piece_tokens, merges)
+                merged_piece_tokens = _bpe(piece_tokens, merges_dict=merges_dict)
                 tokens.extend(merged_piece_tokens)
                 bpe_cache[piece_bytes] = merged_piece_tokens
 
@@ -293,7 +293,7 @@ def main():
 
     print("Encoding...")
     with Profile() as prof:
-        tokens = _encode(val_text, pattern, merges_dict, reverse_vocab)
+        tokens = _encode(val_text, pattern=pattern, merges_dict=merges_dict, reverse_vocab=reverse_vocab)
     print(f"  val_text={len(val_text):,} -> tokens={len(tokens):,}: elapsed={prof.milliseconds_formatted}")
 
     print("Deconding...")
