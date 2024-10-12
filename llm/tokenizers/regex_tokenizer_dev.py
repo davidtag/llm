@@ -258,14 +258,14 @@ def _encode(
     return tokens
 
 
-def _decode(tokens: list[int], vocab: Vocabulary) -> bytes:
+def _decode_bytes(tokens: list[int], vocab: Vocabulary) -> bytes:
     # TODO(dtag): Speed this up in Cython by pre-allocating the correct byte size and
     # using C loops instead of Python loops.
     return b"".join([vocab[token] for token in tokens])
 
 
-def _decode_text(tokens: list[int], vocab: Vocabulary) -> str:
-    return _decode(tokens, vocab).decode("utf-8", errors="replace")
+def _decode(tokens: list[int], vocab: Vocabulary, errors: str = "replace") -> str:
+    return _decode_bytes(tokens, vocab=vocab).decode("utf-8", errors=errors)
 
 
 def main():
@@ -298,7 +298,7 @@ def main():
 
     print("Deconding...")
     with Profile() as prof:
-        val_out = _decode_text(tokens, vocab=vocab)
+        val_out = _decode(tokens, vocab=vocab)
     print(f"  tokens={len(tokens):,} -> val_out={len(val_out):,}: elapsed={prof.milliseconds_formatted}")
     assert len(val_out) == len(val_text)
     assert val_out == val_text
