@@ -83,7 +83,7 @@ def get_masked_pairwise_token_frequencies_and_heap_numpy(
     # Determine all unique pairs using bit packing
     buffer = np.zeros(len(tokens_masked) - 1, dtype=np.int64)
     np.add(buffer, tokens_masked[:-1], out=buffer)
-    np.multiply(buffer, 1_000_000, out=buffer)
+    np.multiply(buffer, TOKEN_VALUE_UBOUND, out=buffer)
     np.add(buffer, tokens_masked[1:], out=buffer)
     buffer[masked_positions] = -1
     buffer[masked_positions - 1] = -1
@@ -299,28 +299,7 @@ def main():
     train_text = train_data.decode("utf-8")
     val_text = val_data.decode("utf-8")
 
-    # tokens_masked = []
-    # mask_positions = []
-
-    # for match in pattern.finditer(train_text, concurrent=False):
-    #     span = match.span()
-    #     piece_str = train_text[span[0] : span[1]]
-    #     piece_bytes = piece_str.encode("utf-8")
-    #     piece_tokens = list(piece_bytes)
-
-    #     tokens_masked.extend(piece_tokens)
-    #     mask_positions.append(len(tokens_masked))
-    #     tokens_masked.append(-1)
-
-    # mask_positions = np.array(mask_positions[:-1], dtype=np.int32)
-    # tokens_masked = np.array(tokens_masked[:-1], dtype=np.int32)
-
     tokens_masked, mask_positions = _prepare_masked_token_sequence(train_text, pattern=pattern)
-    print(tokens_masked)
-    print(mask_positions)
-
-    print(len(tokens_masked))
-
     frequencies, heap = get_masked_pairwise_token_frequencies_and_heap_numpy(tokens_masked, mask_positions)
 
     tokens = np.array(tokens_masked, dtype=np.uint32)
