@@ -240,10 +240,14 @@ def _encode(
     bpe_cache: dict[bytes, list[int]] = {}  # for a serving system, can be an LRU cache
 
     for match in pattern.finditer(text, concurrent=False):
+        # Extract the pattern-matched piece in the original text
         span = match.span()
         piece_str = text[span[0] : span[1]]
-        piece_bytes = piece_str.encode("utf-8")  # We can skip this if we cache the str -> tokens instead
 
+        # Get the byte-level tokens for this piece
+        piece_bytes = piece_str.encode(
+            "utf-8"
+        )  # TODO(dtag): We can skip this if we cache the str -> tokens instead
         maybe_token = reverse_vocab.get(piece_bytes, None)  # TODO(dtag): SortedDict might be faster
         if maybe_token is not None:
             tokens.append(maybe_token)
@@ -259,56 +263,6 @@ def _encode(
                 bpe_cache[piece_bytes] = merged_piece_tokens
 
     return tokens
-
-
-def _encode_2(
-    text: str, pattern: regex.Pattern, merges: MergeList, reverse_vocab: ReverseVocabulary
-) -> NumpyTokenSequence:
-
-    tokens_masked = []
-    mask_positions = []
-
-    num_matched = 0
-
-    for match in pattern.finditer(text, concurrent=False):
-        span = match.span()
-        piece_str = text[span[0] : span[1]]
-        piece_bytes = piece_str.encode("utf-8")
-
-        maybe_token = reverse_vocab.get(piece_bytes, None)  # TODO(dtag): SortedDict might be faster
-        if maybe_token is not None:
-            num_matched += 1
-            tokens_masked.append(maybe_token)
-        else:
-            tokens_masked.extend(list(piece_bytes))
-
-        mask_positions.append(len(tokens_masked))
-        tokens_masked.append(-1)
-
-    mask_positions = np.array(mask_positions[:-1], dtype=np.int32)
-    tokens_masked = np.array(tokens_masked, dtype=np.int64)
-
-    frequencies = get_pairwise_token_frequencies_numpy(tokens_masked, mask_positions)
-
-    tokens = np.array(tokens_masked, dtype=np.uint32)
-
-    for pair, output_token in merges:
-        pair_freq = frequencies.get(pair, 0)
-        if pair_freq == 0:
-            continue
-        assert pair_freq > 0
-
-        tokens = merge_inplace_and_update_frequencies(
-            tokens=tokens,
-            token_1=pair.first,
-            token_2=pair.second,
-            output_token=output_token,
-            expected_num_merges=pair_freq,
-            frequencies=frequencies,
-        )
-
-    print(num_matched)
-    return np.array([t for t in tokens if t != 4294967295], dtype=TokenDtype)
 
 
 def _decode(tokens: list[int], vocab: Vocabulary) -> bytes:
