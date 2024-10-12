@@ -108,11 +108,45 @@ def get_masked_pairwise_token_frequencies_and_heap_numpy(
     return freq, heap
 
 
+def _prepare_masked_token_sequence(
+    text: str,
+    pattern: regex.Pattern,
+) -> tuple[
+    NumpyMaskedTokenSequence,
+    NumpyMaskedTokenSequence,
+]:
+    tokens_masked: list[int] = []
+    masked_positions: list[int] = []
+
+    for match in pattern.finditer(text, concurrent=False):
+        # Extract the pattern-matched piece in the original text
+        span = match.span()
+        piece_str = text[span[0] : span[1]]
+
+        # Get the byte-level tokens for this piece
+        piece_bytes = piece_str.encode("utf-8")
+        piece_tokens = list(piece_bytes)
+        tokens_masked.extend(piece_tokens)
+
+        # Append a mask at the end of each piece
+        masked_positions.append(len(tokens_masked))
+        tokens_masked.append(-1)
+
+    # Package into array and remove terminal mask
+    tokens_masked_npy = np.array(tokens_masked[:-1], dtype=MaskedTokenDtype)
+    masked_positions_npy = np.array(masked_positions[:-1], dtype=MaskedTokenDtype)
+
+    return tokens_masked_npy, masked_positions_npy
+
+
 def _train(text: str, pattern: regex.Pattern, num_merges: int, verbose: bool = True) -> MergeList:
     train_start = time.monotonic()
 
     merges: MergeList = []
     next_token = 256
+
+    if len(text) == 0:
+        return merges
 
     tokens_masked, mask_positions = _prepare_masked_token_sequence(text, pattern=pattern)
     frequencies, heap = get_masked_pairwise_token_frequencies_and_heap_numpy(tokens_masked, mask_positions)
@@ -289,37 +323,6 @@ def _decode(tokens: list[int], vocab: Vocabulary) -> bytes:
 
 def _decode_text(tokens: list[int], vocab: Vocabulary) -> str:
     return _decode(tokens, vocab).decode("utf-8", errors="replace")
-
-
-def _prepare_masked_token_sequence(
-    text: str,
-    pattern: regex.Pattern,
-) -> tuple[
-    NumpyMaskedTokenSequence,
-    NumpyMaskedTokenSequence,
-]:
-    tokens_masked: list[int] = []
-    masked_positions: list[int] = []
-
-    for match in pattern.finditer(text, concurrent=False):
-        # Extract the pattern-matched piece in the original text
-        span = match.span()
-        piece_str = text[span[0] : span[1]]
-
-        # Get the byte-level tokens for this piece
-        piece_bytes = piece_str.encode("utf-8")
-        piece_tokens = list(piece_bytes)
-        tokens_masked.extend(piece_tokens)
-
-        # Append a mask at the end of each piece
-        masked_positions.append(len(tokens_masked))
-        tokens_masked.append(-1)
-
-    # Package into array and remove terminal mask
-    tokens_masked_npy = np.array(tokens_masked[:-1], dtype=MaskedTokenDtype)
-    masked_positions_npy = np.array(masked_positions[:-1], dtype=MaskedTokenDtype)
-
-    return tokens_masked_npy, masked_positions_npy
 
 
 def main():

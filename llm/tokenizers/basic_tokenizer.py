@@ -59,6 +59,9 @@ def _train(text: bytes, num_merges: int, verbose: bool = True) -> MergeList:
     merges: MergeList = []
     next_token = 256
 
+    if len(text) == 0:
+        return merges
+
     tokens = _convert_bytes_to_token_sequence(text)
     frequencies, heap = get_pairwise_token_frequencies_and_heap_numpy(tokens)
 
