@@ -108,14 +108,50 @@ def get_masked_pairwise_token_frequencies_and_heap_numpy(
     return freq, heap
 
 
-def _train(text: bytes, num_merges: int, verbose: bool = True) -> MergeList:
+def _train(text: str, pattern: regex.Pattern, num_merges: int, verbose: bool = True) -> MergeList:
     train_start = time.monotonic()
 
     merges: MergeList = []
     next_token = 256
 
-    tokens = _convert_bytes_to_token_sequence(text)
-    raise NotImplementedError
+    tokens_masked, mask_positions = _prepare_masked_token_sequence(text, pattern=pattern)
+    frequencies, heap = get_masked_pairwise_token_frequencies_and_heap_numpy(tokens_masked, mask_positions)
+
+    tokens = np.array(tokens_masked, dtype=np.uint32)  # TODO(dtag): Handle underflow
+    node = heap[0]  # TODO(dtag): hanle empty
+    merges = []
+    verbose = True
+    train_start = time.monotonic()
+    for i in range(num_merges):
+        iter_start = time.monotonic()
+        node = heap[0]
+        while node.deleted:
+            heapq.heappop(heap)
+            node = heap[0]
+        if node.count < 2:
+            break
+        tokens = merge_inplace_and_update_frequencies_and_heap(
+            tokens=tokens,
+            token_1=node.first,
+            token_2=node.second,
+            output_token=next_token,
+            expected_num_merges=node.count,
+            frequencies=frequencies,
+            heap=heap,
+        )
+        merges.append((node.pair, next_token))
+        next_token += 1
+        if verbose:
+            iter_end = time.monotonic()
+            iter_duration_ms = 1000 * (iter_end - iter_start)
+            elapsed = iter_end - train_start
+            print(
+                f" {i + 1:6}/{num_merges} : [{next_token}] <- "
+                f"[{node.first:>5}][{node.second:>5}]"
+                f": iter={iter_duration_ms:>4.1f}ms, {elapsed=:.3f}s, freq={node.count}"
+            )
+
+    return merges
 
 
 def _convert_merge_list_to_vocab(merges: MergeList) -> Vocabulary:
@@ -289,7 +325,7 @@ def _prepare_masked_token_sequence(
 def main():
     """Entrypoint."""
     print()
-    print("-- Basic Tokenizer Example ----------------------------------------------------------------------")
+    print("-- Regex Tokenizer Example ----------------------------------------------------------------------")
     data = _load_file_bytes(TRAIN_FILE)
     train_data, val_data = _split_train_and_test(data, val_length=2 * _MB)
 
@@ -299,44 +335,7 @@ def main():
     train_text = train_data.decode("utf-8")
     val_text = val_data.decode("utf-8")
 
-    tokens_masked, mask_positions = _prepare_masked_token_sequence(train_text, pattern=pattern)
-    frequencies, heap = get_masked_pairwise_token_frequencies_and_heap_numpy(tokens_masked, mask_positions)
-
-    tokens = np.array(tokens_masked, dtype=np.uint32)
-    node = heap[0]  # TODO: hanle empty
-    next_token = 256
-    num_merges = 1000
-    merges = []
-    verbose = True
-    train_start = time.monotonic()
-    for i in range(num_merges):
-        iter_start = time.monotonic()
-        node = heap[0]
-        while node.deleted:
-            heapq.heappop(heap)
-            node = heap[0]
-        if node.count < 2:
-            break
-        tokens = merge_inplace_and_update_frequencies_and_heap(
-            tokens=tokens,
-            token_1=node.first,
-            token_2=node.second,
-            output_token=next_token,
-            expected_num_merges=node.count,
-            frequencies=frequencies,
-            heap=heap,
-        )
-        merges.append((node.pair, next_token))
-        next_token += 1
-        if verbose:
-            iter_end = time.monotonic()
-            iter_duration_ms = 1000 * (iter_end - iter_start)
-            elapsed = iter_end - train_start
-            print(
-                f" {i + 1:6}/{num_merges} : [{next_token}] <- "
-                f"[{node.first:>5}][{node.second:>5}]"
-                f": iter={iter_duration_ms:>4.1f}ms, {elapsed=:.3f}s, freq={node.count}"
-            )
+    merges = _train(train_text, pattern=pattern, num_merges=1000)
     vocab = _convert_merge_list_to_vocab(merges)
     # pprint.pprint(vocab)
 
