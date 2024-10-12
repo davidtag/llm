@@ -254,10 +254,8 @@ def _encode(
         piece_str = text[span[0] : span[1]]
 
         # Get the byte-level tokens for this piece
-        piece_bytes = piece_str.encode(
-            "utf-8"
-        )  # TODO(dtag): We can skip this if we cache the str -> tokens instead
-        maybe_token = reverse_vocab.get(piece_bytes, None)  # TODO(dtag): SortedDict might be faster
+        piece_bytes = piece_str.encode("utf-8")
+        maybe_token = reverse_vocab.get(piece_bytes, None)
         if maybe_token is not None:
             tokens.append(maybe_token)
         else:
