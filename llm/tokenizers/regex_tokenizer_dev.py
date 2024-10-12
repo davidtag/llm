@@ -1,4 +1,4 @@
-"""Implementation of a basic BPE tokenizer."""
+"""Implementation of a regex BPE tokenizer."""
 
 import copy
 import dataclasses
