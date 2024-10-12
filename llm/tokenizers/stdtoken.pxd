@@ -4,7 +4,7 @@ from libc.stdint cimport uint32_t, int32_t
 
 
 ctypedef uint32_t token_t
-ctypedef token_t[::1] token_sequence_t  # typed memoryview, in contiguous C-order memory
+ctypedef token_t[::1] token_sequence_t  # typed memoryview, in contiguous C-order
 
 
 cdef uint32_t TOKEN_VALUE_UBOUND
