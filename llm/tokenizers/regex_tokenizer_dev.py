@@ -298,7 +298,7 @@ def main():
 
     print("Deconding...")
     with Profile() as prof:
-        val_out = _decode_text(tokens, vocab)
+        val_out = _decode_text(tokens, vocab=vocab)
     print(f"  tokens={len(tokens):,} -> val_out={len(val_out):,}: elapsed={prof.milliseconds_formatted}")
     assert len(val_out) == len(val_text)
     assert val_out == val_text
