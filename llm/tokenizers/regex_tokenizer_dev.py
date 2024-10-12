@@ -37,7 +37,7 @@ _MB = 1024 * _KB
 
 
 MergeList = list[tuple[TokenPair, int]]
-MergeDict = dict[tuple[int, int], int]
+MergeDict = dict[tuple[int, int], int]  # TODO(dtag): Use TokenPair as key
 Vocabulary = list[bytes]
 ReverseVocabulary = dict[bytes, int]
 
@@ -328,27 +328,21 @@ def main():
     data = _load_file_bytes(TRAIN_FILE)
     train_data, val_data = _split_train_and_test(data, val_length=2 * _MB)
 
-    pattern = regex.compile(GPT4_SPLIT_PATTERN)
-
     # train_text = "This is my fancy string, where is your's, man? ✐✐. Hi there."
     train_text = train_data.decode("utf-8")
     val_text = val_data.decode("utf-8")
 
+    pattern = regex.compile(GPT4_SPLIT_PATTERN)
+
+    print("Training....")
     merges = _train(train_text, pattern=pattern, num_merges=1000)
     vocab = _convert_merge_list_to_vocab(merges)
-    # pprint.pprint(vocab)
-
     reverse_vocab = _convert_vocabulary_to_reverse_vocabulary(vocab)
     merges_dict = _convert_merges_list_to_merges_dict(merges)
-    # pprint.pprint(reverse_vocab)
+    # pprint.pprint(vocab)
 
     # TODO(dtag): Run encode on the train set and in addition to the merges, store the top #merges most
     # common byte patterns and their decoded token sequence
-
-    # print("Training....")
-    # merges = _train(train_data, num_merges=1300)
-    # vocab = _convert_merge_list_to_vocab(merges)
-    # pprint.pprint(vocab)
 
     print("Encoding...")
     with Profile() as prof:
