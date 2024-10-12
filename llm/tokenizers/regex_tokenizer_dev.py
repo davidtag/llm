@@ -382,8 +382,7 @@ def main():
     pattern = regex.compile(GPT4_SPLIT_PATTERN)
 
     print("Training....")
-    num_merges = 10_000
-    merges = _train(train_text, pattern=pattern, num_merges=num_merges)
+    merges = _train(train_text, pattern=pattern, num_merges=10_000)
     vocab = _convert_merge_list_to_vocab(merges)
     reverse_vocab = _convert_vocabulary_to_reverse_vocabulary(vocab)
     merges_dict = _convert_merges_list_to_merges_dict(merges)
@@ -396,7 +395,7 @@ def main():
         pattern=pattern,
         merges_dict=merges_dict,
         initial_piece_cache=piece_cache,
-        num_extra_pieces=num_merges,  # roughly 2-3x the memory
+        num_extra_pieces=20_000,
     )
     for piece, tokens in augmented_piece_cache.items():
         assert _decode(tokens, vocab=vocab) == piece
