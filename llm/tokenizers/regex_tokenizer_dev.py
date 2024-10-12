@@ -2,6 +2,7 @@
 
 import copy
 import dataclasses
+import gc
 import heapq
 import time
 
@@ -277,6 +278,40 @@ def _encode(
     return tokens
 
 
+def _encode_2(
+    text: str,
+    pattern: regex.Pattern,
+    merges_dict: MergeDict,
+    piece_cache: PieceCache,
+) -> list[int]:
+    tokens: list[int] = []
+    bpe_cache: dict[bytes, list[int]] = {}  # for a serving system, can be an LRU cache
+
+    for match in pattern.finditer(text, concurrent=False):
+        # Extract the pattern-matched piece in the original text
+        span = match.span()
+        piece_str = text[span[0] : span[1]]
+
+        # If already cached, directly get tokens
+        maybe_tokens = piece_cache.get(piece_str, None)
+        if maybe_tokens is not None:
+            tokens.extend(maybe_tokens)
+            continue
+
+        # Otherwise, compute it (with runtime cache)
+        piece_bytes = piece_str.encode("utf-8")
+        maybe_cached_tokens = bpe_cache.get(piece_bytes, None)
+        if maybe_cached_tokens is not None:
+            tokens.extend(maybe_cached_tokens)
+        else:
+            piece_tokens = list(piece_bytes)
+            merged_piece_tokens = _bpe(piece_tokens, merges_dict=merges_dict)
+            tokens.extend(merged_piece_tokens)
+            bpe_cache[piece_bytes] = merged_piece_tokens
+
+    return tokens
+
+
 @dataclasses.dataclass
 class _PieceCacheCounter:
 
@@ -353,7 +388,8 @@ def main():
     pattern = regex.compile(GPT4_SPLIT_PATTERN)
 
     print("Training....")
-    merges = _train(train_text, pattern=pattern, num_merges=1000)
+    num_merges = 10_000
+    merges = _train(train_text, pattern=pattern, num_merges=num_merges)
     vocab = _convert_merge_list_to_vocab(merges)
     reverse_vocab = _convert_vocabulary_to_reverse_vocabulary(vocab)
     merges_dict = _convert_merges_list_to_merges_dict(merges)
@@ -366,13 +402,22 @@ def main():
         pattern=pattern,
         merges_dict=merges_dict,
         initial_piece_cache=piece_cache,
+        num_extra_pieces=num_merges,  # roughly 2-3x the memory
     )
     for piece, tokens in augmented_piece_cache.items():
         assert _decode(tokens, vocab=vocab) == piece
+    gc.collect()
 
-    print("Encoding...")
+    print("Encoding (#1 without piece cache)...")
     with Profile() as prof:
         tokens = _encode(val_text, pattern=pattern, merges_dict=merges_dict, reverse_vocab=reverse_vocab)
+    print(f"  val_text={len(val_text):,} -> tokens={len(tokens):,}: elapsed={prof.milliseconds_formatted}")
+
+    print("Encoding (#2 with piece cache)...")
+    with Profile() as prof:
+        tokens = _encode_2(
+            val_text, pattern=pattern, merges_dict=merges_dict, piece_cache=augmented_piece_cache
+        )
     print(f"  val_text={len(val_text):,} -> tokens={len(tokens):,}: elapsed={prof.milliseconds_formatted}")
 
     print("Deconding...")
