@@ -11,14 +11,17 @@ import numpy as np
 import tiktoken
 
 from llm.tokenizers.benchmarks.profile import Profile
-from llm.tokenizers.frequencies import (
-    get_pairwise_token_frequencies_from_list,
-)
-from llm.tokenizers.merge import (
-    merge_inplace_and_update_frequencies_and_heap,
-)
+from llm.tokenizers.frequencies import get_pairwise_token_frequencies_from_list
+from llm.tokenizers.merge import merge_inplace_and_update_frequencies_and_heap
 from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
 from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype, NumpyMaskedTokenSequence
+
+
+MergeList = list[tuple[TokenPair, int]]
+MergeDict = dict[TokenPair, int]
+Vocabulary = list[bytes]
+ReverseVocabulary = dict[bytes, int]
+PieceCache = dict[str, list[int]]
 
 
 TRAIN_FILE = "data/blob/t8.shakespeare.txt"
@@ -30,13 +33,6 @@ GPT4_SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1
 _BYTE = 1
 _KB = 1024 * _BYTE
 _MB = 1024 * _KB
-
-
-MergeList = list[tuple[TokenPair, int]]
-MergeDict = dict[TokenPair, int]
-Vocabulary = list[bytes]
-ReverseVocabulary = dict[bytes, int]
-PieceCache = dict[str, list[int]]
 
 
 def _load_file_bytes(file_path: str = TRAIN_FILE) -> bytes:
