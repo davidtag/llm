@@ -9,7 +9,7 @@ import tiktoken
 
 from llm.tokenizers.benchmarks.profile import Profile
 from llm.tokenizers.frequencies import (
-    get_pairwise_token_frequencies_sequential_pure_python,
+    get_pairwise_token_frequencies_from_list,
 )
 from llm.tokenizers.merge import (
     merge_inplace_and_update_frequencies_and_heap,
@@ -30,7 +30,7 @@ _MB = 1024 * _KB
 
 
 MergeList = list[tuple[TokenPair, int]]
-MergeDict = dict[tuple[int, int], int]  # TODO(dtag): Use TokenPair as key
+MergeDict = dict[TokenPair, int]
 Vocabulary = list[bytes]
 ReverseVocabulary = dict[bytes, int]
 
@@ -196,15 +196,13 @@ def _convert_vocabulary_to_reverse_vocabulary(vocab: Vocabulary) -> ReverseVocab
 
 
 def _convert_merges_list_to_merges_dict(merges: MergeList) -> MergeDict:
-    merges_dict = {
-        (token_pair.first, token_pair.second): replacement_token for token_pair, replacement_token in merges
-    }
+    merges_dict = {token_pair: replacement_token for token_pair, replacement_token in merges}
     return merges_dict
 
 
 def _merge(
     tokens: list[int],
-    pair: tuple[int, int],
+    pair: TokenPair,
     replacement: int,
 ) -> list[int]:
     output_tokens = []
@@ -212,7 +210,7 @@ def _merge(
     i = 0
 
     while i < n:
-        if i < n - 1 and tokens[i] == pair[0] and tokens[i + 1] == pair[1]:
+        if i < n - 1 and tokens[i] == pair.first and tokens[i + 1] == pair.second:
             output_tokens.append(replacement)
             i += 2
         else:
@@ -223,8 +221,8 @@ def _merge(
 
 
 def _bpe(tokens: list[int], merges_dict: MergeDict) -> list[int]:
-    while len(tokens) > 2:
-        freq = get_pairwise_token_frequencies_sequential_pure_python(tokens)
+    while len(tokens) > 1:
+        freq = get_pairwise_token_frequencies_from_list(tokens)
         merge_pair = min(freq.keys(), key=lambda p: merges_dict.get(p, float("inf")))
         if merge_pair not in merges_dict:
             break
