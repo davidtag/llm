@@ -8,6 +8,16 @@ PyTorch or Tensorflow.
 
 # TODO
 
+- Tokenizer (enc, dec, train)
+    - Update the Cython libraries / tests for the things needed for regex tokenizer
+        - frequencies.pyx
+        - merges.pyx
+        - bpe.pyx  -- new module for byte_pair_encode() and decode() helpers
+    - Create a Tokenizer class that uses regex-style logic
+        - Ability to train and export a model file (have a runner script)
+        - Ability to train a piece cache -- as part of regular runner, or with separate text
+        - Registry for model files and ability to load them from disk
+    - Add support for special tokens
 - Develop a simple Embedding class and refactor TextEmbedding to use 2 of them (token + position)
 - Diagnose FeedForward training after 1 iter
     - Distribution of activations
@@ -38,7 +48,6 @@ PyTorch or Tensorflow.
     - Add requirements files
     - Add test runner
 - Data Loader & batcher
-- Tokenizer (enc, dec, train)
 - Dropout layer for training deeper networks and avoiding overfitting
     - See Karpathy's "building GPT from scratch" video ~1:40:00 and also Transformer/GPT-1 papers
 - Revisit hack in LayerNorm when n_input==2
