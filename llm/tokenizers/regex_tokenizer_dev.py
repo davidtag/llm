@@ -1,24 +1,17 @@
 """Implementation of a basic BPE tokenizer."""
 
-from collections import Counter
 import heapq
-import pdb
-import pprint
 import time
 
 import regex
 import numpy as np
-from numpy.typing import NDArray
 import tiktoken
 
 from llm.tokenizers.benchmarks.profile import Profile
 from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_sequential_pure_python,
-    get_pairwise_token_frequencies_numpy,
-    get_pairwise_token_frequencies_and_heap_numpy,
 )
 from llm.tokenizers.merge import (
-    merge_inplace_and_update_frequencies,
     merge_inplace_and_update_frequencies_and_heap,
 )
 from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
