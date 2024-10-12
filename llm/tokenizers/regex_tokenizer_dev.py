@@ -199,6 +199,11 @@ def merge(  # TODO(dtag): Move to merge.pyx
     pair: TokenPair,
     replacement: int,
 ) -> list[int]:
+    """Replace all occurences of `pair` with `replacement`.
+
+    Returns:
+        A new list with all possible replacements performed.
+    """
     output_tokens = []
     n = len(tokens)
     i = 0
