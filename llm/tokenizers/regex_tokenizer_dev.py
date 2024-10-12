@@ -53,7 +53,7 @@ def _split_train_and_test(data: bytes, val_length: int = 1 * _MB) -> tuple[bytes
 TOKEN_VALUE_UBOUND = 1_000_000
 
 
-def get_masked_pairwise_token_frequencies_and_heap_numpy(
+def get_masked_pairwise_token_frequencies_and_heap_numpy(  # TODO(dtag): Move to frequencies.pyx
     tokens_masked: NumpyMaskedTokenSequence,
     masked_positions: NumpyMaskedTokenSequence,
 ) -> tuple[
@@ -194,7 +194,7 @@ def _convert_merges_list_to_merges_dict(merges: MergeList) -> MergeDict:
     return merges_dict
 
 
-def _merge(
+def merge(  # TODO(dtag): Move to merge.pyx
     tokens: list[int],
     pair: TokenPair,
     replacement: int,
@@ -221,7 +221,7 @@ def _bpe(tokens: list[int], merges_dict: MergeDict) -> list[int]:
         if merge_pair not in merges_dict:
             break
         replacement = merges_dict[merge_pair]
-        tokens = _merge(tokens, merge_pair, replacement)
+        tokens = merge(tokens, merge_pair, replacement)
     return tokens
 
 
