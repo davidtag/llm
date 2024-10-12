@@ -15,7 +15,7 @@ from llm.tokenizers.merge import (
     merge_inplace_and_update_frequencies_and_heap,
 )
 from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
-from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence, MaskedTokenDtype, NumpyMaskedTokenSequence
+from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype, NumpyMaskedTokenSequence
 
 
 TRAIN_FILE = "data/blob/t8.shakespeare.txt"
@@ -48,12 +48,6 @@ def _split_train_and_test(data: bytes, val_length: int = 1 * _MB) -> tuple[bytes
     val = data[-val_length:]
     print(f"Split data into train ({len(train):,} bytes) and val ({len(val):,} bytes)")
     return train, val
-
-
-def _convert_bytes_to_token_sequence(data: bytes) -> NumpyTokenSequence:
-    out = np.array(list(data), dtype=TokenDtype)
-    assert out.shape == (len(data),)
-    return out
 
 
 TOKEN_VALUE_UBOUND = 1_000_000
