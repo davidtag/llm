@@ -1,5 +1,7 @@
 """Implementation of a basic BPE tokenizer."""
 
+import copy
+import dataclasses
 import heapq
 import time
 
@@ -33,6 +35,7 @@ MergeList = list[tuple[TokenPair, int]]
 MergeDict = dict[TokenPair, int]
 Vocabulary = list[bytes]
 ReverseVocabulary = dict[bytes, int]
+PieceCache = dict[str, list[int]]
 
 
 def _load_file_bytes(file_path: str = TRAIN_FILE) -> bytes:
@@ -189,6 +192,18 @@ def _convert_vocabulary_to_reverse_vocabulary(vocab: Vocabulary) -> ReverseVocab
     return reverse_vocab
 
 
+def _convert_vocabulary_to_piece_cache(vocab: Vocabulary) -> PieceCache:
+    piece_cache: PieceCache = {}
+    for token, token_bytes in enumerate(vocab):
+        try:
+            token_str = token_bytes.decode("utf-8", errors="strict")
+        except UnicodeDecodeError:
+            continue
+        else:
+            piece_cache[token_str] = [token]
+    return piece_cache
+
+
 def _convert_merges_list_to_merges_dict(merges: MergeList) -> MergeDict:
     merges_dict = {token_pair: replacement_token for token_pair, replacement_token in merges}
     return merges_dict
@@ -262,6 +277,58 @@ def _encode(
     return tokens
 
 
+@dataclasses.dataclass
+class _PieceCacheCounter:
+
+    tokens: list[int]
+    count: int
+
+
+def _train_piece_cache(
+    text: str,
+    pattern: regex.Pattern,
+    merges_dict: MergeDict,
+    initial_piece_cache: PieceCache,
+    num_extra_pieces: int = 10,
+) -> PieceCache:
+    """Run a modified verion of encode() to compute the most frequent pieces and their token encodings."""
+    piece_counter: dict[str, _PieceCacheCounter] = {}
+
+    for match in pattern.finditer(text, concurrent=False):
+        # Extract the pattern-matched piece in the original text
+        span = match.span()
+        piece_str = text[span[0] : span[1]]
+
+        # If we've seen this in the initial_piece_cache, there's nothing to do, it
+        # will always be in the output
+        if piece_str in initial_piece_cache:
+            continue
+
+        # If we have already computed and cached this piece, augment it's count
+        if piece_str in piece_counter:
+            piece_counter[piece_str].count += 1
+            continue
+
+        # Otherwise, compute the correct encoding and cache it
+        piece_bytes = piece_str.encode("utf-8")
+        piece_tokens = list(piece_bytes)
+        merged_piece_tokens = _bpe(piece_tokens, merges_dict=merges_dict)
+        piece_counter[piece_str] = _PieceCacheCounter(tokens=merged_piece_tokens, count=1)
+
+    top_pieces = sorted(
+        piece_counter.keys(),
+        key=lambda piece, counter=piece_counter: counter[piece].count,
+        reverse=True,
+    )[:num_extra_pieces]
+    top_pieces_cache = {piece: piece_counter[piece].tokens for piece in top_pieces}
+
+    piece_cache = copy.deepcopy(initial_piece_cache)
+    piece_cache.update(top_pieces_cache)
+    assert len(piece_cache) == len(initial_piece_cache) + len(top_pieces_cache)
+
+    return piece_cache
+
+
 def _decode_bytes(tokens: list[int], vocab: Vocabulary) -> bytes:
     # TODO(dtag): Speed this up in Cython by pre-allocating the correct byte size and
     # using C loops instead of Python loops.
@@ -292,8 +359,16 @@ def main():
     merges_dict = _convert_merges_list_to_merges_dict(merges)
     # pprint.pprint(vocab)
 
-    # TODO(dtag): Run encode on the train set and in addition to the merges, store the top #merges most
-    # common byte patterns and their decoded token sequence
+    print("Training piece cache...")
+    piece_cache = _convert_vocabulary_to_piece_cache(vocab)
+    augmented_piece_cache = _train_piece_cache(
+        train_text,
+        pattern=pattern,
+        merges_dict=merges_dict,
+        initial_piece_cache=piece_cache,
+    )
+    for piece, tokens in augmented_piece_cache.items():
+        assert _decode(tokens, vocab=vocab) == piece
 
     print("Encoding...")
     with Profile() as prof:
