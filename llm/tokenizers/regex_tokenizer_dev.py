@@ -202,17 +202,24 @@ def _convert_merges_list_to_merges_dict(merges: MergeList) -> MergeDict:
     return merges_dict
 
 
-def _merge(tokens: list[int], pair: tuple[int, int], replacement: int) -> list[int]:
-    newids = []
+def _merge(
+    tokens: list[int],
+    pair: tuple[int, int],
+    replacement: int,
+) -> list[int]:
+    output_tokens = []
+    n = len(tokens)
     i = 0
-    while i < len(tokens):
-        if i < len(tokens) - 1 and tokens[i] == pair[0] and tokens[i + 1] == pair[1]:
-            newids.append(replacement)
+
+    while i < n:
+        if i < n - 1 and tokens[i] == pair[0] and tokens[i + 1] == pair[1]:
+            output_tokens.append(replacement)
             i += 2
         else:
-            newids.append(tokens[i])
+            output_tokens.append(tokens[i])
             i += 1
-    return newids
+
+    return output_tokens
 
 
 def _bpe(tokens: list[int], merges_dict: MergeDict) -> list[int]:
