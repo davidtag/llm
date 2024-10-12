@@ -152,10 +152,7 @@ def _train(text: str, pattern: regex.Pattern, num_merges: int, verbose: bool = T
     frequencies, heap = get_masked_pairwise_token_frequencies_and_heap_numpy(tokens_masked, mask_positions)
 
     tokens = np.array(tokens_masked, dtype=np.uint32)  # TODO(dtag): Handle underflow
-    node = heap[0]  # TODO(dtag): hanle empty
-    merges = []
-    verbose = True
-    train_start = time.monotonic()
+
     for i in range(num_merges):
         iter_start = time.monotonic()
         node = heap[0]
