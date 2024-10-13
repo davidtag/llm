@@ -223,6 +223,42 @@ class TestMaskedNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
             freq[self._convert_token_pair_to_tuple(pair)] = node.count
         return freq
 
+    def test_small_sequence(self) -> None:
+        """Test frequency on a small input sequence."""
+        tokens_masked = np.array([0, 0, -1, 1, 0, -1, 2, 1, 0], dtype=MaskedTokenDtype)
+        masked_positions = np.array([2, 5], dtype=MaskedTokenDtype)
+        # Raw frequencies:
+        # {
+        #     (0, 0): 1,
+        #     (1, 0): 2,
+        #     (2, 1): 1,
+        # }
+        pair_to_node, heap = get_masked_pairwise_token_frequencies_and_heap_numpy(
+            tokens_masked,
+            masked_positions,
+        )
+        self.assertEqual(len(pair_to_node), len(heap))
+
+        # Test the min_node
+        min_node = heapq.heappop(heap)
+        self.assertEqual(min_node.count, 2)
+        self.assertEqual(min_node.pair, TokenPair(1, 0))
+        self.assertIs(pair_to_node[TokenPair(1, 0)], min_node)
+
+        # Check for correct tie-break ordering among remaining nodes
+        node_1 = heapq.heappop(heap)
+        node_2 = heapq.heappop(heap)
+        self.assertEqual(len(heap), 0)
+
+        self.assertEqual(node_1.count, 1)
+        self.assertEqual(node_2.count, 1)
+
+        self.assertEqual(node_1.pair, TokenPair(0, 0))
+        self.assertEqual(node_2.pair, TokenPair(2, 1))
+
+        self.assertIs(pair_to_node[TokenPair(0, 0)], node_1)
+        self.assertIs(pair_to_node[TokenPair(2, 1)], node_2)
+
 
 #########################################################################################
 # Helpers returning max-only frequencies                                                #
