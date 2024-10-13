@@ -62,56 +62,56 @@ cdef class TokenPairNode:
         int32_t count,
         bint deleted = False
     ):
-        self.first = first
-        self.second = second
-        self.count = count
-        self.deleted = deleted
+        self._first = first
+        self._second = second
+        self._count = count
+        self._deleted = deleted
 
     @property
     def first(self) -> int:
-        return self.first
+        return self._first
 
     @property
     def second(self) -> int:
-        return self.second
+        return self._second
 
     @property
     def pair(self) -> TokenPair:
-        return TokenPair(self.first, self.second)
+        return TokenPair(self._first, self._second)
 
     @property
     def count(self) -> int:
-        return self.count
+        return self._count
 
     @count.setter
     def count(self, int32_t count) -> None:
-        self.count = count
+        self._count = count
 
     @property
     def deleted(self) -> bool:
-        return self.deleted
+        return self._deleted
 
     @deleted.setter
     def deleted(self, bint deleted) -> None:
-        self.deleted = deleted
+        self._deleted = deleted
 
     def __eq__(self, other: TokenPairNode) -> bool:
         return (
-            self.first == other.first
-            and self.second == other.second
-            and self.count == other.count
-            and self.deleted == other.deleted
+            self._first == other._first
+            and self._second == other._second
+            and self._count == other._count
+            and self._deleted == other._deleted
         )
 
     def __lt__(self, other: TokenPairNode) -> bool:
-        self_order = (-self.count, self.first, self.second)
-        other_order = (-other.count, other.first, other.second)
+        self_order = (-self._count, self._first, self._second)
+        other_order = (-other._count, other._first, other._second)
         return  self_order <  other_order
 
     def __str__(self) -> str:
         return (
             "TokenPairNode("
-            f"first={self.first}, second={self.second}, count={self.count}, deleted={self.deleted}"
+            f"first={self._first}, second={self._second}, count={self._count}, deleted={self._deleted}"
             ")"
         )
 

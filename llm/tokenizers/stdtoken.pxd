@@ -17,7 +17,7 @@ cdef class TokenPair:
 
 
 cdef class TokenPairNode:
-    cdef token_t first
-    cdef token_t second
-    cdef int32_t count
-    cdef bint deleted
+    cdef token_t _first
+    cdef token_t _second
+    cdef int32_t _count
+    cdef bint _deleted
