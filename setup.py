@@ -1,4 +1,8 @@
-"""Build the llm package."""
+"""Build the llm package.
+
+From project root, run:
+>> python setup.py build_ext --inplace
+"""
 
 from setuptools import setup
 from Cython.Build import cythonize
@@ -7,9 +11,9 @@ from Cython.Build import cythonize
 setup(
     ext_modules=cythonize(
         [
+            "llm/tokenizers/cython/stdtoken.pyx",
             "llm/tokenizers/cython/frequencies.pyx",
             "llm/tokenizers/cython/merge.pyx",
-            "llm/tokenizers/cython/stdtoken.pyx",
         ],
         compiler_directives={
             "language_level": "3str",
