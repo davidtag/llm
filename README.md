@@ -9,8 +9,9 @@ PyTorch or Tensorflow.
 # TODO
 
 - Tokenizer (enc, dec, train)
-    - Update the Cython libraries / tests for the things needed for regex tokenizer
-        - bpe.pyx  -- new module for byte_pair_encode() and decode() helpers
+    - Implemente a BaseTokenizer class with:
+        - Data types for merges / vocab
+        - Helpers for byte_pair_encode() and decode() and decode_bytes()
     - Create a Tokenizer class that uses regex-style logic
         - Ability to train and export a model file (have a runner script)
         - Ability to train a piece cache -- as part of regular runner, or with separate text
