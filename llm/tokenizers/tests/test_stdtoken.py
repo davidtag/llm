@@ -64,6 +64,11 @@ class TestTokenPair(unittest.TestCase):
         self.assertEqual(hash(pair2), 100 * 1_000_000 + 200)
         self.assertEqual(hash(pair3), 200 * 1_000_000 + 100)
 
+    def test_hash_large_values(self) -> None:
+        """Test the hash implementation for large token values."""
+        pair = TokenPair(999_999, 999_999)
+        self.assertEqual(hash(pair) + 1, 1_000_000**2)
+
     def test_set_hashability(self) -> None:
         """Test that TokenPair can be used in sets."""
         pair1 = TokenPair(100, 200)
