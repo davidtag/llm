@@ -18,17 +18,17 @@ cdef class TokenPair:
         token_t first,
         token_t second,
     ):
-        self.first = first
-        self.second = second
+        self._first = first
+        self._second = second
         self._unique = self.first * TOKEN_VALUE_UBOUND + self.second
 
     @property
     def first(self) -> int:
-        return self.first
+        return self._first
 
     @property
     def second(self) -> int:
-        return self.second
+        return self._second
 
     def __eq__(self, other: TokenPair) -> bool:
         return self._unique == other._unique
@@ -40,7 +40,7 @@ cdef class TokenPair:
         return self._unique
 
     def __str__(self) -> str:
-        return f"TokenPair(first={self.first}, second={self.second})"
+        return f"TokenPair(first={self._first}, second={self._second})"
 
     def __repr__(self) -> str:
         return self.__str__()

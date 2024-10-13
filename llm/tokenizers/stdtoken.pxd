@@ -11,8 +11,8 @@ cdef uint32_t TOKEN_VALUE_UBOUND
 
 
 cdef class TokenPair:
-    cdef token_t first
-    cdef token_t second
+    cdef token_t _first
+    cdef token_t _second
     cdef token_t _unique
 
 
