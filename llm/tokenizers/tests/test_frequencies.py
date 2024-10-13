@@ -18,7 +18,7 @@ from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_and_heap_numpy,
     get_masked_pairwise_token_frequencies_and_heap_numpy,
 )
-from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
+from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence, MaskedTokenDtype
 from llm.tokenizers.stdtoken import TokenPair
 
 
@@ -214,7 +214,7 @@ class TestMaskedNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
         pair_to_node, _ = get_masked_pairwise_token_frequencies_and_heap_numpy(
             tokens,
-            np.array([], dtype=np.int32),
+            np.array([], dtype=MaskedTokenDtype),
         )
         freq = {}
         for pair, node in pair_to_node.items():
