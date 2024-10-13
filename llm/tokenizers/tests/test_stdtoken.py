@@ -3,7 +3,7 @@
 import heapq
 import unittest
 
-from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
+from llm.tokenizers.cython.stdtoken import TokenPair, TokenPairNode
 
 
 class TestTokenPair(unittest.TestCase):
