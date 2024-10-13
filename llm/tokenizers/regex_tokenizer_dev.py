@@ -95,7 +95,7 @@ def _train(text: str, pattern: regex.Pattern, num_merges: int, verbose: bool = T
 
     tokens_masked, mask_positions = _prepare_masked_token_sequence(text, pattern=pattern)
     frequencies, heap = get_masked_pairwise_token_frequencies_and_heap_numpy(tokens_masked, mask_positions)
-    tokens = np.array(tokens_masked, dtype=TokenDtype)  # TODO(dtag): Handle underflow
+    tokens = np.array(tokens_masked, dtype=TokenDtype)  # intentionally underflow masks (-1). handled in merge
 
     for i in range(num_merges):
         iter_start = time.monotonic()

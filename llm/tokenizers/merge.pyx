@@ -11,6 +11,8 @@ from numpy.typing import NDArray
 from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
 
 
+# TODO(dtag): Add a Pure-Python  & Cython merge operation that are not in-place
+
 @cython.nogil
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -97,7 +99,7 @@ cdef (Py_ssize_t, Py_ssize_t, Py_ssize_t) _c_merge_inplace_and_report_neighbors(
             and tokens[read_index] == token_1
             and tokens[read_index + 1] == token_2
         ):
-            # TODO(dtag): Gan speed this up by special-casing first & last token to avoid
+            # TODO(dtag): Can speed this up by special-casing first & last token to avoid
             # a bunch of conditional branches and jump instructions
             if read_index >= 1:  # there exists a prefix
                 if (
@@ -218,6 +220,10 @@ def _update_freq_and_heap(
         frequencies[pair] = node
 
 
+# To support re-use of the method below for the masked input token sequence, without re-implementing it.
+cdef token_t MASKED_TOKEN = <token_t>(-1)
+
+
 def merge_inplace_and_update_frequencies_and_heap(
     tokens: NumpyTokenSequence,
     token_t token_1,
@@ -263,6 +269,8 @@ def merge_inplace_and_update_frequencies_and_heap(
     for prefix, count in zip(prefix_values, prefix_counts, strict=True):
         if prefix == output_token:  # successive merges. special-casing handled with suffix tokens
             pass
+        elif prefix == MASKED_TOKEN:  # freq/heap ignore masked positions
+            pass
         else:
             _update_freq_and_heap(frequencies, heap, TokenPair(prefix, token_1), -count)
             _update_freq_and_heap(frequencies, heap, TokenPair(prefix, output_token), +count)
@@ -271,6 +279,8 @@ def merge_inplace_and_update_frequencies_and_heap(
         if suffix == output_token:  # successive merges
             _update_freq_and_heap(frequencies, heap, TokenPair(token_2, token_1), -count)
             _update_freq_and_heap(frequencies, heap, TokenPair(output_token, output_token), +count)
+        elif suffix == MASKED_TOKEN:  # freq/heap ignore masked positions
+            pass
         else:
             _update_freq_and_heap(frequencies, heap, TokenPair(token_2, suffix), -count)
             _update_freq_and_heap(frequencies, heap, TokenPair(output_token, suffix), +count)
