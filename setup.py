@@ -2,6 +2,9 @@
 
 From project root, run:
 >> python setup.py build_ext --inplace
+
+To run all tests
+>> python setup.py build_ext --inplace && PYTHONPATH=. python -m unittest discover
 """
 
 from setuptools import setup
