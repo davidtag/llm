@@ -6,14 +6,23 @@ from llm.tokenizers.benchmarks.profile import Profile
 from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_sequential_pure_python,
     get_pairwise_token_frequencies_from_list,
-    get_pairwise_token_frequencies_sequential_cython,
+    get_pairwise_token_frequencies_cython_loop,
     get_pairwise_token_frequencies_numpy,
     get_pairwise_token_frequencies_numpy_maxonly,
     get_pairwise_token_frequencies_numpy_bitshift,
     get_pairwise_token_frequencies_numpy_bitshift_maxonly,
     get_pairwise_token_frequencies_and_heap_numpy,
+    get_masked_pairwise_token_frequencies_and_heap_numpy,
 )
-from llm.tokenizers.pytoken import TokenDtype
+from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype, NumpyTokenSequence
+
+
+def get_masked_pairwise_token_frequencies_and_heap_numpy_wrapped(tokens: NumpyTokenSequence):
+    """Call the underlying method with no masked positions."""
+    return get_masked_pairwise_token_frequencies_and_heap_numpy(
+        tokens,
+        masked_positions=np.array([], dtype=MaskedTokenDtype),
+    )
 
 
 def main() -> None:
@@ -24,12 +33,13 @@ def main() -> None:
     methods = [
         get_pairwise_token_frequencies_sequential_pure_python,
         get_pairwise_token_frequencies_from_list,
-        get_pairwise_token_frequencies_sequential_cython,
+        get_pairwise_token_frequencies_cython_loop,
         get_pairwise_token_frequencies_numpy,
         get_pairwise_token_frequencies_numpy_maxonly,
         get_pairwise_token_frequencies_numpy_bitshift,
         get_pairwise_token_frequencies_numpy_bitshift_maxonly,
         get_pairwise_token_frequencies_and_heap_numpy,
+        get_masked_pairwise_token_frequencies_and_heap_numpy_wrapped,
     ]
     for method in methods:
         with Profile() as prof:
