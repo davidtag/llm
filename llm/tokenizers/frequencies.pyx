@@ -9,7 +9,7 @@ from typing import Tuple
 import cython
 import numpy as np
 
-from llm.tokenizers.pytoken import NumpyTokenSequence
+from llm.tokenizers.pytoken import NumpyTokenSequence, NumpyMaskedTokenSequence
 
 
 def get_pairwise_token_frequencies_sequential_pure_python(
@@ -195,10 +195,10 @@ def get_pairwise_token_frequencies_numpy_bitshift_maxonly(
 
 def get_pairwise_token_frequencies_and_heap_numpy(
     tokens: NumpyTokenSequence,
-) -> Tuple[
-        dict[TokenPair, TokenPairNode],
-        list[TokenPairNode],
-    ]:
+) -> tuple[
+    dict[TokenPair, TokenPairNode],
+    list[TokenPairNode],
+]:
     """Compute the token frequencies using numpy broadcast, and arrange them in a heap."""
     freq: dict[TokenPair, TokenPairNode] = {}
     heap: list[TokenPairNode] = []
@@ -222,6 +222,49 @@ def get_pairwise_token_frequencies_and_heap_numpy(
 
     # Package the frequencies
     for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
+        pair = TokenPair(token_1, token_2)
+        node = TokenPairNode(token_1, token_2, count=count)
+        heap.append(node)
+        freq[pair] = node
+
+    heapq.heapify(heap)
+
+    return freq, heap
+
+
+def get_masked_pairwise_token_frequencies_and_heap_numpy(
+    tokens_masked: NumpyMaskedTokenSequence,
+    masked_positions: NumpyMaskedTokenSequence,
+) -> tuple[
+    dict[TokenPair, TokenPairNode],
+    list[TokenPairNode],
+]:
+    """Compute the token frequencies using numpy broadcast, and arrange them in a heap."""
+    freq: dict[TokenPair, TokenPairNode] = {}
+    heap: list[TokenPairNode] = []
+
+    cdef Py_ssize_t n_tokens = tokens_masked.shape[0]
+    if n_tokens == 0:
+        return freq, heap
+
+    # Determine all unique pairs using bit packing
+    buffer = np.zeros(n_tokens - 1, dtype=np.int64)
+    np.add(buffer, tokens_masked[:-1], out=buffer)
+    np.multiply(buffer, TOKEN_VALUE_UBOUND, out=buffer)
+    np.add(buffer, tokens_masked[1:], out=buffer)
+    buffer[masked_positions] = -1
+    buffer[masked_positions - 1] = -1
+    unique_values, counts = np.unique(buffer, return_counts=True)
+
+    # Efficiently unpack them
+    first_tokens = np.floor_divide(unique_values, TOKEN_VALUE_UBOUND)
+    second_tokens = np.mod(unique_values, TOKEN_VALUE_UBOUND)
+
+    # Package the frequencies
+    for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
+        assert token_2 >= 0
+        if token_1 < 0:
+            continue  # filter out masked connections
         pair = TokenPair(token_1, token_2)
         node = TokenPairNode(token_1, token_2, count=count)
         heap.append(node)

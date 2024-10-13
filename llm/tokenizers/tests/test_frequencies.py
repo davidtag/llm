@@ -16,6 +16,7 @@ from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_numpy_bitshift,
     get_pairwise_token_frequencies_numpy_bitshift_maxonly,
     get_pairwise_token_frequencies_and_heap_numpy,
+    get_masked_pairwise_token_frequencies_and_heap_numpy,
 )
 from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
 from llm.tokenizers.stdtoken import TokenPair
@@ -205,6 +206,22 @@ class TestNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
         self.assertIs(pair_to_node[TokenPair(0, 1)], node_2)
         self.assertIs(pair_to_node[TokenPair(0, 2)], node_3)
         self.assertIs(pair_to_node[TokenPair(2, 1)], node_4)
+
+
+class TestMaskedNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
+    """Unit tests for get_masked_pairwise_token_frequencies_and_heap_numpy()."""
+
+    def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
+        pair_to_node, _ = get_masked_pairwise_token_frequencies_and_heap_numpy(
+            tokens,
+            np.array([], dtype=np.int32),
+        )
+        freq = {}
+        for pair, node in pair_to_node.items():
+            assert node.pair == pair
+            assert node.deleted is False
+            freq[self._convert_token_pair_to_tuple(pair)] = node.count
+        return freq
 
 
 #########################################################################################

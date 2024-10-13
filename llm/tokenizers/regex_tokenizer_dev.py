@@ -11,9 +11,12 @@ import numpy as np
 import tiktoken
 
 from llm.tokenizers.benchmarks.profile import Profile
-from llm.tokenizers.frequencies import get_pairwise_token_frequencies_from_list
+from llm.tokenizers.frequencies import (
+    get_pairwise_token_frequencies_from_list,
+    get_masked_pairwise_token_frequencies_and_heap_numpy,
+)
 from llm.tokenizers.merge import merge_inplace_and_update_frequencies_and_heap
-from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
+from llm.tokenizers.stdtoken import TokenPair
 from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype, NumpyMaskedTokenSequence
 
 
@@ -48,51 +51,6 @@ def _split_train_and_test(data: bytes, val_length: int = 1 * _MB) -> tuple[bytes
     val = data[-val_length:]
     print(f"Split data into train ({len(train):,} bytes) and val ({len(val):,} bytes)")
     return train, val
-
-
-TOKEN_VALUE_UBOUND = 1_000_000
-
-
-def get_masked_pairwise_token_frequencies_and_heap_numpy(  # TODO(dtag): Move to frequencies.pyx
-    tokens_masked: NumpyMaskedTokenSequence,
-    masked_positions: NumpyMaskedTokenSequence,
-) -> tuple[
-    dict[TokenPair, TokenPairNode],
-    list[TokenPairNode],
-]:
-    """Compute the token frequencies using numpy broadcast, and arrange them in a heap."""
-    freq: dict[TokenPair, TokenPairNode] = {}
-    heap: list[TokenPairNode] = []
-
-    if len(tokens_masked) == 0:
-        return freq, heap
-
-    # Determine all unique pairs using bit packing
-    buffer = np.zeros(len(tokens_masked) - 1, dtype=np.int64)
-    np.add(buffer, tokens_masked[:-1], out=buffer)
-    np.multiply(buffer, TOKEN_VALUE_UBOUND, out=buffer)
-    np.add(buffer, tokens_masked[1:], out=buffer)
-    buffer[masked_positions] = -1
-    buffer[masked_positions - 1] = -1
-    unique_values, counts = np.unique(buffer, return_counts=True)
-
-    # Efficiently unpack them
-    first_tokens = np.floor_divide(unique_values, TOKEN_VALUE_UBOUND)
-    second_tokens = np.mod(unique_values, TOKEN_VALUE_UBOUND)
-
-    # Package the frequencies
-    for token_1, token_2, count in zip(first_tokens, second_tokens, counts, strict=True):
-        assert token_2 > 0
-        if token_1 < 0:
-            continue
-        pair = TokenPair(token_1, token_2)
-        node = TokenPairNode(token_1, token_2, count=count)
-        heap.append(node)
-        freq[pair] = node
-
-    heapq.heapify(heap)
-
-    return freq, heap
 
 
 def _prepare_masked_token_sequence(
