@@ -8,7 +8,7 @@ import heapq
 import numpy as np
 
 from llm.tokenizers.frequencies import (
-    get_pairwise_token_frequencies_sequential_cython,
+    get_pairwise_token_frequencies_cython_loop,
     get_pairwise_token_frequencies_and_heap_numpy,
 )
 from llm.tokenizers.merge import (
@@ -287,7 +287,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
     def test_random_sequence(self) -> None:
         """Test implementation parity with naive version on a random sequence."""
         tokens = np.random.randint(low=0, high=100, size=10_000).astype(TokenDtype)
-        frequencies = get_pairwise_token_frequencies_sequential_cython(tokens)
+        frequencies = get_pairwise_token_frequencies_cython_loop(tokens)
         initial_length = len(frequencies)
         max_freq_pair = max(frequencies.keys(), key=lambda pair: frequencies[pair])
         out_tokens = merge_inplace_and_update_frequencies(
@@ -302,7 +302,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         self.assertNotEqual(initial_length, final_length)
         cleaned_frequencies = {key: val for key, val in frequencies.items() if val != 0}
 
-        post_frequencies = get_pairwise_token_frequencies_sequential_cython(out_tokens)
+        post_frequencies = get_pairwise_token_frequencies_cython_loop(out_tokens)
         self.assertDictEqual(cleaned_frequencies, post_frequencies)
 
 

@@ -45,7 +45,7 @@ def get_pairwise_token_frequencies_from_list(
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def get_pairwise_token_frequencies_sequential_cython(  # TODO(dtag): remove _sequential from name
+def get_pairwise_token_frequencies_cython_loop(
     token_sequence_t tokens,
 ) -> defaultdict[TokenPair, int]:
     """Compute the token frequencies using a sequential scan in Cython."""
