@@ -10,8 +10,6 @@ PyTorch or Tensorflow.
 
 - Tokenizer (enc, dec, train)
     - Update the Cython libraries / tests for the things needed for regex tokenizer
-        - frequencies.pyx
-        - merges.pyx
         - bpe.pyx  -- new module for byte_pair_encode() and decode() helpers
     - Create a Tokenizer class that uses regex-style logic
         - Ability to train and export a model file (have a runner script)
