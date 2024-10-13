@@ -2,7 +2,11 @@
 # This project's ignores                                    #
 #############################################################
 
+# Data files
 data/blob/*
+
+# Compiled Cython modules
+llm/tokenizers/cython/*.c
 
 
 #############################################################
