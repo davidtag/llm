@@ -12,12 +12,62 @@ from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_and_heap_numpy,
 )
 from llm.tokenizers.merge import (
+    merge,
     merge_inplace,
     merge_inplace_and_update_frequencies,
     merge_inplace_and_update_frequencies_and_heap,
 )
 from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype
 from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
+
+
+class TestMerge(unittest.TestCase):
+    """Unit tests for merge()."""
+
+    def test_empty_input(self) -> None:
+        """Test with an empty input."""
+        in_tokens = []
+        out_tokens = merge(in_tokens, TokenPair(0, 0), 1)
+        expected = []
+        self.assertListEqual(out_tokens, expected)
+
+    def test_single_token(self) -> None:
+        """Test with a single token input."""
+        in_tokens = [13]
+        out_tokens = merge(in_tokens, TokenPair(0, 0), 1)
+        expected = [13]
+        self.assertListEqual(out_tokens, expected)
+
+    def test_merges_one_pair(self) -> None:
+        """Test merging a single pair."""
+        in_tokens = [0, 0]
+        out_tokens = merge(in_tokens, TokenPair(0, 0), 1)
+        expected = [1]
+        self.assertListEqual(out_tokens, expected)
+
+    def test_merges_from_left_to_right(self) -> None:
+        """Test merging occurs from left-to-right when multiple merges are possible."""
+        in_tokens = [0, 0, 0]
+        out_tokens = merge(in_tokens, TokenPair(0, 0), 1)
+        expected = [1, 0]
+        self.assertListEqual(out_tokens, expected)
+
+    def test_multiple_merge_targets(self) -> None:
+        """Test merging occurs correctly when there are multiple merges."""
+        in_tokens = [0, 0, 0, 1, 3, 0, 1, 0, 0]
+        out_tokens = merge(in_tokens, TokenPair(0, 0), 9)
+        expected = [9, 0, 1, 3, 0, 1, 9]
+        self.assertListEqual(out_tokens, expected)
+
+    def test_successive_merges(self) -> None:
+        """Test correctness and that the same underlying array is used after successive merges."""
+        in_tokens = [0, 0, 0, 1, 3, 0, 1, 0, 0]
+        o1 = merge(in_tokens, TokenPair(0, 0), 9)  # [9, 0, 1, 3, 0, 1, 9]
+        o2 = merge(o1, TokenPair(0, 1), 10)  # [9, 10, 3, 10, 9]
+        o3 = merge(o2, TokenPair(10, 9), 11)  # [9, 10, 3, 11]
+        out_tokens = o3
+        expected = [9, 10, 3, 11]
+        self.assertListEqual(out_tokens, expected)
 
 
 class TestMergeInPlace(unittest.TestCase):
