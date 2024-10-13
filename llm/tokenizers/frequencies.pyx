@@ -53,13 +53,9 @@ def get_pairwise_token_frequencies_sequential_cython(  # TODO(dtag): remove _seq
 
     cdef Py_ssize_t n = tokens.shape[0]
     cdef Py_ssize_t i
-    cdef token_t token_1
-    cdef token_t token_2
 
     for i in range(n - 1):
-        token_1 = tokens[i]
-        token_2 = tokens[i + 1]
-        pair = TokenPair(token_1, token_2)  # TODO(dtag): Construct directly instead of creating loop vars
+        pair = TokenPair(tokens[i], tokens[i + 1])
         freq[pair] += 1
 
     return freq
