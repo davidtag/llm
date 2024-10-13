@@ -9,7 +9,7 @@ PyTorch or Tensorflow.
 # TODO
 
 - Tokenizer (enc, dec, train)
-    - Implemente a BaseTokenizer class with:
+    - Implement a bpe.py module with:
         - Data types for merges / vocab
         - Helpers for byte_pair_encode() and decode() and decode_bytes()
     - Create a Tokenizer class that uses regex-style logic
