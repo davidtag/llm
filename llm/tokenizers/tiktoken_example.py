@@ -1,12 +1,11 @@
-"""."""
+"""Sample script for encoding with tiktoken."""
 
 import time
 
 import tiktoken
 
 
-def encode_shakespeare_with_gpt2() -> None:
-    """."""
+def _encode_shakespeare_with_gpt2() -> None:
     print("Reading file...")
     with open("data/blob/t8.shakespeare.txt", mode="r", encoding="utf-8") as f:
         text = f.read()
@@ -24,4 +23,4 @@ def encode_shakespeare_with_gpt2() -> None:
 
 
 if __name__ == "__main__":
-    encode_shakespeare_with_gpt2()
+    _encode_shakespeare_with_gpt2()

@@ -8,16 +8,16 @@ import numpy as np
 import tiktoken
 
 from llm.tokenizers.benchmarks.profile import Profile
-from llm.tokenizers.frequencies import (
+from llm.tokenizers.cython.frequencies import (
     get_pairwise_token_frequencies_numpy,
     get_pairwise_token_frequencies_and_heap_numpy,
 )
-from llm.tokenizers.merge import (
+from llm.tokenizers.cython.merge import (
     merge_inplace_and_update_frequencies,
     merge_inplace_and_update_frequencies_and_heap,
 )
-from llm.tokenizers.stdtoken import TokenPair
-from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
+from llm.tokenizers.cython.stdtoken import TokenPair
+from llm.tokenizers.cython.pytoken import TokenDtype, NumpyTokenSequence
 
 
 TRAIN_FILE = "data/blob/t8.shakespeare.txt"
