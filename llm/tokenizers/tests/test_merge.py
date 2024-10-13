@@ -16,7 +16,7 @@ from llm.tokenizers.merge import (
     merge_inplace_and_update_frequencies,
     merge_inplace_and_update_frequencies_and_heap,
 )
-from llm.tokenizers.pytoken import TokenDtype
+from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype
 from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
 
 
@@ -370,6 +370,31 @@ class TestMergeInPlaceAndUpdateFrequenciesAndHeap(unittest.TestCase):
             heap=heap,
         )
         expected = np.array([9], dtype=TokenDtype)
+        np.testing.assert_array_equal(out_tokens, expected)
+        self.assertIs(out_tokens.base, in_tokens)
+        self.assertIs(in_tokens.base, None)
+        self.assertDictEqual(frequencies, {})
+        self.assertListEqual(heap, [])
+
+    def test_merges_with_mask(self) -> None:
+        """Test merging in the presence of a mask."""
+        in_tokens = np.array([7, 7, -1, 7, 7], dtype=MaskedTokenDtype).astype(TokenDtype)
+        heap = [
+            TokenPairNode(7, 7, count=2),
+        ]
+        frequencies = {
+            TokenPair(7, 7): heap[0],
+        }
+        out_tokens = merge_inplace_and_update_frequencies_and_heap(
+            in_tokens,
+            7,
+            7,
+            9,
+            expected_num_merges=2,
+            frequencies=frequencies,
+            heap=heap,
+        )
+        expected = np.array([9, -1, 9], dtype=MaskedTokenDtype).astype(TokenDtype)
         np.testing.assert_array_equal(out_tokens, expected)
         self.assertIs(out_tokens.base, in_tokens)
         self.assertIs(in_tokens.base, None)
