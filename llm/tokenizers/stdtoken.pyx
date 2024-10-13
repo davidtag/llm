@@ -9,8 +9,8 @@ cdef uint32_t TOKEN_VALUE_UBOUND = 1_000_000
 cdef class TokenPair:
     """Stores an immutable pair of tokens.
 
-    Requires about 1/2 as much memory and runs in 1/2 the time when constructing and
-    storing these objects in a Python dict, as compared to a regular tuple of 2 integers.
+    An instance of this type occupies 32 bytes of memory, compared to 56 bytes for a tuple
+    of two ints.
     """
 
     def __cinit__(

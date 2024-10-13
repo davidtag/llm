@@ -1,6 +1,6 @@
 """Cython data types for handling tokenization."""
 
-from libc.stdint cimport uint32_t, int32_t
+from libc.stdint cimport uint32_t, int32_t, uint64_t
 
 
 ctypedef uint32_t token_t
@@ -13,7 +13,7 @@ cdef uint32_t TOKEN_VALUE_UBOUND
 cdef class TokenPair:
     cdef token_t _first
     cdef token_t _second
-    cdef token_t _unique
+    cdef uint64_t _unique
 
 
 cdef class TokenPairNode:
