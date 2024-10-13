@@ -68,9 +68,18 @@ def get_pairwise_token_frequencies_numpy(
     """Compute the token frequencies using numpy broadcast."""
     freq: defaultdict[TokenPair, int] = defaultdict(int)
 
+    cdef Py_ssize_t n = tokens.shape[0]
+    if n == 0:
+        return freq
+
     # Determine all unique pairs using bit packing
-    y = tokens[:-1] * TOKEN_VALUE_UBOUND + tokens[1:]  # TODO(dtag): Tokens over ~2k will overflow int32
-    unique_values, counts = np.unique(y, return_counts=True)
+    # NOTE: we are essentially doing `buffer = tokens[:-1] * TOKEN_VALUE_UBOUND + tokens[1:]` but avoiding
+    # some extra scratch-space memory and also re-casting to a larger capacity dtype.
+    buffer = np.zeros(n - 1, dtype=np.uint64)
+    np.add(buffer, tokens[:-1], out=buffer)
+    np.multiply(buffer, TOKEN_VALUE_UBOUND, out=buffer)
+    np.add(buffer, tokens[1:], out=buffer)
+    unique_values, counts = np.unique(buffer, return_counts=True)
 
     # Efficiently unpack them
     first_tokens = np.floor_divide(unique_values, TOKEN_VALUE_UBOUND)
@@ -90,12 +99,18 @@ def get_pairwise_token_frequencies_numpy_maxonly(
     """Compute the token frequencies using numpy broadcast, filtered for max-freq only."""
     freq: defaultdict[TokenPair, int] = defaultdict(int)
 
-    if tokens.shape[0] <= 1:
+    cdef Py_ssize_t n = tokens.shape[0]
+    if n <= 1:
         return freq
 
     # Determine all unique pairs using bit packing
-    y = tokens[:-1] * TOKEN_VALUE_UBOUND + tokens[1:]  # TODO(dtag): Tokens over ~2k will overflow int32
-    unique_values, counts = np.unique(y, return_counts=True)
+    # NOTE: we are essentially doing `buffer = tokens[:-1] * TOKEN_VALUE_UBOUND + tokens[1:]` but avoiding
+    # some extra scratch-space memory and also re-casting to a larger capacity dtype.
+    buffer = np.zeros(n - 1, dtype=np.uint64)
+    np.add(buffer, tokens[:-1], out=buffer)
+    np.multiply(buffer, TOKEN_VALUE_UBOUND, out=buffer)
+    np.add(buffer, tokens[1:], out=buffer)
+    unique_values, counts = np.unique(buffer, return_counts=True)
 
     # Determine the max count and all it's occurences
     max_count = np.max(counts)
@@ -188,9 +203,18 @@ def get_pairwise_token_frequencies_and_heap_numpy(
     freq: dict[TokenPair, TokenPairNode] = {}
     heap: list[TokenPairNode] = []
 
+    cdef Py_ssize_t n = tokens.shape[0]
+    if n == 0:
+        return freq, heap
+
     # Determine all unique pairs using bit packing
-    y = tokens[:-1] * TOKEN_VALUE_UBOUND + tokens[1:]  # TODO(dtag): Tokens over ~2k will overflow int32
-    unique_values, counts = np.unique(y, return_counts=True)
+    # NOTE: we are essentially doing `buffer = tokens[:-1] * TOKEN_VALUE_UBOUND + tokens[1:]` but avoiding
+    # some extra scratch-space memory and also re-casting to a larger capacity dtype.
+    buffer = np.zeros(n - 1, dtype=np.uint64)
+    np.add(buffer, tokens[:-1], out=buffer)
+    np.multiply(buffer, TOKEN_VALUE_UBOUND, out=buffer)
+    np.add(buffer, tokens[1:], out=buffer)
+    unique_values, counts = np.unique(buffer, return_counts=True)
 
     # Efficiently unpack them
     first_tokens = np.floor_divide(unique_values, TOKEN_VALUE_UBOUND)

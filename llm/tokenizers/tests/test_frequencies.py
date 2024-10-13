@@ -68,6 +68,19 @@ class FrequencyCommonBaseTest(abc.ABC):
         freq = self._call(tokens)
         self.assertDictEqual(freq, {(9, 9): 7})
 
+    def test_large_token_values(self):
+        """Test that large token values are handled correctly."""
+        tokens = np.array([9_000, 5_000, 40_000, 62_000], dtype=TokenDtype)
+        freq = self._call(tokens)
+        self.assertDictEqual(
+            freq,
+            {
+                (9_000, 5_000): 1,
+                (5_000, 40_000): 1,
+                (40_000, 62_000): 1,
+            },
+        )
+
 
 #########################################################################################
 # Helpers returning full frequencies                                                    #
