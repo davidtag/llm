@@ -5,9 +5,9 @@ import numpy
 setup(
     ext_modules=cythonize(
         [
-            "llm/tokenizers/frequencies.pyx",
-            "llm/tokenizers/merge.pyx",
-            "llm/tokenizers/stdtoken.pyx",
+            "llm/tokenizers/cython/frequencies.pyx",
+            "llm/tokenizers/cython/merge.pyx",
+            "llm/tokenizers/cython/stdtoken.pyx",
         ],
         compiler_directives={
             # "boundscheck": False,

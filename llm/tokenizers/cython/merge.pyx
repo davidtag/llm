@@ -1,6 +1,6 @@
 """Various library methods for performing BPE merge operations."""
 
-from llm.tokenizers.stdtoken cimport token_t, token_sequence_t, TokenPair, TokenPairNode
+from llm.tokenizers.cython.stdtoken cimport token_t, token_sequence_t, TokenPair, TokenPairNode
 
 import heapq
 
@@ -8,7 +8,7 @@ import cython
 import numpy as np
 from numpy.typing import NDArray
 
-from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
+from llm.tokenizers.cython.pytoken import TokenDtype, NumpyTokenSequence
 
 
 def merge(

@@ -7,18 +7,18 @@ import heapq
 
 import numpy as np
 
-from llm.tokenizers.frequencies import (
+from llm.tokenizers.cython.frequencies import (
     get_pairwise_token_frequencies_cython_loop,
     get_pairwise_token_frequencies_and_heap_numpy,
 )
-from llm.tokenizers.merge import (
+from llm.tokenizers.cython.merge import (
     merge,
     merge_inplace,
     merge_inplace_and_update_frequencies,
     merge_inplace_and_update_frequencies_and_heap,
 )
-from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype
-from llm.tokenizers.stdtoken import TokenPair, TokenPairNode
+from llm.tokenizers.cython.pytoken import TokenDtype, MaskedTokenDtype
+from llm.tokenizers.cython.stdtoken import TokenPair, TokenPairNode
 
 
 class TestMerge(unittest.TestCase):
