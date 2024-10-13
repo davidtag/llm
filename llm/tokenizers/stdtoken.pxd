@@ -7,7 +7,7 @@ ctypedef uint32_t token_t
 ctypedef token_t[::1] token_sequence_t  # typed memoryview, in contiguous C-order
 
 
-cdef uint32_t TOKEN_VALUE_UBOUND
+cdef uint64_t TOKEN_VALUE_UBOUND
 
 
 cdef class TokenPair:
