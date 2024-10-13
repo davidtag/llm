@@ -3,7 +3,7 @@
 import numpy as np
 
 from llm.tokenizers.benchmarks.profile import Profile
-from llm.tokenizers.frequencies import (
+from llm.tokenizers.cython.frequencies import (
     get_pairwise_token_frequencies_sequential_pure_python,
     get_pairwise_token_frequencies_from_list,
     get_pairwise_token_frequencies_cython_loop,
@@ -14,7 +14,7 @@ from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_and_heap_numpy,
     get_masked_pairwise_token_frequencies_and_heap_numpy,
 )
-from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype, NumpyTokenSequence
+from llm.tokenizers.cython.pytoken import TokenDtype, MaskedTokenDtype, NumpyTokenSequence
 
 
 def get_masked_pairwise_token_frequencies_and_heap_numpy_wrapped(tokens: NumpyTokenSequence):

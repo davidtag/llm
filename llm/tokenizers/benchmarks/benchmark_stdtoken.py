@@ -6,7 +6,7 @@ import psutil
 import sys
 
 from llm.tokenizers.benchmarks.profile import Profile
-from llm.tokenizers.stdtoken import TokenPair
+from llm.tokenizers.cython.stdtoken import TokenPair
 
 
 NUM_ITEMS = 1_000_000
