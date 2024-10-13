@@ -1,3 +1,4 @@
 numpy>=2.1
 setuptools>=75.1
 Cython>=3.0
+psutil>=6.0.0
