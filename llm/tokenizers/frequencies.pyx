@@ -27,7 +27,25 @@ def get_pairwise_token_frequencies_sequential_pure_python(
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def get_pairwise_token_frequencies_sequential_cython(
+def get_pairwise_token_frequencies_from_list(
+    tokens: List[int],
+) -> defaultdict[TokenPair, int]:
+    """Compute the token frequencies using a sequential scan in Cython."""
+    freq: defaultdict[TokenPair, int] = defaultdict(int)
+
+    cdef Py_ssize_t n = len(tokens)
+    cdef Py_ssize_t i
+
+    for i in range(n - 1):
+        pair = TokenPair(tokens[i], tokens[i + 1])
+        freq[pair] += 1
+
+    return freq
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def get_pairwise_token_frequencies_sequential_cython(  # TODO(dtag): remove _sequential from name
     token_sequence_t tokens,
 ) -> defaultdict[TokenPair, int]:
     """Compute the token frequencies using a sequential scan in Cython."""
@@ -41,7 +59,7 @@ def get_pairwise_token_frequencies_sequential_cython(
     for i in range(n - 1):
         token_1 = tokens[i]
         token_2 = tokens[i + 1]
-        pair = TokenPair(token_1, token_2)
+        pair = TokenPair(token_1, token_2)  # TODO(dtag): Construct directly instead of creating loop vars
         freq[pair] += 1
 
     return freq

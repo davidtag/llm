@@ -9,6 +9,7 @@ import numpy as np
 
 from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_sequential_pure_python,
+    get_pairwise_token_frequencies_from_list,
     get_pairwise_token_frequencies_sequential_cython,
     get_pairwise_token_frequencies_numpy,
     get_pairwise_token_frequencies_numpy_maxonly,
@@ -104,6 +105,14 @@ class TestSequentialPurePython(AllFrequencyBaseTest, unittest.TestCase):
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
         return get_pairwise_token_frequencies_sequential_pure_python(tokens)
+
+
+class TestFromList(AllFrequencyBaseTest, unittest.TestCase):
+    """Unit tests for get_pairwise_token_frequencies_from_list()."""
+
+    def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
+        freq = get_pairwise_token_frequencies_from_list(tokens)
+        return self._convert_token_pair_dict_to_tuple_dict(freq)
 
 
 class TestSequentialCython(AllFrequencyBaseTest, unittest.TestCase):

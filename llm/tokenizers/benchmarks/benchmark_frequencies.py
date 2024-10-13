@@ -5,6 +5,7 @@ import numpy as np
 from llm.tokenizers.benchmarks.profile import Profile
 from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_sequential_pure_python,
+    get_pairwise_token_frequencies_from_list,
     get_pairwise_token_frequencies_sequential_cython,
     get_pairwise_token_frequencies_numpy,
     get_pairwise_token_frequencies_numpy_maxonly,
@@ -22,6 +23,7 @@ def main() -> None:
     num_runs = 10
     methods = [
         get_pairwise_token_frequencies_sequential_pure_python,
+        get_pairwise_token_frequencies_from_list,
         get_pairwise_token_frequencies_sequential_cython,
         get_pairwise_token_frequencies_numpy,
         get_pairwise_token_frequencies_numpy_maxonly,
