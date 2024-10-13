@@ -15,7 +15,10 @@ from llm.tokenizers.frequencies import (
     get_pairwise_token_frequencies_from_list,
     get_masked_pairwise_token_frequencies_and_heap_numpy,
 )
-from llm.tokenizers.merge import merge_inplace_and_update_frequencies_and_heap
+from llm.tokenizers.merge import (
+    merge,
+    merge_inplace_and_update_frequencies_and_heap,
+)
 from llm.tokenizers.stdtoken import TokenPair
 from llm.tokenizers.pytoken import TokenDtype, MaskedTokenDtype, NumpyMaskedTokenSequence
 
@@ -162,31 +165,6 @@ def _convert_vocabulary_to_piece_cache(vocab: Vocabulary) -> PieceCache:
 def _convert_merges_list_to_merges_dict(merges: MergeList) -> MergeDict:
     merges_dict = {token_pair: replacement_token for token_pair, replacement_token in merges}
     return merges_dict
-
-
-def merge(  # TODO(dtag): Move to merge.pyx
-    tokens: list[int],
-    pair: TokenPair,
-    replacement: int,
-) -> list[int]:
-    """Replace all occurences of `pair` with `replacement`.
-
-    Returns:
-        A new list with all possible replacements performed.
-    """
-    output_tokens = []
-    n = len(tokens)
-    i = 0
-
-    while i < n:
-        if i < n - 1 and tokens[i] == pair.first and tokens[i + 1] == pair.second:
-            output_tokens.append(replacement)
-            i += 2
-        else:
-            output_tokens.append(tokens[i])
-            i += 1
-
-    return output_tokens
 
 
 def _bpe(tokens: list[int], merges_dict: MergeDict) -> list[int]:

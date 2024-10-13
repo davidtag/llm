@@ -11,7 +11,35 @@ from numpy.typing import NDArray
 from llm.tokenizers.pytoken import TokenDtype, NumpyTokenSequence
 
 
-# TODO(dtag): Add a Pure-Python  & Cython merge operation that are not in-place
+def merge(
+    tokens: list[int],
+    pair: TokenPair,
+    replacement: int,
+) -> list[int]:
+    """Replace all occurences of `pair` with `replacement`.
+
+    Returns:
+        A new list with all possible replacements performed.
+    """
+    output_tokens = []
+
+    cdef Py_ssize_t n = len(tokens)
+    cdef Py_ssize_t read_index = 0
+
+    while read_index < n:
+        if (
+            read_index < n - 1
+            and tokens[read_index] == pair.first
+            and tokens[read_index + 1] == pair.second
+        ):
+            output_tokens.append(replacement)
+            read_index += 2
+        else:
+            output_tokens.append(tokens[read_index])
+            read_index += 1
+
+    return output_tokens
+
 
 @cython.nogil
 @cython.boundscheck(False)
