@@ -176,7 +176,8 @@ def merge_inplace_and_update_frequencies(
 
     Additionally, update `frequencies` to reflect the merges performed
 
-    Returns: the new effective size of `tokens`
+    Returns:
+        A view into the original array with replaced tokens and updated length.
     """
     prefix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
     suffix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
@@ -265,7 +266,8 @@ def merge_inplace_and_update_frequencies_and_heap(
 
     Additionally, update `frequencies` and `heap` to reflect the merges performed
 
-    Returns: the new effective size of `tokens`
+    Returns:
+        A view into the original array with replaced tokens and updated length.
     """
     # TODO(dtag): static initialize these initialize these and pass-in for better memory efficiency and latency
     prefix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
