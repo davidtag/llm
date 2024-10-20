@@ -4,7 +4,7 @@ from llm.tokenizers.cython.stdtoken cimport token_t, token_sequence_t, TokenPair
 
 from collections import defaultdict
 import heapq
-from typing import Tuple
+from typing import Sequence
 
 import cython
 import numpy as np
@@ -14,9 +14,9 @@ from llm.tokenizers.cython.pytoken import NumpyTokenSequence, NumpyMaskedTokenSe
 
 def get_pairwise_token_frequencies_sequential_pure_python(
     tokens: Sequence[int],
-) -> defaultdict[Tuple[int, int], int]:
+) -> defaultdict[tuple[int, int], int]:
     """Compute the token frequencies using a sequential scan in pure-Python."""
-    freq: defaultdict[Tuple[int, int], int] = defaultdict(int)
+    freq: defaultdict[tuple[int, int], int] = defaultdict(int)
 
     for token_1, token_2 in zip(tokens[:-1], tokens[1:], strict=True):
         pair = (token_1, token_2)
@@ -25,10 +25,11 @@ def get_pairwise_token_frequencies_sequential_pure_python(
     return freq
 
 
+# TODO(dtag): nogil?
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def get_pairwise_tokens(  # TODO(dtag): Add unit tests
-    tokens: List[int],
+    tokens: list[int],
 ) -> set[TokenPair]:
     """Compute the unique neighboring token pairs."""
     pairs = set()
@@ -46,7 +47,7 @@ def get_pairwise_tokens(  # TODO(dtag): Add unit tests
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def get_pairwise_token_frequencies_from_list(
-    tokens: List[int],
+    tokens: list[int],
 ) -> defaultdict[TokenPair, int]:
     """Compute the token frequencies using a sequential scan in Cython."""
     freq: defaultdict[TokenPair, int] = defaultdict(int)

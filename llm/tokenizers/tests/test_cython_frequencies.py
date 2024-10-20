@@ -109,7 +109,7 @@ class AllFrequencyBaseTest(FrequencyCommonBaseTest):
     def test_random_sequence(self) -> None:
         """Test implementation parity with naive version on a random sequence."""
         tokens = np.random.randint(low=0, high=1000, size=10_000).astype(TokenDtype)
-        ground_truth = get_pairwise_token_frequencies_sequential_pure_python(tokens)
+        ground_truth = get_pairwise_token_frequencies_sequential_pure_python(tokens.tolist())
         freq = self._call(tokens)
         self.assertDictEqual(freq, ground_truth)
 
@@ -118,14 +118,14 @@ class TestSequentialPurePython(AllFrequencyBaseTest, unittest.TestCase):
     """Unit tests for get_pairwise_token_frequencies_sequential_pure_python()."""
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
-        return get_pairwise_token_frequencies_sequential_pure_python(tokens)
+        return get_pairwise_token_frequencies_sequential_pure_python(tokens.tolist())
 
 
 class TestFromList(AllFrequencyBaseTest, unittest.TestCase):
     """Unit tests for get_pairwise_token_frequencies_from_list()."""
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
-        freq = get_pairwise_token_frequencies_from_list(tokens)
+        freq = get_pairwise_token_frequencies_from_list(tokens.tolist())
         return self._convert_token_pair_dict_to_tuple_dict(freq)
 
 
@@ -133,7 +133,7 @@ class TestSequentialCython(AllFrequencyBaseTest, unittest.TestCase):
     """Unit tests for get_pairwise_token_frequencies_cython_loop()."""
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
-        freq = get_pairwise_token_frequencies_cython_loop(tokens)
+        freq = get_pairwise_token_frequencies_cython_loop(memoryview(tokens))
         return self._convert_token_pair_dict_to_tuple_dict(freq)
 
 
@@ -213,7 +213,7 @@ class TestMaskedNumpyWithHeap(AllFrequencyBaseTest, unittest.TestCase):
 
     def _call(self, tokens: NumpyTokenSequence) -> Mapping[Tuple[int, int], int]:
         pair_to_node, _ = get_masked_pairwise_token_frequencies_and_heap_numpy(
-            tokens,
+            tokens.astype(MaskedTokenDtype),
             np.array([], dtype=MaskedTokenDtype),
         )
         freq = {}
@@ -297,7 +297,7 @@ class MaxOnlyFrequencyBaseTest(FrequencyCommonBaseTest):
     def test_random_sequence(self) -> None:
         """Test implementation parity with naive version on a random sequence."""
         tokens = np.random.randint(low=0, high=1000, size=10_000).astype(TokenDtype)
-        all_pairs = get_pairwise_token_frequencies_sequential_pure_python(tokens)
+        all_pairs = get_pairwise_token_frequencies_sequential_pure_python(tokens.tolist())
         max_val = max(all_pairs.values())
         ground_truth = {key: val for key, val in all_pairs.items() if val == max_val}
         freq = self._call(tokens)
