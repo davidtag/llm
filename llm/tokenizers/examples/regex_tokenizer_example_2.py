@@ -39,6 +39,9 @@ def train():
 def test():
     tokenizer = RegexTokenizer.load(Path("out/"))
     print(len(tokenizer.trained_cache), len(tokenizer.runtime_cache))
+
+    print()
+    print("-- Basic Test ------------------------------------------------------")
     _input = "hello world!!!? (안녕하세요!) lol123 😉"
     print(f"{_input=}")
     tokens = tokenizer.encode(_input)
@@ -47,6 +50,8 @@ def test():
     print(f"{_output=}")
     assert _input == _output
 
+    print()
+    print("-- Large Test ------------------------------------------------------")
     _, val_text = _load_train_test_split(file_path="data/blob/t8.shakespeare.txt")
     with Profile() as prof:
         tokens = tokenizer.encode(val_text)
@@ -58,6 +63,7 @@ def test():
     assert len(val_out) == len(val_text)
     assert val_out == val_text
 
+    print()
     print(len(tokenizer.trained_cache), len(tokenizer.runtime_cache))
 
 
