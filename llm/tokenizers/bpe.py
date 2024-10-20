@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 import unicodedata
 
+from llm.tokenizers.cython import bpe as _bpe_internal
 from llm.tokenizers.cython.frequencies import get_pairwise_tokens
 from llm.tokenizers.cython.merge import merge
 from llm.tokenizers.cython.stdtoken import TokenPair
@@ -87,9 +88,9 @@ def encode_piece(piece: str, merge_dict: MergeDict) -> list[int]:
 
 def decode_bytes(tokens: list[int], vocab: Vocabulary) -> bytes:
     """Decode a list of tokens into bytes."""
-    # TODO(dtag): Speed this up in Cython by pre-allocating the correct byte size and
-    # using C loops instead of Python loops.
-    return b"".join(vocab[token] for token in tokens)
+    # Equivalent but slower:
+    #   return b"".join(vocab[token] for token in tokens)
+    return _bpe_internal.decode_bytes(tokens, vocab)
 
 
 def _replace_control_characters(s: str) -> str:
