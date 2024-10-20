@@ -33,7 +33,7 @@ class RegexTokenizer:
         self.split_pattern = split_pattern
         self.pattern = regex.compile(split_pattern)
         self.merge_dict = bpe.convert_merge_list_to_merge_dict(self.merge_list)
-        self.vocab = bpe.convert_merge_list_to_vocab(self.merge_list)
+        self.vocab = bpe.convert_merge_list_to_vocabulary(self.merge_list)
         self.trained_cache = bpe.convert_vocabulary_to_piece_cache(self.vocab)
         self.runtime_cache: bpe.PieceCache = {}  # TODO(dtag): Convert to LRU
 

@@ -31,7 +31,7 @@ def convert_merge_list_to_merge_dict(merge_list: MergeList) -> MergeDict:
     return merge_dict
 
 
-def convert_merge_list_to_vocab(merge_list: MergeList) -> Vocabulary:
+def convert_merge_list_to_vocabulary(merge_list: MergeList) -> Vocabulary:
     """Convert an ordered list of merge rules to a token vocabulary."""
     vocab_size = 256 + len(merge_list)
     vocab: Vocabulary = [b"" for _ in range(vocab_size)]
