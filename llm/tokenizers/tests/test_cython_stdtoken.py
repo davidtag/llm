@@ -19,9 +19,9 @@ class TestTokenPair(unittest.TestCase):
         """Test that the data type is immutable."""
         pair = TokenPair(100, 200)
         with self.assertRaises(AttributeError):
-            pair.first = 300
+            pair.first = 300  # type: ignore
         with self.assertRaises(AttributeError):
-            pair.second = 300
+            pair.second = 300  # type: ignore
 
     def test_eq(self) -> None:
         """Test the equality operator."""
@@ -121,9 +121,9 @@ class TestTokenPairNode(unittest.TestCase):
         """Test that certain fields are immutable while others aren't."""
         node = TokenPairNode(100, 200, count=13)
         with self.assertRaises(AttributeError):
-            node.first = 300
+            node.first = 300  # type: ignore
         with self.assertRaises(AttributeError):
-            node.second = 300
+            node.second = 300  # type: ignore
 
         self.assertEqual(node.count, 13)
         node.count = 40
@@ -165,7 +165,7 @@ class TestTokenPairNode(unittest.TestCase):
         with self.assertRaises(TypeError):
             _ = set([node])
         with self.assertRaises(TypeError):
-            _ = {node: 1}
+            _ = {node: 1}  # type: ignore
 
     def test_lt_by_count(self) -> None:
         """Test that nodes with higher count are ordered first."""
