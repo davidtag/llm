@@ -8,6 +8,7 @@ import unittest
 import numpy as np
 
 from llm.tokenizers.cython.frequencies import (
+    get_pairwise_tokens,
     get_pairwise_token_frequencies_sequential_pure_python,
     get_pairwise_token_frequencies_from_list,
     get_pairwise_token_frequencies_cython_loop,
@@ -20,6 +21,41 @@ from llm.tokenizers.cython.frequencies import (
 )
 from llm.tokenizers.cython.pytoken import TokenDtype, NumpyTokenSequence, MaskedTokenDtype
 from llm.tokenizers.cython.stdtoken import TokenPair
+
+
+class TestGetPairwiseTokens(unittest.TestCase):
+    """Unit tests for get_pairwise_tokens()."""
+
+    def test_empty_input(self) -> None:
+        pairs = get_pairwise_tokens([])
+        self.assertSetEqual(pairs, set())
+
+    def test_single_token(self) -> None:
+        pairs = get_pairwise_tokens([13])
+        self.assertSetEqual(pairs, set())
+
+    def test_two_tokens(self) -> None:
+        pairs = get_pairwise_tokens([13, 14])
+        self.assertSetEqual(pairs, {TokenPair(13, 14)})
+
+    def test_three_tokens(self) -> None:
+        pairs = get_pairwise_tokens([13, 14, 15])
+        self.assertSetEqual(pairs, {TokenPair(13, 14), TokenPair(14, 15)})
+
+    def test_repeated_tokens(self) -> None:
+        pairs = get_pairwise_tokens([13, 13, 13, 13, 13, 13, 13, 13, 13, 13])
+        self.assertSetEqual(pairs, {TokenPair(13, 13)})
+
+    def test_large_token_values(self) -> None:
+        pairs = get_pairwise_tokens([9_000, 5_000, 40_000, 62_000])
+        self.assertSetEqual(
+            pairs,
+            {
+                TokenPair(9_000, 5_000),
+                TokenPair(5_000, 40_000),
+                TokenPair(40_000, 62_000),
+            },
+        )
 
 
 #########################################################################################
@@ -69,7 +105,7 @@ class FrequencyCommonBaseTest(abc.ABC):
         freq = self._call(tokens)
         self.assertDictEqual(freq, {(9, 9): 7})
 
-    def test_large_token_values(self):
+    def test_large_token_values(self) -> None:
         """Test that large token values are handled correctly."""
         tokens = np.array([9_000, 5_000, 40_000, 62_000], dtype=TokenDtype)
         freq = self._call(tokens)
