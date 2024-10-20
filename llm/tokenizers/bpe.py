@@ -38,7 +38,7 @@ def convert_merge_list_to_vocab(merge_list: MergeList) -> Vocabulary:
     vocab: Vocabulary = [b"" for _ in range(vocab_size)]
 
     for i in range(256):  # base tokens : 1-byte code points
-        vocab[i] = chr(i).encode("utf-8")
+        vocab[i] = bytes([i])
 
     for token_pair, replacement_token in merge_list:  # tokens minted during training
         vocab[replacement_token] = vocab[token_pair.first] + vocab[token_pair.second]

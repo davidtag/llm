@@ -39,11 +39,12 @@ def train():
 def test():
     tokenizer = RegexTokenizer.load(Path("out/"))
     print(len(tokenizer.trained_cache), len(tokenizer.runtime_cache))
-    _input = "This is my string"  # "hello world!!!? (안녕하세요!) lol123 😉"
+    _input = "hello world!!!? (안녕하세요!) lol123 😉"
+    print(f"{_input=}")
     tokens = tokenizer.encode(_input)
-    print(tokens)
+    print(f"{tokens=}")
     _output = tokenizer.decode(tokens)
-    print(_output)
+    print(f"{_output=}")
     assert _input == _output
 
     _, val_text = _load_train_test_split(file_path="data/blob/t8.shakespeare.txt")
