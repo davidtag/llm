@@ -10,6 +10,8 @@ no dependencies other than the `regex` library, and supports training.
 # TODO
 
 - Tokenizer (enc, dec, train)
+    - Add unit tests for bpe.pyx
+    - Add unit tests for RegexTokenizer
     - Create a Tokenizer class that uses regex-style logic
         - Add runner scripts
             - train model
