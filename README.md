@@ -4,18 +4,17 @@ Ground-up implementation of LLMs with NumPy as the only dependency.
 The purpose of this repo is educational - explore the main concepts of LLMs without relying on
 3rd party packages for the heavy lifting. In particular, the computation of gradients (i.e., the
 "backward pass") is done manually, instead of relying on autograd systems, like the ones in
-PyTorch or Tensorflow.
+PyTorch or Tensorflow. The Byte-Pair Encoding (BPE) algorithm is also manually implemented with
+no dependencies other than the `regex` library, and supports training.
 
 # TODO
 
 - Tokenizer (enc, dec, train)
-    - Implement a bpe.py module with:
-        - Data types for merges / vocab
-        - Helpers for byte_pair_encode() and decode() and decode_bytes()
     - Create a Tokenizer class that uses regex-style logic
-        - Ability to train and export a model file (have a runner script)
-        - Ability to train a piece cache -- as part of regular runner, or with separate text
-        - Registry for model files and ability to load them from disk
+        - Add runner scripts
+            - train model
+            - train piece cache: as part of regular runner, or with separate text
+        - Registry for model files and ability to load them from disk (include gpt-4 and o-1 encoders)
     - Add support for special tokens
 - Develop a simple Embedding class and refactor TextEmbedding to use 2 of them (token + position)
 - Diagnose FeedForward training after 1 iter
