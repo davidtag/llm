@@ -27,6 +27,24 @@ def get_pairwise_token_frequencies_sequential_pure_python(
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
+def get_pairwise_tokens(  # TODO(dtag): Add unit tests
+    tokens: List[int],
+) -> set[TokenPair]:
+    """Compute the unique neighboring token pairs."""
+    pairs = set()
+
+    cdef Py_ssize_t n = len(tokens)
+    cdef Py_ssize_t i
+
+    for i in range(n - 1):
+        pair = TokenPair(tokens[i], tokens[i + 1])
+        pairs.add(pair)
+
+    return pairs
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def get_pairwise_token_frequencies_from_list(
     tokens: List[int],
 ) -> defaultdict[TokenPair, int]:
