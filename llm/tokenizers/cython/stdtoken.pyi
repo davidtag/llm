@@ -1,3 +1,5 @@
+"""Cython data types for handling tokenization."""
+
 class TokenPair:
     """Stores an immutable pair of tokens."""
 
