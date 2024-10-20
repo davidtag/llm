@@ -17,10 +17,15 @@ from llm.tokenizers.cython.frequencies import (
 from llm.tokenizers.cython.pytoken import TokenDtype, MaskedTokenDtype, NumpyTokenSequence
 
 
+def get_pairwise_token_frequencies_from_list_wrapped(tokens: NumpyTokenSequence):
+    """Call the underlying method with a list conversion."""
+    return get_pairwise_token_frequencies_from_list(tokens.tolist())
+
+
 def get_masked_pairwise_token_frequencies_and_heap_numpy_wrapped(tokens: NumpyTokenSequence):
     """Call the underlying method with no masked positions."""
     return get_masked_pairwise_token_frequencies_and_heap_numpy(
-        tokens,
+        tokens.astype(dtype=MaskedTokenDtype),
         masked_positions=np.array([], dtype=MaskedTokenDtype),
     )
 
@@ -32,7 +37,7 @@ def main() -> None:
     num_runs = 10
     methods = [
         get_pairwise_token_frequencies_sequential_pure_python,
-        get_pairwise_token_frequencies_from_list,
+        get_pairwise_token_frequencies_from_list_wrapped,
         get_pairwise_token_frequencies_cython_loop,
         get_pairwise_token_frequencies_numpy,
         get_pairwise_token_frequencies_numpy_maxonly,
