@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import tiktoken
+
 from llm.tokenizers.benchmarks.profile import Profile
 from llm.tokenizers.regex_tokenizer import RegexTokenizer
 
@@ -53,12 +55,28 @@ def test():
     print()
     print("-- Large Test ------------------------------------------------------")
     _, val_text = _load_train_test_split(file_path="data/blob/t8.shakespeare.txt")
+
+    print("Encoding...")
     with Profile() as prof:
         tokens = tokenizer.encode(val_text)
     print(f"  val_text={len(val_text):,} -> tokens={len(tokens):,}: elapsed={prof.milliseconds_formatted}")
 
+    print("Decoding...")
     with Profile() as prof:
         val_out = tokenizer.decode(tokens)
+    print(f"  tokens={len(tokens):,} -> val_out={len(val_out):,}: elapsed={prof.milliseconds_formatted}")
+    assert len(val_out) == len(val_text)
+    assert val_out == val_text
+
+    print("Encodig with tiktoken...")
+    enc = tiktoken.get_encoding("cl100k_base")
+    with Profile() as prof:
+        tokens = enc.encode(val_text)
+    print(f"  val_text={len(val_text):,} -> tokens={len(tokens):,}: elapsed={prof.milliseconds_formatted}")
+
+    print("Decoding with tiktoken...")
+    with Profile() as prof:
+        val_out = enc.decode(tokens)
     print(f"  tokens={len(tokens):,} -> val_out={len(val_out):,}: elapsed={prof.milliseconds_formatted}")
     assert len(val_out) == len(val_text)
     assert val_out == val_text
