@@ -10,6 +10,7 @@ def decode_bytes(tokens: list[int], vocab: list[bytes]) -> bytes:
 
     cdef Py_ssize_t n = len(tokens)
     cdef Py_ssize_t i = 0
+    cdef Py_ssize_t token
 
     buffer = bytearray()
 
