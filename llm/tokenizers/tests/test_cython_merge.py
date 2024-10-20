@@ -137,7 +137,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
     def test_empty_input(self) -> None:
         """Test with an empty input."""
         in_tokens = np.array([], dtype=TokenDtype)
-        frequencies = {}
+        frequencies = defaultdict[TokenPair, int](int)
         out_tokens = merge_inplace_and_update_frequencies(
             in_tokens,
             0,
@@ -155,7 +155,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
     def test_single_token(self) -> None:
         """Test with a single token input."""
         in_tokens = np.array([13], dtype=TokenDtype)
-        frequencies = {}
+        frequencies = defaultdict[TokenPair, int](int)
         out_tokens = merge_inplace_and_update_frequencies(
             in_tokens,
             0,
@@ -337,7 +337,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
     def test_random_sequence(self) -> None:
         """Test implementation parity with naive version on a random sequence."""
         tokens = np.random.randint(low=0, high=100, size=10_000).astype(TokenDtype)
-        frequencies = get_pairwise_token_frequencies_cython_loop(tokens)
+        frequencies = get_pairwise_token_frequencies_cython_loop(memoryview(tokens))
         initial_length = len(frequencies)
         max_freq_pair = max(frequencies.keys(), key=lambda pair: frequencies[pair])
         out_tokens = merge_inplace_and_update_frequencies(
@@ -352,7 +352,7 @@ class TestMergeInPlaceAndUpdateFrequencies(unittest.TestCase):
         self.assertNotEqual(initial_length, final_length)
         cleaned_frequencies = {key: val for key, val in frequencies.items() if val != 0}
 
-        post_frequencies = get_pairwise_token_frequencies_cython_loop(out_tokens)
+        post_frequencies = get_pairwise_token_frequencies_cython_loop(memoryview(out_tokens))
         self.assertDictEqual(cleaned_frequencies, post_frequencies)
 
 
