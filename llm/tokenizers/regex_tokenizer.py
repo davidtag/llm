@@ -293,7 +293,7 @@ class RegexTokenizer:
         return piece_cache
 
     ######################################
-    # Private Methods: training
+    # Private Methods: for training
     ######################################
 
     @staticmethod
