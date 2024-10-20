@@ -1,10 +1,10 @@
 """Utilities for implementing the Byte-Pair Encoding (BPE) algorithm."""
 
-from llm.tokenizers.cython.frequencies import get_pairwise_tokens  # TODO(dtag): Add pxd so I can cimport
-from llm.tokenizers.cython.merge import merge  # TODO(dtag): Add pxd so I can cimport
-from llm.tokenizers.cython.stdtoken cimport TokenPair
-
 import cython
+
+from llm.tokenizers.cython.frequencies import get_pairwise_tokens
+from llm.tokenizers.cython.merge import merge
+from llm.tokenizers.cython.stdtoken import TokenPair
 
 
 def encode_tokens(tokens: list[int], merge_dict: dict[TokenPair, int]) -> list[int]:
