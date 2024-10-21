@@ -37,6 +37,10 @@ class RegexTokenizer:
         self.trained_cache = bpe.convert_vocabulary_to_piece_cache(self.vocab)
         self.runtime_cache: bpe.PieceCache = {}  # TODO(dtag): Convert to LRU
 
+    @property
+    def vocab_size(self) -> int:
+        return len(self.vocab)
+
     ######################################
     # Encoding
     ######################################
