@@ -27,18 +27,8 @@ no dependencies other than the `regex` library, and supports training.
         # See Karpathy's "Building makemore part3", 1:07:00
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
 - Support in-memory parameter dumping and loading: get_params() -> dict, set_params(dict)
-    - Linear
-    - FeedForward
-    - LayerNorm
-    - MultiHeadAttention
-    - Block
-    - BlockStack
     - Embedding
     - Transformer
-    # {
-    #   "layer_1": {"w": ..., "b": ...},
-    #   "norm_1": {"gamma": ..., "beta": ...}
-    # }
 - Support on-disk model dumping and loading (factory method): dump_model(file), load_model(file)
     - Transformer (parameters + settings)
 - Create virtual env and helper scripts
