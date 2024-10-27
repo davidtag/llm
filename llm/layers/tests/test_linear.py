@@ -1,10 +1,12 @@
 """Unit tests for linear.py."""
 
+import operator
 import unittest
 
 import numpy as np
 
 from llm.layers.linear import Linear
+from llm.constants import DEFAULT_DTYPE
 
 
 class TestLinear(unittest.TestCase):
@@ -28,6 +30,47 @@ class TestLinear(unittest.TestCase):
 
         model = Linear(n_input=50, n_output=73)
         self.assertEqual(model.n_params, 50 * 73 + 73)
+
+    def test_get_parameters(self) -> None:
+        """Test the get_parameters() method."""
+        model = Linear(n_input=3, n_output=5)
+        params = model.get_parameters()
+        self.assertSetEqual(set(params.keys()), {"w", "b"})
+        w = params["w"]
+        b = params["b"]
+        assert isinstance(w, np.ndarray)
+        assert isinstance(b, np.ndarray)
+        self.assertEqual(w.shape, (3, 5))
+        self.assertEqual(b.shape, (1, 5))
+        self.assertEqual(w.dtype, DEFAULT_DTYPE)
+        self.assertEqual(b.dtype, DEFAULT_DTYPE)
+
+    def test_load_parameters(self) -> None:
+        """Test the load_paramters() method."""
+        model = Linear(n_input=3, n_output=5)
+        out1 = model.forward(self.data)
+
+        w_new = np.zeros((3, 5), dtype=DEFAULT_DTYPE)
+        b_new = np.zeros((1, 5), dtype=DEFAULT_DTYPE)
+        params = {
+            "w": w_new,
+            "b": b_new,
+        }
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_compare(operator.__ne__, out1, out2)
+
+    def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
+        """Test that the return value of get_parameters() can be loaded."""
+        model = Linear(n_input=3, n_output=5)
+        out1 = model.forward(self.data)
+
+        params = model.get_parameters()
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_equal(out1, out2)
 
     def test_forward(self) -> None:
         """Test the forward pass."""

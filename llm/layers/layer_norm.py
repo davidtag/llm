@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DType, DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.optimizers import Optimizer
 
 
@@ -37,6 +37,23 @@ class LayerNorm:
     def n_params(self) -> int:
         """The number of parameters in the layer."""
         return self.gamma.size + self.beta.size
+
+    def get_parameters(self) -> Parameters:
+        """Return the parameter map for the layer."""
+        params = {
+            "gamma": self.gamma,
+            "beta": self.beta,
+        }
+        return params
+
+    def load_parameters(self, params: Parameters) -> None:
+        """Set the parameters."""
+        if "gamma" not in params or "beta" not in params:
+            raise ValueError("Missing parameters")
+        if not isinstance(params["gamma"], BaseParameter) or not isinstance(params["beta"], BaseParameter):
+            raise ValueError("Invalid shape for parameters map")
+        self.gamma = params["gamma"]
+        self.beta = params["beta"]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

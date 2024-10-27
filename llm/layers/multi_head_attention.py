@@ -5,7 +5,7 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DType, DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 
@@ -51,6 +51,32 @@ class MultiHeadAttention:
     def n_params(self) -> int:
         """The number of parameters in the layer."""
         return self.w_q.size + self.w_k.size + self.w_v.size + self.w_o.size
+
+    def get_parameters(self) -> Parameters:
+        """Return the parameter map for the layer."""
+        params = {
+            "w_q": self.w_q,
+            "w_k": self.w_k,
+            "w_v": self.w_v,
+            "w_o": self.w_o,
+        }
+        return params
+
+    def load_parameters(self, params: Parameters) -> None:
+        """Set the parameters."""
+        if "w_q" not in params or "w_k" not in params or "w_v" not in params or "w_o" not in params:
+            raise ValueError("Missing parameters")
+        if (
+            not isinstance(params["w_q"], BaseParameter)
+            or not isinstance(params["w_k"], BaseParameter)
+            or not isinstance(params["w_v"], BaseParameter)
+            or not isinstance(params["w_o"], BaseParameter)
+        ):
+            raise ValueError("Invalid shape for parameters map")
+        self.w_q = params["w_q"]
+        self.w_k = params["w_k"]
+        self.w_v = params["w_v"]
+        self.w_o = params["w_o"]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

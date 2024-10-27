@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DType, DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.layers.linear import Linear
 from llm.optimizers import Optimizer
 from llm.utils.math import relu
@@ -50,6 +50,23 @@ class FeedForward:
     def n_params(self) -> int:
         """The number of parameters in the layer."""
         return self.layer_1.n_params + self.layer_2.n_params
+
+    def get_parameters(self) -> Parameters:
+        """Return the parameter map for the layer."""
+        params = {
+            "layer_1": self.layer_1.get_parameters(),
+            "layer_2": self.layer_2.get_parameters(),
+        }
+        return params
+
+    def load_parameters(self, params: Parameters) -> None:
+        """Set the parameters."""
+        if "layer_1" not in params or "layer_2" not in params:
+            raise ValueError("Missing parameters")
+        if isinstance(params["layer_1"], BaseParameter) or isinstance(params["layer_2"], BaseParameter):
+            raise ValueError("Invalid shape for parameters map")
+        self.layer_1.load_parameters(params["layer_1"])
+        self.layer_2.load_parameters(params["layer_2"])
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

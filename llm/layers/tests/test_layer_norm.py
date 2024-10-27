@@ -1,9 +1,11 @@
 """Unit tests for layer_norm.py."""
 
+import operator
 import unittest
 
 import numpy as np
 
+from llm.constants import DEFAULT_DTYPE
 from llm.layers.layer_norm import LayerNorm
 
 
@@ -28,6 +30,47 @@ class TestLayerNorm(unittest.TestCase):
 
         model = LayerNorm(n_input=32)
         self.assertEqual(model.n_params, 32 + 32)
+
+    def test_get_parameters(self) -> None:
+        """Test the get_parameters() method."""
+        model = LayerNorm(n_input=3)
+        params = model.get_parameters()
+        self.assertSetEqual(set(params.keys()), {"gamma", "beta"})
+        gamma = params["gamma"]
+        beta = params["beta"]
+        assert isinstance(gamma, np.ndarray)
+        assert isinstance(beta, np.ndarray)
+        self.assertEqual(gamma.shape, (1, 3))
+        self.assertEqual(beta.shape, (1, 3))
+        self.assertEqual(gamma.dtype, DEFAULT_DTYPE)
+        self.assertEqual(beta.dtype, DEFAULT_DTYPE)
+
+    def test_load_parameters(self) -> None:
+        """Test the load_paramters() method."""
+        model = LayerNorm(n_input=3)
+        out1 = model.forward(self.data)
+
+        gamma_new = np.zeros((1, 3), dtype=DEFAULT_DTYPE)
+        beta_new = np.zeros((1, 3), dtype=DEFAULT_DTYPE)
+        params = {
+            "gamma": gamma_new,
+            "beta": beta_new,
+        }
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_compare(operator.__ne__, out1, out2)
+
+    def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
+        """Test that the return value of get_parameters() can be loaded."""
+        model = LayerNorm(n_input=3)
+        out1 = model.forward(self.data)
+
+        params = model.get_parameters()
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_equal(out1, out2)
 
     def test_forward(self) -> None:
         """Test the forward pass."""

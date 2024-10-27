@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DType, DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.optimizers import Optimizer
 
 
@@ -38,6 +38,23 @@ class Linear:
     def n_params(self) -> int:
         """The number of parameters in the layer."""
         return self.w.size + self.b.size
+
+    def get_parameters(self) -> Parameters:
+        """Return the parameter map for the layer."""
+        params = {
+            "w": self.w,
+            "b": self.b,
+        }
+        return params
+
+    def load_parameters(self, params: Parameters) -> None:
+        """Set the parameters."""
+        if "w" not in params or "b" not in params:
+            raise ValueError("Missing parameters")
+        if not isinstance(params["w"], BaseParameter) or not isinstance(params["b"], BaseParameter):
+            raise ValueError("Invalid shape for parameters map")
+        self.w = params["w"]
+        self.b = params["b"]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

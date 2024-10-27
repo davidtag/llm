@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DType, DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.layers.feed_forward import FeedForward
 from llm.layers.layer_norm import LayerNorm
 from llm.layers.multi_head_attention import MultiHeadAttention
@@ -63,6 +63,37 @@ class Block:
     def n_params(self) -> int:
         """The number of parameters in the layer."""
         return self.norm_1.n_params + self.attention.n_params + self.norm_2.n_params + self.ffn.n_params
+
+    def get_parameters(self) -> Parameters:
+        """Return the parameter map for the layer."""
+        params = {
+            "norm_1": self.norm_1.get_parameters(),
+            "attention": self.attention.get_parameters(),
+            "norm_2": self.norm_2.get_parameters(),
+            "ffn": self.ffn.get_parameters(),
+        }
+        return params
+
+    def load_parameters(self, params: Parameters) -> None:
+        """Set the parameters."""
+        if (
+            "norm_1" not in params
+            or "attention" not in params
+            or "norm_2" not in params
+            or "ffn" not in params
+        ):
+            raise ValueError("Missing parameters")
+        if (
+            isinstance(params["norm_1"], BaseParameter)
+            or isinstance(params["attention"], BaseParameter)
+            or isinstance(params["norm_2"], BaseParameter)
+            or isinstance(params["ffn"], BaseParameter)
+        ):
+            raise ValueError("Invalid shape for parameters map")
+        self.norm_1.load_parameters(params["norm_1"])
+        self.attention.load_parameters(params["attention"])
+        self.norm_2.load_parameters(params["norm_2"])
+        self.ffn.load_parameters(params["ffn"])
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

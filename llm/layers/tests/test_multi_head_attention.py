@@ -1,9 +1,11 @@
 """Unit tests for multi_head_attention.py."""
 
+import operator
 import unittest
 
 import numpy as np
 
+from llm.constants import DEFAULT_DTYPE
 from llm.layers.multi_head_attention import MultiHeadAttention
 
 
@@ -29,6 +31,60 @@ class TestMultiHeadAttention(unittest.TestCase):
 
         model = MultiHeadAttention(d_model=14, d_k=64, d_v=37, h=8)
         self.assertEqual(model.n_params, 8 * 14 * (64 + 64 + 37 + 37))
+
+    def test_get_parameters(self) -> None:
+        """Test the get_parameters() method."""
+        model = MultiHeadAttention(d_model=13, d_k=17, d_v=37, h=7)
+        params = model.get_parameters()
+        self.assertSetEqual(set(params.keys()), {"w_q", "w_k", "w_v", "w_o"})
+        w_q = params["w_q"]
+        w_k = params["w_k"]
+        w_v = params["w_v"]
+        w_o = params["w_o"]
+        assert isinstance(w_q, np.ndarray)
+        assert isinstance(w_k, np.ndarray)
+        assert isinstance(w_v, np.ndarray)
+        assert isinstance(w_o, np.ndarray)
+        self.assertEqual(w_q.shape, (7, 13, 17))
+        self.assertEqual(w_k.shape, (7, 13, 17))
+        self.assertEqual(w_v.shape, (7, 13, 37))
+        self.assertEqual(w_o.shape, (259, 13))
+        self.assertEqual(w_q.dtype, DEFAULT_DTYPE)
+        self.assertEqual(w_k.dtype, DEFAULT_DTYPE)
+        self.assertEqual(w_v.dtype, DEFAULT_DTYPE)
+        self.assertEqual(w_o.dtype, DEFAULT_DTYPE)
+
+    def test_load_parameters(self) -> None:
+        """Test the load_paramters() method."""
+        model = MultiHeadAttention(d_model=3, d_k=13, d_v=17, h=16)
+        out1 = model.forward(self.data)
+
+        w_q = np.zeros((16, 3, 13), dtype=DEFAULT_DTYPE)
+        w_k = np.zeros((16, 3, 13), dtype=DEFAULT_DTYPE)
+        w_v = np.zeros((16, 3, 17), dtype=DEFAULT_DTYPE)
+        w_o = np.zeros((272, 3), dtype=DEFAULT_DTYPE)
+
+        params = {
+            "w_q": w_q,
+            "w_k": w_k,
+            "w_v": w_v,
+            "w_o": w_o,
+        }
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_compare(operator.__ne__, out1, out2)
+
+    def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
+        """Test that the return value of get_parameters() can be loaded."""
+        model = MultiHeadAttention(d_model=3, d_k=13, d_v=17, h=16)
+        out1 = model.forward(self.data)
+
+        params = model.get_parameters()
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_equal(out1, out2)
 
     def test_forward(self) -> None:
         """Test the forward pass."""

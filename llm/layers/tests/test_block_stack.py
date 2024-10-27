@@ -43,6 +43,23 @@ class TestBlockStack(unittest.TestCase):
             ),
         )
 
+    def test_get_parameters(self) -> None:
+        """Test the get_parameters() method."""
+        model = BlockStack(n_blocks=5, d_model=3)
+        params = model.get_parameters()
+        self.assertSetEqual(set(params.keys()), {"block_0", "block_1", "block_2", "block_3", "block_4"})
+
+    def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
+        """Test that the return value of get_parameters() can be loaded."""
+        model = BlockStack(n_blocks=5, d_model=3)
+        out1 = model.forward(self.data)
+
+        params = model.get_parameters()
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_equal(out1, out2)
+
     def test_forward(self) -> None:
         """Test the forward pass."""
         model = BlockStack(n_blocks=5, d_model=3)

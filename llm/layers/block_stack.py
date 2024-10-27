@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DType, DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.layers.block import Block
 from llm.optimizers import Optimizer
 
@@ -57,6 +57,22 @@ class BlockStack:
     def n_params(self) -> int:
         """The number of parameters in the layer."""
         return sum(block.n_params for block in self.blocks)
+
+    def get_parameters(self) -> Parameters:
+        """Return the parameter map for the layer."""
+        params = {f"block_{i}": self.blocks[i].get_parameters() for i in range(self.n_blocks)}
+        return params
+
+    def load_parameters(self, params: Parameters) -> None:
+        """Set the parameters."""
+        for i in range(self.n_blocks):
+            key = f"block_{i}"
+            if key not in params:
+                raise ValueError("Missing parameters")
+            params_i = params[key]
+            if isinstance(params_i, BaseParameter):
+                raise ValueError("Invalid shape for parameters map")
+            self.blocks[i].load_parameters(params_i)
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

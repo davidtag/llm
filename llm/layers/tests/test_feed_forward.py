@@ -35,6 +35,23 @@ class TestFeedForward(unittest.TestCase):
         total_params = layer_1_params + layer_2_params
         self.assertEqual(model.n_params, total_params)
 
+    def test_get_parameters(self) -> None:
+        """Test the get_parameters() method."""
+        model = FeedForward(n_input=3, n_hidden=13, n_output=5)
+        params = model.get_parameters()
+        self.assertSetEqual(set(params.keys()), {"layer_1", "layer_2"})
+
+    def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
+        """Test that the return value of get_parameters() can be loaded."""
+        model = FeedForward(n_input=3, n_hidden=13, n_output=5)
+        out1 = model.forward(self.data)
+
+        params = model.get_parameters()
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_equal(out1, out2)
+
     def test_forward(self) -> None:
         """Test the forward pass."""
         model = FeedForward(n_input=3, n_hidden=13, n_output=5)
