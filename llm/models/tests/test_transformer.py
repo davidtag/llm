@@ -43,6 +43,23 @@ class TestTransformer(unittest.TestCase):
 
         self.assertEqual(self.model.n_params, total_params)
 
+    def test_get_parameters(self) -> None:
+        """Test the get_parameters() method."""
+        params = self.model.get_parameters()
+        self.assertSetEqual(
+            set(params.keys()), {"embedding_layer", "decoder", "final_norm", "unembedding_layer"}
+        )
+
+    def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
+        """Test that the return value of get_parameters() can be loaded."""
+        out1 = self.model.forward(self.data)
+
+        params = self.model.get_parameters()
+
+        self.model.load_parameters(params)
+        out2 = self.model.forward(self.data)
+        np.testing.assert_array_equal(out1, out2)
+
     def test_forward(self) -> None:
         """Test the forward pass."""
         out = self.model.forward(self.data)

@@ -5,16 +5,17 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DType, DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.layers.block_stack import BlockStack
 from llm.layers.linear import Linear
 from llm.layers.layer_norm import LayerNorm
 from llm.layers.text_embedding import TextEmbedding
+from llm.models.base import Model
 from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 
 
-class Transformer:
+class Transformer(Model):
     """A Transformer architecture for sequence processing."""
 
     def __init__(
@@ -32,6 +33,7 @@ class Transformer:
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the model."""
+        super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.vocab_size = vocab_size
         self.context_size = context_size
         self.n_blocks = n_blocks
@@ -40,9 +42,6 @@ class Transformer:
         self.d_v = d_v
         self.h = h
         self.d_ff = d_ff
-        self.dtype = dtype
-        self.enable_grad = enable_grad
-        self.optimizer = optimizer
 
         self.embedding_layer = TextEmbedding(
             vocab_size=vocab_size,
@@ -87,6 +86,37 @@ class Transformer:
             + self.final_norm.n_params
             + self.unembedding_layer.n_params
         )
+
+    def get_parameters(self) -> Parameters:
+        """Return the parameter map for the layer."""
+        params = {
+            "embedding_layer": self.embedding_layer.get_parameters(),
+            "decoder": self.decoder.get_parameters(),
+            "final_norm": self.final_norm.get_parameters(),
+            "unembedding_layer": self.unembedding_layer.get_parameters(),
+        }
+        return params
+
+    def load_parameters(self, params: Parameters) -> None:
+        """Set the parameters."""
+        if (
+            "embedding_layer" not in params
+            or "decoder" not in params
+            or "final_norm" not in params
+            or "unembedding_layer" not in params
+        ):
+            raise ValueError("Missing parameters")
+        if (
+            isinstance(params["embedding_layer"], BaseParameter)
+            or isinstance(params["decoder"], BaseParameter)
+            or isinstance(params["final_norm"], BaseParameter)
+            or isinstance(params["unembedding_layer"], BaseParameter)
+        ):
+            raise ValueError("Invalid shape for parameters map")
+        self.embedding_layer.load_parameters(params["embedding_layer"])
+        self.decoder.load_parameters(params["decoder"])
+        self.final_norm.load_parameters(params["final_norm"])
+        self.unembedding_layer.load_parameters(params["unembedding_layer"])
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
