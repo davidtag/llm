@@ -5,10 +5,11 @@ from typing import Optional
 import numpy as np
 
 from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
+from llm.layers.base import Layer
 from llm.optimizers import Optimizer
 
 
-class Linear:
+class Linear(Layer):
     """Implements a single linear layer with a weight matrix and bias."""
 
     def __init__(
@@ -20,12 +21,9 @@ class Linear:
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the layer."""
+        super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.n_input = n_input
         self.n_output = n_output
-        self.dtype = dtype
-        self.enable_grad = enable_grad
-        self.optimizer = optimizer
-        self.cache = {}
 
         spread = np.sqrt(1 / n_input)
         self.w = np.random.uniform(low=-spread, high=spread, size=(n_input, n_output)).astype(dtype)

@@ -5,10 +5,11 @@ from typing import Optional
 import numpy as np
 
 from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
+from llm.layers.base import Layer
 from llm.optimizers import Optimizer
 
 
-class LayerNorm:
+class LayerNorm(Layer):
     """Implements a single layer normalization."""
 
     def __init__(
@@ -20,12 +21,9 @@ class LayerNorm:
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the layer."""
+        super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.n_input = n_input
         self.eps = eps
-        self.dtype = dtype
-        self.enable_grad = enable_grad
-        self.optimizer = optimizer
-        self.cache = {}
 
         self.gamma = np.ones(shape=(1, n_input), dtype=dtype)
         self.beta = np.zeros(shape=(1, n_input), dtype=dtype)

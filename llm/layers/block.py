@@ -5,13 +5,14 @@ from typing import Optional
 import numpy as np
 
 from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
+from llm.layers.base import Layer
 from llm.layers.feed_forward import FeedForward
 from llm.layers.layer_norm import LayerNorm
 from llm.layers.multi_head_attention import MultiHeadAttention
 from llm.optimizers import Optimizer
 
 
-class Block:
+class Block(Layer):
     """A single block in a Transformer architecture."""
 
     def __init__(
@@ -27,16 +28,13 @@ class Block:
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the block."""
+        super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.d_model = d_model
         self.d_k = d_k
         self.d_v = d_v
         self.h = h
         self.d_ff = d_ff
         self.masked_attention = masked_attention
-        self.dtype = dtype
-        self.enable_grad = enable_grad
-        self.optimizer = optimizer
-        self.cache = {}
 
         self.norm_1 = LayerNorm(n_input=d_model, dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.attention = MultiHeadAttention(

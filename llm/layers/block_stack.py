@@ -5,11 +5,12 @@ from typing import Optional
 import numpy as np
 
 from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
+from llm.layers.base import Layer
 from llm.layers.block import Block
 from llm.optimizers import Optimizer
 
 
-class BlockStack:
+class BlockStack(Layer):
     """A stack of block in a Transformer architecture."""
 
     def __init__(
@@ -26,6 +27,7 @@ class BlockStack:
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the block stack."""
+        super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         assert n_blocks >= 1
         self.n_blocks = n_blocks
         self.d_model = d_model
@@ -33,10 +35,6 @@ class BlockStack:
         self.d_v = d_v
         self.h = h
         self.d_ff = d_ff
-        self.dtype = dtype
-        self.enable_grad = enable_grad
-        self.optimizer = optimizer
-        self.cache = {}
 
         self.blocks = [
             Block(

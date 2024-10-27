@@ -5,12 +5,13 @@ from typing import Optional
 import numpy as np
 
 from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
+from llm.layers.base import Layer
 from llm.layers.linear import Linear
 from llm.optimizers import Optimizer
 from llm.utils.math import relu
 
 
-class FeedForward:
+class FeedForward(Layer):
     """A 2-layer feed-forward network with ReLU activation."""
 
     def __init__(
@@ -23,13 +24,10 @@ class FeedForward:
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the layer."""
+        super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.n_input = n_input
         self.n_hidden = n_hidden
         self.n_output = n_output
-        self.dtype = dtype
-        self.enable_grad = enable_grad
-        self.optimizer = optimizer
-        self.cache = {}
 
         self.layer_1 = Linear(
             n_input=n_input,

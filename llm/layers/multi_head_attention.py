@@ -6,11 +6,12 @@ from typing import Optional
 import numpy as np
 
 from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
+from llm.layers.base import Layer
 from llm.optimizers import Optimizer
 from llm.utils.math import softmax
 
 
-class MultiHeadAttention:
+class MultiHeadAttention(Layer):
     """A single multi-head attention sub-layer of a Transformer block."""
 
     def __init__(
@@ -25,15 +26,12 @@ class MultiHeadAttention:
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the layer."""
+        super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.d_model = d_model
         self.d_k = d_k
         self.d_v = d_v
         self.h = h
         self.masked = masked
-        self.dtype = dtype
-        self.enable_grad = enable_grad
-        self.optimizer = optimizer
-        self.cache = {}
 
         spread_in = np.sqrt(1 / d_model)
         self.w_q = np.random.uniform(low=-spread_in, high=spread_in, size=(h, d_model, d_k)).astype(dtype)

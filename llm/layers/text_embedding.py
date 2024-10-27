@@ -5,10 +5,11 @@ from typing import Optional
 import numpy as np
 
 from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
+from llm.layers.base import Layer
 from llm.optimizers import Optimizer
 
 
-class TextEmbedding:
+class TextEmbedding(Layer):
     """A learned text embedding layer for a fixed vocab size & context window."""
 
     def __init__(
@@ -21,13 +22,10 @@ class TextEmbedding:
         optimizer: Optional[Optimizer] = None,
     ) -> None:
         """Initialize the layer."""
+        super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
         self.vocab_size = vocab_size
         self.context_size = context_size
         self.d_model = d_model
-        self.dtype = dtype
-        self.enable_grad = enable_grad
-        self.optimizer = optimizer
-        self.cache = {}
 
         self.token_embedding_matrix = np.random.standard_normal(size=(vocab_size, d_model)).astype(dtype)
         self.position_embedding_matrix = np.random.standard_normal(size=(context_size, d_model)).astype(dtype)
