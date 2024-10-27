@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from llm.constants import DType, DEFAULT_DTYPE
+from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.optimizers import Optimizer
 
 
@@ -47,6 +47,25 @@ class TextEmbedding:
     def n_params(self) -> int:
         """The number of parameters in the layer."""
         return self.token_embedding_matrix.size + self.position_embedding_matrix.size
+
+    def get_parameters(self) -> Parameters:
+        """Return the parameter map for the layer."""
+        params = {
+            "token_embedding_matrix": self.token_embedding_matrix,
+            "position_embedding_matrix": self.position_embedding_matrix,
+        }
+        return params
+
+    def load_parameters(self, params: Parameters) -> None:
+        """Set the parameters."""
+        if "token_embedding_matrix" not in params or "position_embedding_matrix" not in params:
+            raise ValueError("Missing parameters")
+        if not isinstance(params["token_embedding_matrix"], BaseParameter) or not isinstance(
+            params["position_embedding_matrix"], BaseParameter
+        ):
+            raise ValueError("Invalid shape for parameters map")
+        self.token_embedding_matrix = params["token_embedding_matrix"]
+        self.position_embedding_matrix = params["position_embedding_matrix"]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

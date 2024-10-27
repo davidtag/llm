@@ -1,9 +1,11 @@
 """Unit tests for text_embedding.py."""
 
+import operator
 import unittest
 
 import numpy as np
 
+from llm.constants import DEFAULT_DTYPE
 from llm.layers.text_embedding import TextEmbedding
 
 
@@ -22,6 +24,47 @@ class TestTextEmbedding(unittest.TestCase):
         """Test the layer reports the correct number of parameters."""
         model = TextEmbedding(vocab_size=1000, context_size=256, d_model=512)
         self.assertEqual(model.n_params, 1000 * 512 + 256 * 512)
+
+    def test_get_parameters(self) -> None:
+        """Test the get_parameters() method."""
+        model = TextEmbedding(vocab_size=1000, context_size=256, d_model=512)
+        params = model.get_parameters()
+        self.assertSetEqual(set(params.keys()), {"token_embedding_matrix", "position_embedding_matrix"})
+        token = params["token_embedding_matrix"]
+        pos = params["position_embedding_matrix"]
+        assert isinstance(token, np.ndarray)
+        assert isinstance(pos, np.ndarray)
+        self.assertEqual(token.shape, (1000, 512))
+        self.assertEqual(pos.shape, (256, 512))
+        self.assertEqual(token.dtype, DEFAULT_DTYPE)
+        self.assertEqual(pos.dtype, DEFAULT_DTYPE)
+
+    def test_load_parameters(self) -> None:
+        """Test the load_paramters() method."""
+        model = TextEmbedding(vocab_size=256, context_size=128, d_model=512)
+        out1 = model.forward(self.data)
+
+        token_new = np.zeros((256, 512), dtype=DEFAULT_DTYPE)
+        pos_new = np.zeros((128, 512), dtype=DEFAULT_DTYPE)
+        params = {
+            "token_embedding_matrix": token_new,
+            "position_embedding_matrix": pos_new,
+        }
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_compare(operator.__ne__, out1, out2)
+
+    def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
+        """Test that the return value of get_parameters() can be loaded."""
+        model = TextEmbedding(vocab_size=256, context_size=128, d_model=512)
+        out1 = model.forward(self.data)
+
+        params = model.get_parameters()
+
+        model.load_parameters(params)
+        out2 = model.forward(self.data)
+        np.testing.assert_array_equal(out1, out2)
 
     def test_forward(self) -> None:
         """Test the forward pass."""
