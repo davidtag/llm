@@ -18,7 +18,6 @@ no dependencies other than the `regex` library, and supports training.
             - train piece cache: as part of regular runner, or with separate text
         - Registry for model files and ability to load them from disk (include gpt-4 and o-1 encoders)
     - Add support for special tokens
-- Develop a simple Embedding class and refactor TextEmbedding to use 2 of them (token + position)
 - Diagnose FeedForward training after 1 iter
     - Distribution of activations
     - Distribution of gradients
@@ -27,7 +26,6 @@ no dependencies other than the `regex` library, and supports training.
         # See Karpathy's "Building makemore part3", 1:07:00
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
 - Support in-memory parameter dumping and loading: get_params() -> dict, set_params(dict)
-    - Embedding
     - Transformer
 - Support on-disk model dumping and loading (factory method): dump_model(file), load_model(file)
     - Transformer (parameters + settings)
