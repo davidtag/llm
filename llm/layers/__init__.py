@@ -1,5 +1,6 @@
 """Library implementation of various model layers."""
 
+from .base import Layer
 from .block_stack import BlockStack
 from .block import Block
 from .feed_forward import FeedForward
