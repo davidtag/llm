@@ -1,5 +1,4 @@
-# pylint: disable=C0103
-"""Implementation of a learned embedding layer."""
+"""A learned text embedding layer for a fixed vocab size & context window."""
 
 from typing import Optional
 
