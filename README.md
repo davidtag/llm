@@ -14,6 +14,17 @@ no dependencies other than the `regex` library, and supports training.
 ```shell
 python3.12 -m venv venv
 source venv/bin/activate
+make install_requirements
+```
+
+2. Compile Cython extension modules
+```shell
+make python_extensions
+```
+
+3. Run tests
+```shell
+make test
 ```
 
 

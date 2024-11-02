@@ -1,6 +1,9 @@
 all: default
 default: install_requirements
 
+############################################################################
+# Environment Setup
+############################################################################
 
 .PHONY: upgrade_pip
 upgrade_pip:
@@ -16,11 +19,22 @@ install_base_requirements: upgrade_pip
 install_dev_requirements: upgrade_pip
 	pip install -r requirements_dev.txt
 
+.PHONY: install_requirements
+install_requirements: install_base_requirements install_dev_requirements
+
+
+############################################################################
+# Build Package
+############################################################################
 
 .PHONY: python_extensions
 python_extensions:
 	python setup.py build_ext --inplace
 
+
+############################################################################
+# Testing
+############################################################################
 
 .PHONY: test
 test:  python_extensions
