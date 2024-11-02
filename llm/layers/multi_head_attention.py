@@ -71,10 +71,10 @@ class MultiHeadAttention(Layer):
             or not isinstance(params["w_o"], BaseParameter)
         ):
             raise ValueError("Invalid shape for parameters map")
-        self.w_q = params["w_q"]
-        self.w_k = params["w_k"]
-        self.w_v = params["w_v"]
-        self.w_o = params["w_o"]
+        self.w_q[:] = params["w_q"]
+        self.w_k[:] = params["w_k"]
+        self.w_v[:] = params["w_v"]
+        self.w_o[:] = params["w_o"]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

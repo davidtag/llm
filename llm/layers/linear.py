@@ -51,8 +51,8 @@ class Linear(Layer):
             raise ValueError("Missing parameters")
         if not isinstance(params["w"], BaseParameter) or not isinstance(params["b"], BaseParameter):
             raise ValueError("Invalid shape for parameters map")
-        self.w = params["w"]
-        self.b = params["b"]
+        self.w[:] = params["w"]
+        self.b[:] = params["b"]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

@@ -62,8 +62,8 @@ class TextEmbedding(Layer):
             params["position_embedding_matrix"], BaseParameter
         ):
             raise ValueError("Invalid shape for parameters map")
-        self.token_embedding_matrix = params["token_embedding_matrix"]
-        self.position_embedding_matrix = params["position_embedding_matrix"]
+        self.token_embedding_matrix[:] = params["token_embedding_matrix"]
+        self.position_embedding_matrix[:] = params["position_embedding_matrix"]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""

@@ -50,8 +50,8 @@ class LayerNorm(Layer):
             raise ValueError("Missing parameters")
         if not isinstance(params["gamma"], BaseParameter) or not isinstance(params["beta"], BaseParameter):
             raise ValueError("Invalid shape for parameters map")
-        self.gamma = params["gamma"]
-        self.beta = params["beta"]
+        self.gamma[:] = params["gamma"]
+        self.beta[:] = params["beta"]
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
