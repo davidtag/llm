@@ -168,6 +168,9 @@ class RegexTokenizer:
         This essentially warms up the runtime_cache based on some training data. The training data can be
         the same or different from the data used to train the BPE merges.
         """
+        if num_extra_pieces < 0:
+            raise ValueError("`num_extra_pieces` must be non-negative")
+
         train_start = time.monotonic()
         if verbose:
             print(f"-- Training {self.__class__.__name__} : piece cache -------------------------------")
