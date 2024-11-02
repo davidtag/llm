@@ -1,18 +1,12 @@
-"""Build the llm package.
+"""Configuration for the llm package."""
 
-From project root, run:
->> python setup.py build_ext --inplace
-
-To run all tests
->> python setup.py build_ext --inplace && PYTHONPATH=. python -m unittest discover
-"""
-
-from setuptools import setup
+from setuptools import setup, Extension
 from Cython.Build import cythonize
 
 
-setup(
-    ext_modules=cythonize(
+def get_cython_extension_modules() -> list[Extension]:
+    """Compile Cython sources into extension modules"""
+    return cythonize(
         [
             "llm/tokenizers/cython/stdtoken.pyx",
             "llm/tokenizers/cython/frequencies.pyx",
@@ -22,6 +16,11 @@ setup(
         compiler_directives={
             "language_level": "3str",
         },
-    ),
-    include_dirs=[],
+    )
+
+
+setup(
+    name="llm",
+    ext_modules=get_cython_extension_modules(),
+    zip_safe=False,
 )

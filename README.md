@@ -7,6 +7,16 @@ The purpose of this repo is educational - explore the main concepts of LLMs with
 PyTorch or Tensorflow. The Byte-Pair Encoding (BPE) algorithm is also manually implemented with
 no dependencies other than the `regex` library, and supports training.
 
+
+## Quick Start
+
+1. Setup a virtual environment and activate it. Code has been tested on Python 3.12.
+```shell
+python3.12 -m venv venv
+source venv/bin/activate
+```
+
+
 # TODO
 
 - Tokenizer (enc, dec, train)
@@ -44,3 +54,7 @@ no dependencies other than the `regex` library, and supports training.
     - 2D PCA for viz
         - do we see natural groups? whitespace, punctuation, character names
     - Clustering
+- Support for linters and type checkers:
+    - mypy
+    - flake8
+    - pylint

@@ -1,4 +1,9 @@
-numpy>=2.1
+# For building Cython code
 setuptools>=75.1
 Cython>=3.0
-psutil>=6.0.0
+
+# For Transformer model
+numpy>=2.1
+
+# For RegexTokenizer
+regex>=2024.9.11
