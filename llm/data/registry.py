@@ -3,7 +3,20 @@
 from pathlib import Path
 
 
-class DataRegistry:
+class _BaseRegistry:
+
+    @property
+    def project_dir(self) -> Path:
+        """Root directory for the git project."""
+        return Path(__file__).parent.parent.parent
+
+    @property
+    def assets_dir(self) -> Path:
+        """Root directory for all assets."""
+        return Path(self.project_dir, "assets")
+
+
+class DataRegistry(_BaseRegistry):
     """Registry of all data assets."""
 
     SOURCE_URL = "https://ocw.mit.edu/ans7870/6/6.006/s08/lecturenotes/files/t8.shakespeare.txt"
@@ -17,16 +30,6 @@ class DataRegistry:
     TEST_SIZE = 1 * _MB
     VAL_SIZE = 1 * _MB
     TRAIN_SIZE = EXPECTED_TOTAL_SIZE - TEST_SIZE - VAL_SIZE
-
-    @property
-    def project_dir(self) -> Path:
-        """Root directory for the git project."""
-        return Path(__file__).parent.parent.parent
-
-    @property
-    def assets_dir(self) -> Path:
-        """Root directory for all assets."""
-        return Path(self.project_dir, "assets")
 
     @property
     def text_dir(self) -> Path:
@@ -52,3 +55,21 @@ class DataRegistry:
     def test_text_file(self) -> Path:
         """Path containing the test split of the text data."""
         return Path(self.text_dir, "test.txt")
+
+
+class TokenizerRegistry(_BaseRegistry):
+    """Registry for trained tokenizer checkpoints."""
+
+    @property
+    def checkpoint_dir(self) -> Path:
+        """Root directory for all trained BPE tokenizer checkpoints."""
+        return Path(self.assets_dir, "bpe_checkpoints")
+
+
+class TokenRegistry(_BaseRegistry):
+    """Registry for all token-based assets."""
+
+    @property
+    def token_dir(self) -> Path:
+        """Root directory for all text assets."""
+        return Path(self.assets_dir, "tokens")
