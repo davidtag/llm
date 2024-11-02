@@ -1,5 +1,5 @@
 # llm
-Ground-up implementation of LLMs with NumPy as the only dependency.
+Ground-up implementation of LLMs with `NumPy` and `regex` as the only dependencies.
 
 The purpose of this repo is educational - explore the main concepts of LLMs without relying on
 3rd party packages for the heavy lifting. In particular, the computation of gradients (i.e., the
@@ -40,3 +40,7 @@ no dependencies other than the `regex` library, and supports training.
 - Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
 - Make script to download all data assets:
     https://ocw.mit.edu/ans7870/6/6.006/s08/lecturenotes/files/t8.shakespeare.txt
+- Analyze the embeddings
+    - 2D PCA for viz
+        - do we see natural groups? whitespace, punctuation, character names
+    - Clustering
