@@ -1,2 +1,5 @@
 # Linters
 black==24.8.0
+
+# Downloading data assets
+requests>=2.23.3

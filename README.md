@@ -27,6 +27,11 @@ make python_extensions
 make test
 ```
 
+4. Download data
+```shell
+make download_text
+```
+
 
 # TODO
 

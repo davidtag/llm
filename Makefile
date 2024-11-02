@@ -40,3 +40,7 @@ python_extensions:
 test:  python_extensions
 	PYTHONPATH=. python -m unittest discover
 
+
+.PHONY: download_text
+download_text:
+	PYTHONPATH=. python scripts/download_and_split_data.py
