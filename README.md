@@ -32,6 +32,11 @@ make test
 make download_text
 ```
 
+5. Train the BPE tokenizer:
+```shell
+PYTHONPATH=. python scripts/train_tokenizer.py -y -n default_10k
+```
+
 
 # TODO
 
