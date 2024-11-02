@@ -10,6 +10,17 @@ from llm.tokenizers.regex_tokenizer import RegexTokenizer
 from llm.tokenizers.split_pattern import SplitPattern
 
 
+def _validate(tokenizer: RegexTokenizer):
+    print("-- Validating ----------------------------------------------------")
+    sample_unicode = "hello world!!!? (안녕하세요!) joined123 😉"
+    print(f"{sample_unicode=}")
+    tokens = tokenizer.encode(sample_unicode)
+    print(f"{tokens=}")
+    recreated_input = tokenizer.decode(tokens)
+    print(f"{recreated_input=}")
+    assert sample_unicode == recreated_input
+
+
 def main(args: argparse.Namespace) -> None:
     """Entrypoint."""
 
@@ -44,6 +55,9 @@ def main(args: argparse.Namespace) -> None:
         num_extra_pieces=args.cache_size,
         verbose=args.verbose,
     )
+
+    # Validate encode-decode consistency
+    _validate(new_tokenizer)
 
     # Save the checkpoint
     new_tokenizer.save(checkpoint_dir)
