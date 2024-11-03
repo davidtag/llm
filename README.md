@@ -37,6 +37,11 @@ make download_text
 PYTHONPATH=. python scripts/train_tokenizer.py -y -n default_10k
 ```
 
+6. Tokenize the data splits for use in training:
+```shell
+PYTHONPATH=. python scripts/tokenize_splits.py -n default_10k
+```
+
 
 # TODO
 
