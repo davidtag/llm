@@ -129,7 +129,7 @@ class RegexTokenizer:
         # Perform merge operations
         for i in range(num_merges):
             iter_start = time.monotonic()
-            node = heap[0]  # represens max-frequency pair
+            node = heap[0]  # represents max-frequency pair
             while node.deleted:
                 heapq.heappop(heap)
                 node = heap[0]
@@ -287,7 +287,7 @@ class RegexTokenizer:
     def _save_cache(self, file: PathLike) -> None:
         with open(file, mode="w", encoding="utf-8") as f:
             for piece_str, piece_tokens in self.trained_cache.items():
-                if len(piece_tokens) > 1:
+                if len(piece_tokens) > 1:  # len==1 is implicilty captured by the vocabulary
                     f.write(f"{base64.b64encode(piece_str.encode("utf-8")).decode("utf-8")}:{piece_tokens}\n")
 
     @staticmethod
