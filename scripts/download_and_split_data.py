@@ -38,7 +38,7 @@ def _create_splits() -> None:
     write_text_file(_registry.test_text_file, test_split)
 
 
-def main():
+def main() -> None:
     """Entrypoint."""
     _download_and_save_raw_data()
     _create_splits()
