@@ -1,4 +1,5 @@
 # llm
+
 Ground-up implementation of LLMs with `NumPy` and `regex` as the only dependencies.
 
 The purpose of this repo is educational - explore the main concepts of LLMs without relying on
@@ -42,10 +43,10 @@ PYTHONPATH=. python scripts/train_tokenizer.py -y -n default_10k
 PYTHONPATH=. python scripts/tokenize_splits.py -n default_10k
 ```
 
-7. Train the Transformer model:
+7. Train the Transformer model, including the ability to continue training from a checkpoint:
 ```shell
 PYTHONPATH=. python scripts/train_model.py -y -n v1 -t default_10k -bs 8 -nb 100
-PYTHONPATH=. python scripts/train_model.py -y -n v2 -t default_10k -bs 8 -nb 100 -s v1 -c 100
+PYTHONPATH=. python scripts/train_model.py -y -n v2 -t default_10k -bs 8 -nb 100 -s v1 -c 100 -lr 0.0001
 ```
 
 8. Generate output from the model:
