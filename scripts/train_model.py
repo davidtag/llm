@@ -67,6 +67,7 @@ def _initialize_model_for_training(
         d_ff=256,
         optimizer=optimizer,
     )
+    print(f"Initialized model with n_params={model.n_params:,}")
     return model
 
 
@@ -85,6 +86,10 @@ def _load_model_for_training(
     )
 
     model = Transformer.load_for_training(model_file=checkpoint_path, optimizer=optimizer)
+    print(
+        f"Loaded model checkpoint {starting_checkpoint_name}:{starting_checkpoint_iter} "
+        f"with n_params={model.n_params:,}"
+    )
     return model
 
 
