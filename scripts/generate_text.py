@@ -49,7 +49,7 @@ def main(args: argparse.Namespace) -> None:
 
     print("Generating text...")
     print("=================================================================================")
-    start_str = "ACT I. Scene I.\nRome. A public place.\n\nEnter ROMEO.\n\n"
+    start_str = "ACT I. Scene I.\n\n"
     start_tokens = tokenizer.encode(start_str)
     start_sequence = np.array(start_tokens)
 
@@ -58,6 +58,8 @@ def main(args: argparse.Namespace) -> None:
         text = tokenizer.decode([token])
         sys.stdout.write(text)
         sys.stdout.flush()
+    sys.stdout.write("\n")
+    sys.stdout.flush()
     print("=================================================================================")
 
 
