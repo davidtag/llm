@@ -57,7 +57,7 @@ if __name__ == "__main__":
         type=str,
         required=True,
         default="",
-        help="The name of the saved BPE checkpoint",
+        help="The name of the saved tokenizer checkpoint",
     )
     args = parser.parse_args()
 
