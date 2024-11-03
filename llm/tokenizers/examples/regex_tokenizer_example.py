@@ -304,7 +304,7 @@ def _decode(tokens: list[int], vocab: Vocabulary, errors: str = "replace") -> st
     return _decode_bytes(tokens, vocab=vocab).decode("utf-8", errors=errors)
 
 
-def main():
+def main() -> None:
     """Entrypoint."""
     print()
     print("-- Regex Tokenizer Example ----------------------------------------------------------------------")

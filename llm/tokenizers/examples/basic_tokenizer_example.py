@@ -138,7 +138,7 @@ def _decode(tokens: NumpyTokenSequence, vocab: Vocabulary) -> bytes:
     return b"".join([vocab[token] for token in tokens])
 
 
-def main():
+def main() -> None:
     """Entrypoint."""
     print()
     print("-- Basic Tokenizer Example ----------------------------------------------------------------------")

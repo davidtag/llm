@@ -38,7 +38,7 @@ def _load_train_test_split(file_path: PathLike, val_length: int = 2 * 1024 * 102
 
 
 def _train_model(
-    training_sequence,
+    training_sequence: np.ndarray,
     vocab_size: int,
     num_epochs: int = 20,
     context_size: int = 16,
@@ -89,7 +89,7 @@ def _train_model(
     return model
 
 
-def main():
+def main() -> None:
     # Load the training / val text
     train_text, val_text = _load_train_test_split(DATA_FILE)
     print(f"Loaded data: {len(train_text)=:,} chars, {len(val_text)=:,} chars")

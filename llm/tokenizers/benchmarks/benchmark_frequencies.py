@@ -1,5 +1,6 @@
 """Benchmarks for frequencies.pyx."""
 
+from collections import defaultdict
 from typing import Callable
 
 import numpy as np
@@ -16,15 +17,20 @@ from llm.tokenizers.cython.frequencies import (
     get_pairwise_token_frequencies_and_heap_numpy,
     get_masked_pairwise_token_frequencies_and_heap_numpy,
 )
+from llm.tokenizers.cython.stdtoken import TokenPair, TokenPairNode
 from llm.tokenizers.cython.pytoken import TokenDtype, MaskedTokenDtype, NumpyTokenSequence
 
 
-def get_pairwise_token_frequencies_from_list_wrapped(tokens: NumpyTokenSequence):
+def get_pairwise_token_frequencies_from_list_wrapped(
+    tokens: NumpyTokenSequence,
+) -> defaultdict[TokenPair, int]:
     """Call the underlying method with a list conversion."""
     return get_pairwise_token_frequencies_from_list(tokens.tolist())
 
 
-def get_masked_pairwise_token_frequencies_and_heap_numpy_wrapped(tokens: NumpyTokenSequence):
+def get_masked_pairwise_token_frequencies_and_heap_numpy_wrapped(
+    tokens: NumpyTokenSequence,
+) -> tuple[dict[TokenPair, TokenPairNode], list[TokenPairNode]]:
     """Call the underlying method with no masked positions."""
     return get_masked_pairwise_token_frequencies_and_heap_numpy(
         tokens.astype(dtype=MaskedTokenDtype),
