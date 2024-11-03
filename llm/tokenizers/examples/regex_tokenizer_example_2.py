@@ -23,7 +23,7 @@ def _load_train_test_split(file_path: str, val_length: int = 2 * 1024 * 1024) ->
 
 def train() -> None:
     train_text, _ = _load_train_test_split(file_path="data/blob/t8.shakespeare.txt")
-    split_pattern = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
+    split_pattern = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""  # noqa: E501
     tokenizer = RegexTokenizer.train(
         text=train_text,
         split_pattern=split_pattern,
