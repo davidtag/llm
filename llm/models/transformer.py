@@ -1,4 +1,3 @@
-# pylint: disable=C0103
 """Implementation of a Transformer model architecture."""
 
 from __future__ import annotations

@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name
 """A set of integration tests of various layers/losses/model/optimizers, testing training end-to-end."""
 
 from typing import Tuple

@@ -6,7 +6,7 @@ The purpose of this repo is educational - explore the main concepts of LLMs with
 3rd party packages for the heavy lifting. In particular, the computation of gradients (i.e., the
 "backward pass") is done manually, instead of relying on autograd systems, like the ones in
 PyTorch or Tensorflow. The Byte-Pair Encoding (BPE) algorithm is also manually implemented with
-no dependencies other than the `regex` library, and supports training the merges.
+no dependencies other than a regex library, and supports training the merges.
 
 
 ## Quick Start
@@ -34,12 +34,12 @@ make test
 make download_text
 ```
 
-5. Train the BPE tokenizer:
+5. Train the BPE tokenizer merges:
 ```shell
 python scripts/train_tokenizer.py -y -n default_10k
 ```
 
-6. Tokenize the data splits for use in training:
+6. Tokenize the data splits for use in training the model:
 ```shell
 python scripts/tokenize_splits.py -n default_10k
 ```

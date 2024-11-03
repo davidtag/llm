@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name,too-many-locals
 """Implements the multi-head attention layer of a Transformer."""
 
 from typing import Optional

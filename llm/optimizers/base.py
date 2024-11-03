@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 """Interface for implementing optimizers."""
 
 import abc

@@ -1,4 +1,3 @@
-# pylint: disable=C0103
 """Implementation of a cross-entropy loss function."""
 
 import numpy as np

@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 """Implements the Adam optimizer."""
 
 from typing import List

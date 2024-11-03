@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 """Implements the stochastic gradient descent optimizer."""
 
 from typing import List
