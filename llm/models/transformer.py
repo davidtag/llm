@@ -213,7 +213,7 @@ class Transformer(Model):
         self.embedding_layer.backward(draw_embedding)
 
     def step(self) -> None:
-        """Performs a single optimization step."""
+        """Perform a single optimization step."""
         assert self.enable_grad, "Cannot take an optimization step with enable_grad=False"
         assert self.optimizer, "Cannot take an optimization step with optimizer=None"
 

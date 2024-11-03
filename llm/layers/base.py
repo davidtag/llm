@@ -53,5 +53,5 @@ class Layer(abc.ABC):
 
     @abc.abstractmethod
     def step(self) -> None:
-        """Performs a single optimization step."""
+        """Perform a single optimization step."""
         raise NotImplementedError
