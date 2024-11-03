@@ -70,6 +70,8 @@ def main() -> None:
             for _ in range(num_runs):
                 d = method()
 
+        assert isinstance(d, dict)
+
         prof.scale_by(num_runs)
         d_size = sys.getsizeof(d)
         method_memory_use = _get_process_memory() - method_start_memory

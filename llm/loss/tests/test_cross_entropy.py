@@ -52,7 +52,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         )
         targets = np.array([1, 0])
         loss = loss_fn.forward(logits, targets)
-        self.assertAlmostEqual(loss, 0)
+        self.assertAlmostEqual(float(loss), 0)
 
         dlogits = loss_fn.backward()
         self.assertEqual(dlogits.shape, logits.shape)
@@ -92,7 +92,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
             ]
         )
         loss = loss_fn.forward(logits, targets)
-        self.assertAlmostEqual(loss, 0)
+        self.assertAlmostEqual(float(loss), 0)
 
         dlogits = loss_fn.backward()
         self.assertEqual(dlogits.shape, logits.shape)
@@ -112,7 +112,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         )
         targets = np.array([0, 1, 1])
         loss = loss_fn.forward(logits, targets)
-        self.assertGreater(loss, 100)
+        self.assertGreater(float(loss), 100)
 
         dlogits = loss_fn.backward()
         self.assertEqual(dlogits.shape, logits.shape)

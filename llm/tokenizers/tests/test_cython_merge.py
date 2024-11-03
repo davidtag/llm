@@ -26,9 +26,9 @@ class TestMerge(unittest.TestCase):
 
     def test_empty_input(self) -> None:
         """Test with an empty input."""
-        in_tokens = []
+        in_tokens: list[int] = []
         out_tokens = merge(in_tokens, TokenPair(0, 0), 1)
-        expected = []
+        expected: list[int] = []
         self.assertListEqual(out_tokens, expected)
 
     def test_single_token(self) -> None:
@@ -362,8 +362,8 @@ class TestMergeInPlaceAndUpdateFrequenciesAndHeap(unittest.TestCase):
     def test_empty_input(self) -> None:
         """Test with an empty input."""
         in_tokens = np.array([], dtype=TokenDtype)
-        heap = []
-        frequencies = {}
+        heap: list[TokenPairNode] = []
+        frequencies: dict[TokenPair, TokenPairNode] = {}
         out_tokens = merge_inplace_and_update_frequencies_and_heap(
             in_tokens,
             0,
@@ -383,8 +383,8 @@ class TestMergeInPlaceAndUpdateFrequenciesAndHeap(unittest.TestCase):
     def test_single_token(self) -> None:
         """Test with a single token input."""
         in_tokens = np.array([13], dtype=TokenDtype)
-        heap = []
-        frequencies = {}
+        heap: list[TokenPairNode] = []
+        frequencies: dict[TokenPair, TokenPairNode] = {}
         out_tokens = merge_inplace_and_update_frequencies_and_heap(
             in_tokens,
             0,

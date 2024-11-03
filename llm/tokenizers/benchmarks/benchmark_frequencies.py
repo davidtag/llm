@@ -1,5 +1,7 @@
 """Benchmarks for frequencies.pyx."""
 
+from typing import Callable
+
 import numpy as np
 
 from llm.tokenizers.benchmarks.profile import Profile
@@ -35,7 +37,7 @@ def main() -> None:
     print("-- Running benchmark for frequencies.pyx ---------------------------------------")
     tokens_1mb = np.random.randint(low=0, high=256, size=1024 * 1024).astype(dtype=TokenDtype)
     num_runs = 10
-    methods = [
+    methods: list[Callable] = [
         get_pairwise_token_frequencies_sequential_pure_python,
         get_pairwise_token_frequencies_from_list_wrapped,
         get_pairwise_token_frequencies_cython_loop,

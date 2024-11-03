@@ -7,9 +7,9 @@ class Profile:
     """Helper context manager for profiling code."""
 
     def __init__(self) -> None:
-        self.start = 0
-        self.end = 0
-        self.duration = 0
+        self.start: float = 0
+        self.end: float = 0
+        self.duration: float = 0
 
     def __enter__(self):
         """Enter the context."""

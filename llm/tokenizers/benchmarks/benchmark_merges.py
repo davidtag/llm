@@ -37,7 +37,10 @@ def _merge_and_update_freq_inplace(tokens: NumpyTokenSequence, num_merges: int) 
     next_token = 256
     frequencies = get_pairwise_token_frequencies_numpy(tokens)
     for _ in range(num_merges):
-        pair = min(frequencies.keys(), key=lambda pair, freq=frequencies: (-freq[pair], pair))
+        pair = min(
+            frequencies.keys(),
+            key=lambda pair, freq=frequencies: (-freq[pair], pair),  # type: ignore[misc]
+        )
         tokens = merge_inplace_and_update_frequencies(
             tokens=tokens,
             token_1=pair.first,
