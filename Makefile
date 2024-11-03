@@ -52,3 +52,5 @@ check:
 	black --check scripts/
 	mypy llm/
 	mypy scripts/
+	flake8 llm/
+	flake8 scripts/
