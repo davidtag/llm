@@ -16,6 +16,7 @@ no dependencies other than the `regex` library, and supports training the merges
 python3.12 -m venv venv
 source venv/bin/activate
 make install_requirements
+export PYTHONPATH=$PYTHONPATH:$(pwd)
 ```
 
 2. Compile Cython extension modules
@@ -35,32 +36,29 @@ make download_text
 
 5. Train the BPE tokenizer:
 ```shell
-PYTHONPATH=. python scripts/train_tokenizer.py -y -n default_10k
+python scripts/train_tokenizer.py -y -n default_10k
 ```
 
 6. Tokenize the data splits for use in training:
 ```shell
-PYTHONPATH=. python scripts/tokenize_splits.py -n default_10k
+python scripts/tokenize_splits.py -n default_10k
 ```
 
 7. Train the Transformer model, including the ability to continue training from a checkpoint:
 ```shell
-PYTHONPATH=. python scripts/train_model.py -y -n v1 -t default_10k -bs 8 -nb 100
-PYTHONPATH=. python scripts/train_model.py -y -n v2 -t default_10k -bs 8 -nb 100 -s v1 -c 100 -lr 0.0001
+python scripts/train_model.py -y -n v1 -t default_10k -bs 8 -nb 100
+python scripts/train_model.py -y -n v2 -t default_10k -bs 8 -nb 100 -s v1 -c 100 -lr 0.0001
 ```
 
 8. Generate output from the model:
 ```shell
-PYTHONPATH=. python scripts/generate_text.py -t default_10k -n v2 -c 100
+python scripts/generate_text.py -t default_10k -n v2 -c 100
 ```
 
 ## TODO
 
 P0:
-- Support for linters and type checkers:
-    - mypy
-    - flake8
-    - pylint
+- Add GitHub actions for formatters / linters / checkers
 - Unit tests
     - bpe.pyx
     - RegexTokenizer
