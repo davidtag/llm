@@ -53,8 +53,9 @@ PYTHONPATH=. python scripts/train_model.py -y -n v2 -t default_10k -bs 8 -nb 100
 PYTHONPATH=. python scripts/generate_text.py -t default_10k -n v2 -c 100
 ```
 
-# TODO
+## TODO
 
+P0:
 - Support for linters and type checkers:
     - mypy
     - flake8
@@ -69,14 +70,12 @@ PYTHONPATH=. python scripts/generate_text.py -t default_10k -n v2 -c 100
     - 2D PCA for viz
         - do we see natural groups? whitespace, punctuation, character names
     - Clustering
-- Diagnose FeedForward training after 1 iter
-    - Distribution of activations
-    - Distribution of gradients
-    - Ratio of gradients to activations
-    - Should FeedForward have normalization layer before activation?
-        # See Karpathy's "Building makemore part3", 1:07:00
-        # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
+
+P1:
+- Revisit hack in LayerNorm when n_input==2
+- Should FeedForward have normalization layer before activation?
+    - See Karpathy's "Building makemore part3", 1:07:00
+    - [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
 - Dropout layer for training deeper networks and avoiding overfitting
     - See Karpathy's "building GPT from scratch" video ~1:40:00 and also Transformer/GPT-1 papers
-- Revisit hack in LayerNorm when n_input==2
 - Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
