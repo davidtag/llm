@@ -5,7 +5,7 @@ The purpose of this repo is educational - explore the main concepts of LLMs with
 3rd party packages for the heavy lifting. In particular, the computation of gradients (i.e., the
 "backward pass") is done manually, instead of relying on autograd systems, like the ones in
 PyTorch or Tensorflow. The Byte-Pair Encoding (BPE) algorithm is also manually implemented with
-no dependencies other than the `regex` library, and supports training.
+no dependencies other than the `regex` library, and supports training the merges.
 
 
 ## Quick Start
