@@ -137,23 +137,49 @@ class Transformer(Model):
             "h": self.h,
             "d_ff": self.d_ff,
             "dtype": self.dtype,
-            "enable_grad": self.enable_grad,
-            "optimizer": self.optimizer,
         }
         params = self.get_parameters()
-        model_definition = [None, params]
+        model_definition = [constructor_args, params]
         with open(model_path, "wb") as f:
             pickle.dump(model_definition, f)
 
-    def load(self, model_file: PathLike) -> None:  # Transformer:
+    def load(self, model_file: PathLike) -> None:
+        with open(model_file, "rb") as f:
+            model_definition = pickle.load(f)
+        if not isinstance(model_definition, list) and not len(model_definition) == 2:
+            raise ValueError("Invalid model file")
+        _, params = model_definition
+        self.load_parameters(params)
+
+    @classmethod
+    def load_for_training(cls, model_file: PathLike, optimizer: Optimizer) -> Transformer:
         with open(model_file, "rb") as f:
             model_definition = pickle.load(f)
         if not isinstance(model_definition, list) and not len(model_definition) == 2:
             raise ValueError("Invalid model file")
         constructor_args, params = model_definition
-        # model = cls(**constructor_args)
-        self.load_parameters(params)
-        # return model
+        model = cls(
+            **constructor_args,
+            enable_grad=True,
+            optimizer=optimizer,
+        )
+        model.load_parameters(params)
+        return model
+
+    @classmethod
+    def load_for_eval(cls, model_file: PathLike) -> Transformer:
+        with open(model_file, "rb") as f:
+            model_definition = pickle.load(f)
+        if not isinstance(model_definition, list) and not len(model_definition) == 2:
+            raise ValueError("Invalid model file")
+        constructor_args, params = model_definition
+        model = cls(
+            **constructor_args,
+            enable_grad=False,
+            optimizer=None,
+        )
+        model.load_parameters(params)
+        return model
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
