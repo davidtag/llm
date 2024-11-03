@@ -295,8 +295,6 @@ def _train_piece_cache(
 
 
 def _decode_bytes(tokens: list[int], vocab: Vocabulary) -> bytes:
-    # TODO(dtag): Speed this up in Cython by pre-allocating the correct byte size and
-    # using C loops instead of Python loops.
     return b"".join([vocab[token] for token in tokens])
 
 

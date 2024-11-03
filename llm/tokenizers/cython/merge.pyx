@@ -127,7 +127,7 @@ cdef (Py_ssize_t, Py_ssize_t, Py_ssize_t) _c_merge_inplace_and_report_neighbors(
             and tokens[read_index] == token_1
             and tokens[read_index + 1] == token_2
         ):
-            # TODO(dtag): Can speed this up by special-casing first & last token to avoid
+            # TODO(dtag): Can likely speed this up by special-casing first & last token to avoid
             # a bunch of conditional branches and jump instructions
             if read_index >= 1:  # there exists a prefix
                 if (
@@ -179,6 +179,7 @@ def merge_inplace_and_update_frequencies(
     Returns:
         A view into the original array with replaced tokens and updated length.
     """
+    # TODO(dtag): static initialize these arrays and pass-in for better memory efficiency and latency
     prefix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
     suffix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
 
@@ -269,7 +270,7 @@ def merge_inplace_and_update_frequencies_and_heap(
     Returns:
         A view into the original array with replaced tokens and updated length.
     """
-    # TODO(dtag): static initialize these initialize these and pass-in for better memory efficiency and latency
+    # TODO(dtag): static initialize these arrays and pass-in for better memory efficiency and latency
     prefix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
     suffix_neighbors = np.zeros(shape=(expected_num_merges,), dtype=TokenDtype)
 

@@ -126,16 +126,16 @@ P0:
     - RegexTokenizer
 - RegexTokenizer
     - Add support for special tokens
+- Remove code TODOs
+
+P1:
+- Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
 - Analyze the embeddings
     - 2D PCA for viz
         - do we see natural groups? whitespace, punctuation, character names
     - Clustering
-- Remove code TODOs
-
-P1:
 - Should FeedForward have normalization layer before activation?
     - See Karpathy's "Building makemore part3", 1:07:00
     - [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
 - Dropout layer for training deeper networks and avoiding overfitting
     - See Karpathy's "building GPT from scratch" video ~1:40:00 and also Transformer/GPT-1 papers
-- Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)

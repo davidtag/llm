@@ -133,8 +133,6 @@ def _encode(data: bytes, merges: MergeList) -> NumpyTokenSequence:
 
 
 def _decode(tokens: NumpyTokenSequence, vocab: Vocabulary) -> bytes:
-    # TODO(dtag): Speed this up in Cython by pre-allocating the correct byte size and
-    # using C loops instead of Python loops.
     return b"".join([vocab[token] for token in tokens])
 
 
