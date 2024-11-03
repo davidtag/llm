@@ -2,8 +2,9 @@
 
 import gc
 import os
-import psutil
 import sys
+
+import psutil
 
 from llm.tokenizers.benchmarks.profile import Profile
 from llm.tokenizers.cython.stdtoken import TokenPair
