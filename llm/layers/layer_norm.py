@@ -61,8 +61,9 @@ class LayerNorm(Layer):
         x_var = np.mean(np.square(x - x_mean), axis=-1, keepdims=True)
         x_std = np.sqrt(x_var + self.eps)
         if self.n_input == 2:
-            # Need random noise to avoid z values all being exactly 1 or -1
-            # The z-scores of a set of 2 values is always 1 or -1
+            # HACK: Need random noise to avoid z values all being exactly 1 or -1
+            # The z-scores of a set of 2 values is always 1 or -1.
+            # In practice, embedding dimensions are >> 2, so this problem doesn't arise.
             x_std += 5 * np.random.random(size=x_std.shape)
         z = (x - x_mean) / x_std
 

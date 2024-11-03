@@ -124,7 +124,6 @@ P0:
 - Add GitHub actions for formatters / linters / checkers
 - Unit tests
     - RegexTokenizer
-    - New modules in llm/data
 - RegexTokenizer
     - Add support for special tokens
 - Analyze the embeddings
@@ -134,7 +133,6 @@ P0:
 - Remove code TODOs
 
 P1:
-- Revisit hack in LayerNorm when n_input==2
 - Should FeedForward have normalization layer before activation?
     - See Karpathy's "Building makemore part3", 1:07:00
     - [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
