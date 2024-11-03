@@ -117,7 +117,8 @@ def _train_model(
         model.backward(dlogits)
         model.step()
 
-        print(f"  {i + 1:6}/{num_batches}: {loss:.3f}")
+        perplexity = np.exp(loss)
+        print(f"  {i + 1:6}/{num_batches}: {loss=:6.3f}  {perplexity=:7,.0f}")
 
         # Save Checkpoints
         if i % checkpoint_freq == 0 or i == num_batches - 1:
