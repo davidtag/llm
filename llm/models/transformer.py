@@ -253,6 +253,6 @@ class Transformer(Model):
             if is_random:
                 token = np.random.choice(self.vocab_size, p=probs)
             else:
-                token = np.argmax(probs)
+                token = int(np.argmax(probs))
             current_sequence = np.append(current_sequence, token)[-self.context_size :]
-            yield int(token)
+            yield token

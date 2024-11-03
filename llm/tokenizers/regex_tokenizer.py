@@ -198,7 +198,7 @@ class RegexTokenizer:
 
         top_pieces = sorted(
             piece_counter.keys(),
-            key=lambda piece, counter=piece_counter: counter[piece].count,
+            key=lambda piece, counter=piece_counter: counter[piece].count,  # type: ignore[misc]
             reverse=True,
         )[:num_extra_pieces]
         top_pieces_cache = {piece: piece_counter[piece].tokens for piece in top_pieces}
@@ -271,10 +271,10 @@ class RegexTokenizer:
         merge_list = bpe.MergeList()
         with open(file, mode="r", encoding="utf-8") as f:
             for line in f.readlines():
-                pair, replacement = line.strip().split(":")
-                first, second = pair.split(",")
+                pair_str, replacement_str = line.strip().split(":")
+                first, second = pair_str.split(",")
                 token_pair = TokenPair(first=int(first), second=int(second))
-                replacement = int(replacement)
+                replacement = int(replacement_str)
                 merge_list.append((token_pair, replacement))
         return merge_list
 

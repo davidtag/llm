@@ -15,7 +15,7 @@ class CrossEntropyLoss:
     ) -> None:
         """Initialize the loss head."""
         self.enable_grad = enable_grad
-        self.cache = {}
+        self.cache: dict[str, np.ndarray] = {}
 
     def forward(self, logits: np.ndarray, targets: np.ndarray) -> np.float64:
         """Compute the loss for a set of logits and targets."""

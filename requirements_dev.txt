@@ -1,5 +1,7 @@
-# Linters
+# Linters & static analyzers
 black==24.8.0
+mypy>=1.13.0
 
 # Downloading data assets
 requests>=2.23.3
+types-requests>=2.32.0.20241016

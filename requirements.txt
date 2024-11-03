@@ -7,3 +7,4 @@ numpy>=2.1
 
 # For RegexTokenizer
 regex>=2024.9.11
+types-regex>=2024.9.11.20240912
