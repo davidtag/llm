@@ -55,15 +55,20 @@ PYTHONPATH=. python scripts/generate_text.py -t default_10k -n v2 -c 100
 
 # TODO
 
-- Tokenizer (enc, dec, train)
-    - Add unit tests for bpe.pyx
-    - Add unit tests for RegexTokenizer
-    - Create a Tokenizer class that uses regex-style logic
-        - Add runner scripts
-            - train model
-            - train piece cache: as part of regular runner, or with separate text
-        - Registry for model files and ability to load them from disk (include gpt-4 and o-1 encoders)
+- Support for linters and type checkers:
+    - mypy
+    - flake8
+    - pylint
+- Unit tests
+    - bpe.pyx
+    - RegexTokenizer
+    - New modules in llm/data
+- RegexTokenizer
     - Add support for special tokens
+- Analyze the embeddings
+    - 2D PCA for viz
+        - do we see natural groups? whitespace, punctuation, character names
+    - Clustering
 - Diagnose FeedForward training after 1 iter
     - Distribution of activations
     - Distribution of gradients
@@ -71,16 +76,7 @@ PYTHONPATH=. python scripts/generate_text.py -t default_10k -n v2 -c 100
     - Should FeedForward have normalization layer before activation?
         # See Karpathy's "Building makemore part3", 1:07:00
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
-- Add copy=False to all numpy reshapes
 - Dropout layer for training deeper networks and avoiding overfitting
     - See Karpathy's "building GPT from scratch" video ~1:40:00 and also Transformer/GPT-1 papers
 - Revisit hack in LayerNorm when n_input==2
 - Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
-- Analyze the embeddings
-    - 2D PCA for viz
-        - do we see natural groups? whitespace, punctuation, character names
-    - Clustering
-- Support for linters and type checkers:
-    - mypy
-    - flake8
-    - pylint
