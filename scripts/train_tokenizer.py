@@ -23,7 +23,6 @@ def _validate(tokenizer: RegexTokenizer) -> None:
 
 def main(args: argparse.Namespace) -> None:
     """Entrypoint."""
-
     # Initialize the checkpoint directory
     tokenizer_registry = TokenizerRegistry()
     tokenizer_registry.checkpoint_dir.mkdir(parents=True, exist_ok=True)

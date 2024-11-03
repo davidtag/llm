@@ -39,6 +39,7 @@ class RegexTokenizer:
 
     @property
     def vocab_size(self) -> int:
+        """The size of the tokenizer vocabulary."""
         return len(self.vocab)
 
     ######################################

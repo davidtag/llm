@@ -21,7 +21,7 @@ def _load_train_test_split(file_path: str, val_length: int = 2 * 1024 * 1024) ->
     return train, val
 
 
-def train() -> None:
+def _train() -> None:
     train_text, _ = _load_train_test_split(file_path="data/blob/t8.shakespeare.txt")
     split_pattern = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""  # noqa: E501
     tokenizer = RegexTokenizer.train(
@@ -38,7 +38,7 @@ def train() -> None:
     new_tokenizer.save(Path("out/"))
 
 
-def test() -> None:
+def _test() -> None:
     tokenizer = RegexTokenizer.load(Path("out/"))
     print(len(tokenizer.trained_cache), len(tokenizer.runtime_cache))
 
@@ -86,4 +86,4 @@ def test() -> None:
 
 
 if __name__ == "__main__":
-    test()
+    _test()

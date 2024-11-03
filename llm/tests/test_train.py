@@ -267,7 +267,6 @@ class TestTrainingEndToEnd(unittest.TestCase):
 
     def test_train_block_stack(self, num_iters: int = 200) -> None:
         """Test that we can overfit a small training dataset using a BlockStack layer."""
-
         optimizer = Adam(lr=0.004, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
         layer_1 = BlockStack(n_blocks=12, d_model=self.D, optimizer=optimizer)
         layer_2 = Linear(n_input=self.D, n_output=self.C, optimizer=optimizer)  # needed to project to output

@@ -10,14 +10,17 @@ class SplitPattern:
 
     @classmethod
     def default_pattern_name(cls) -> str:
+        """Get the default split pattern name."""
         return "gpt-4"
 
     @classmethod
     def all_pattern_names(cls) -> list[str]:
+        """Get all valid split pattern names."""
         return list(cls._PATTERNS.keys())
 
     @classmethod
     def get_pattern(cls, pattern_name: str) -> str:
+        """Get the split pattern of the given name."""
         if pattern_name not in cls._PATTERNS:
             raise ValueError(f"Unrecognized pattern: '{pattern_name}'")
         return cls._PATTERNS[pattern_name]

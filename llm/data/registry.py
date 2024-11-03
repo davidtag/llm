@@ -70,6 +70,7 @@ class TokenRegistry(_BaseRegistry):
     """Registry for all token-based assets."""
 
     def __init__(self, tokenizer_name: str) -> None:
+        """Initialize the registry."""
         super().__init__()
         self.tokenizer_name = tokenizer_name
 

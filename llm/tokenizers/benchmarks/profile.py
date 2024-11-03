@@ -11,6 +11,7 @@ class Profile:
     """Helper context manager for profiling code."""
 
     def __init__(self) -> None:
+        """Initialize the profile."""
         self.start: float = 0
         self.end: float = 0
         self.duration: float = 0

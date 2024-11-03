@@ -1,4 +1,4 @@
-"""Benchmakrs for stdtoken.pyx"""
+"""Benchmakrs for stdtoken.pyx."""
 
 import gc
 import os

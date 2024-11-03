@@ -1,3 +1,5 @@
+"""Sample training script."""
+
 from os import PathLike
 from pathlib import Path
 import time
@@ -90,6 +92,7 @@ def _train_model(
 
 
 def main() -> None:
+    """Entrypoint."""
     # Load the training / val text
     train_text, val_text = _load_train_test_split(DATA_FILE)
     print(f"Loaded data: {len(train_text)=:,} chars, {len(val_text)=:,} chars")
