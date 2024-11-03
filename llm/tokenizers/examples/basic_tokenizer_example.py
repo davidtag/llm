@@ -152,12 +152,12 @@ def main() -> None:
 
     print("Encoding...")
     with Profile() as prof:
-        tokens = _encode(val_data, merges)
+        tokens = _encode(val_data, merges).tolist()
     print(f"  val_data={len(val_data):,} -> tokens={len(tokens):,}: elapsed={prof.milliseconds_formatted}")
 
     print("Deconding...")
     with Profile() as prof:
-        val_out = _decode(tokens, vocab)
+        val_out = _decode(tokens, vocab).decode()
     print(f"  tokens={len(tokens):,} -> val_out={len(val_out):,}: elapsed={prof.milliseconds_formatted}")
     assert len(val_out) == len(val_data)
     assert val_out == val_data
