@@ -121,12 +121,14 @@ Though the text is non-sensical, this very small model has captured the cadence 
 ## TODO
 
 P0:
+- Clean up repo of stale files
+- Update .gitignore
+- Remove code TODOs
 - Add GitHub actions for formatters / linters / checkers
 - Unit tests
     - RegexTokenizer
 - RegexTokenizer
     - Add support for special tokens
-- Remove code TODOs
 
 P1:
 - Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
