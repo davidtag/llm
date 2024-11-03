@@ -92,3 +92,12 @@ class TokenRegistry(_BaseRegistry):
     def test_token_file(self) -> Path:
         """Path containing the test split of the text data."""
         return Path(self.token_dir, "test.txt")
+
+
+class ModelRegistry(_BaseRegistry):
+    """Registry for trained model checkpoints."""
+
+    @property
+    def checkpoint_dir(self) -> Path:
+        """Root directory for all trained model checkpoints."""
+        return Path(self.assets_dir, "model_checkpoints")
