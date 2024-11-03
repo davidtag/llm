@@ -1,6 +1,11 @@
 # pylint: disable=C0103
 """Implementation of a Transformer model architecture."""
 
+from __future__ import annotations
+
+from pathlib import Path
+import pickle
+from os import PathLike
 from typing import Optional
 
 import numpy as np
@@ -117,6 +122,38 @@ class Transformer(Model):
         self.decoder.load_parameters(params["decoder"])
         self.final_norm.load_parameters(params["final_norm"])
         self.unembedding_layer.load_parameters(params["unembedding_layer"])
+
+    def save(self, model_file: PathLike) -> None:
+        model_path = Path(model_file)
+        base_dir = model_path.parent
+        base_dir.mkdir(parents=False, exist_ok=True)
+        constructor_args = {
+            "vocab_size": self.vocab_size,
+            "context_size": self.context_size,
+            "n_blocks": self.n_blocks,
+            "d_model": self.d_model,
+            "d_k": self.d_k,
+            "d_v": self.d_v,
+            "h": self.h,
+            "d_ff": self.d_ff,
+            "dtype": self.dtype,
+            "enable_grad": self.enable_grad,
+            "optimizer": self.optimizer,
+        }
+        params = self.get_parameters()
+        model_definition = [None, params]
+        with open(model_path, "wb") as f:
+            pickle.dump(model_definition, f)
+
+    def load(self, model_file: PathLike) -> None:  # Transformer:
+        with open(model_file, "rb") as f:
+            model_definition = pickle.load(f)
+        if not isinstance(model_definition, list) and not len(model_definition) == 2:
+            raise ValueError("Invalid model file")
+        constructor_args, params = model_definition
+        # model = cls(**constructor_args)
+        self.load_parameters(params)
+        # return model
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
