@@ -71,21 +71,11 @@ PYTHONPATH=. python scripts/generate_text.py -t default_10k -n v2 -c 100
     - Should FeedForward have normalization layer before activation?
         # See Karpathy's "Building makemore part3", 1:07:00
         # [Linear -> Norm -> ReLU] * N -> Linear -> Norm - (+identity) -> Relu
-- Support on-disk model dumping and loading (factory method): dump_model(file), load_model(file)
-    - Transformer (parameters + settings)
-- Create virtual env and helper scripts
-    - Use latest Python version or one just before it
-    - Use latest numpy
-        - add copy=False to all reshape()s
-    - Add requirements files
-    - Add test runner
-- Data Loader & batcher
+- Add copy=False to all numpy reshapes
 - Dropout layer for training deeper networks and avoiding overfitting
     - See Karpathy's "building GPT from scratch" video ~1:40:00 and also Transformer/GPT-1 papers
 - Revisit hack in LayerNorm when n_input==2
 - Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
-- Make script to download all data assets:
-    https://ocw.mit.edu/ans7870/6/6.006/s08/lecturenotes/files/t8.shakespeare.txt
 - Analyze the embeddings
     - 2D PCA for viz
         - do we see natural groups? whitespace, punctuation, character names
