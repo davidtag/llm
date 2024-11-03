@@ -52,9 +52,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, self.targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -86,9 +86,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, self.targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -122,9 +122,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, self.targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -164,9 +164,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -204,9 +204,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, self.targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -243,9 +243,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, self.targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -283,9 +283,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, self.targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -323,9 +323,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -363,9 +363,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -404,9 +404,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_iters - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
@@ -456,9 +456,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
                 loss = loss_fn.forward(logits, targets)
 
                 if i == 0 and j == 0:
-                    initial_loss = loss
+                    initial_loss = float(loss)
                 if i == num_epochs - 1 and j == context_size - 1:
-                    last_loss = loss
+                    last_loss = float(loss)
                     break
 
                 # Backward Pass
@@ -530,9 +530,9 @@ class TestTrainingEndToEnd(unittest.TestCase):
             loss = loss_fn.forward(logits, targets)
 
             if i == 0:
-                initial_loss = loss
+                initial_loss = float(loss)
             if i == num_epochs - 1:
-                last_loss = loss
+                last_loss = float(loss)
                 break
 
             # Backward Pass
