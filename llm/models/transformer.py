@@ -6,7 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 import pickle
 from os import PathLike
-from typing import Optional
+from typing import Generator, Optional
 
 import numpy as np
 
@@ -228,9 +228,21 @@ class Transformer(Model):
 
     def generate(self, start_sequence: np.ndarray, max_tokens: int = 5, is_random: bool = True) -> np.ndarray:
         """Generate an output sequence based on predicted next token probabilities."""
+        output_sequence = []
+
+        for token in self.generate_stream(
+            start_sequence=start_sequence, max_tokens=max_tokens, is_random=is_random
+        ):
+            output_sequence.append(token)
+
+        return np.array(output_sequence)
+
+    def generate_stream(
+        self, start_sequence: np.ndarray, max_tokens: int = 5, is_random: bool = True
+    ) -> Generator[int]:
+        """Generate an output stream based on predicted next token probabilities."""
         assert start_sequence.ndim == 1
         current_sequence = start_sequence.copy()
-        output_sequence = []
 
         for _ in range(max_tokens):
             probs = self.predict(current_sequence)
@@ -239,6 +251,4 @@ class Transformer(Model):
             else:
                 token = np.argmax(probs)
             current_sequence = np.append(current_sequence, token)[-self.context_size :]
-            output_sequence.append(token)
-
-        return np.array(output_sequence)
+            yield int(token)

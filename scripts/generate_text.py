@@ -2,6 +2,7 @@
 
 import argparse
 from pathlib import Path
+import sys
 
 import numpy as np
 
@@ -52,10 +53,11 @@ def main(args: argparse.Namespace) -> None:
     start_tokens = tokenizer.encode(start_str)
     start_sequence = np.array(start_tokens)
 
-    output_tokens = model.generate(start_sequence, max_tokens=500).tolist()
-    output_str = tokenizer.decode(output_tokens)
-    complete_str = start_str + output_str
-    print(complete_str)
+    print(start_str)
+    for token in model.generate_stream(start_sequence, max_tokens=500):
+        text = tokenizer.decode([token])
+        sys.stdout.write(text)
+        sys.stdout.flush()
     print("=================================================================================")
 
 
