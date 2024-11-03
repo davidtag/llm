@@ -282,7 +282,7 @@ def _train_piece_cache(
 
     top_pieces = sorted(
         piece_counter.keys(),
-        key=lambda piece, counter=piece_counter: counter[piece].count,
+        key=lambda piece, counter=piece_counter: counter[piece].count,  # type: ignore[misc]
         reverse=True,
     )[:num_extra_pieces]
     top_pieces_cache = {piece: piece_counter[piece].tokens for piece in top_pieces}
