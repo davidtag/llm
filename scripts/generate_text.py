@@ -36,6 +36,7 @@ def _load_model_for_eval(
     )
 
     model = Transformer.load_for_eval(model_file=checkpoint_path)
+    print(f"Loaded model {checkpoint_name}:{checkpoint_iter} with n_params={model.n_params:,}")
     return model
 
 
