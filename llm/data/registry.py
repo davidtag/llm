@@ -69,7 +69,26 @@ class TokenizerRegistry(_BaseRegistry):
 class TokenRegistry(_BaseRegistry):
     """Registry for all token-based assets."""
 
+    def __init__(self, tokenizer_name: str) -> None:
+        super().__init__()
+        self.tokenizer_name = tokenizer_name
+
     @property
     def token_dir(self) -> Path:
-        """Root directory for all text assets."""
-        return Path(self.assets_dir, "tokens")
+        """Root directory for all token assets for this tokenizer."""
+        return Path(self.assets_dir, "tokens", self.tokenizer_name)
+
+    @property
+    def train_token_file(self) -> Path:
+        """Path containing the train split of the text data."""
+        return Path(self.token_dir, "train.txt")
+
+    @property
+    def val_token_file(self) -> Path:
+        """Path containing the val split of the text data."""
+        return Path(self.token_dir, "val.txt")
+
+    @property
+    def test_token_file(self) -> Path:
+        """Path containing the test split of the text data."""
+        return Path(self.token_dir, "test.txt")
