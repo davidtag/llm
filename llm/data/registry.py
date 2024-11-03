@@ -1,4 +1,4 @@
-"""Registry of all data assets."""
+"""Registry of all assets."""
 
 from pathlib import Path
 
