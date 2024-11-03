@@ -25,6 +25,21 @@ CHECKPOINTS_DIR = Path("checkpoints/")
 # v5: start from v4.33000 and lr=0.0001. context_size=128. batch_size=32.
 STARTING_CHECKPOINT = Path(CHECKPOINTS_DIR, "v5", "checkpoint.7000.1730563202097.pkl")
 
+"""In new script:
+
+Set context_size=512 in code.
+
+python scripts/train_model.py -y -n v6 -t default_10k -bs 1 -nb 100 -lr 0.005
+python scripts/train_model.py -y -n v7 -t default_10k -bs 1 -nb 100 -lr 0.001 -s v6 -c 100
+python scripts/train_model.py -y -n v8 -t default_10k -bs 2 -nb 10000 -lr 0.001 -s v7 -c 100
+python scripts/train_model.py -y -n v9 -t default_10k -bs 4 -nb 5000 -lr 0.001 -s v8 -c 10000
+python scripts/train_model.py -y -n v10 -t default_10k -bs 2 -nb 1000 -lr 0.0002 -s v9 -c 2001
+python scripts/train_model.py -y -n v11 -t default_10k -bs 1 -nb 1000 -lr 0.00005 -s v10 -c 1000
+python scripts/train_model.py -y -n v12 -t default_10k -bs 4 -nb 10000 -lr 0.001 -s v11 -c 1000
+    >> freeze emebedding and first for blocks
+    >> train last 2 blocks and unembedding layer
+"""
+
 
 def _load_text_file(file_path: PathLike) -> str:
     with open(file_path, mode="r", encoding="utf-8") as f:
