@@ -10,7 +10,7 @@ from llm.tokenizers.regex_tokenizer import RegexTokenizer
 from llm.tokenizers.split_pattern import SplitPattern
 
 
-def _validate(tokenizer: RegexTokenizer):
+def _validate(tokenizer: RegexTokenizer) -> None:
     print("-- Validating ----------------------------------------------------")
     sample_unicode = "hello world!!!? (안녕하세요!) joined123 😉"
     print(f"{sample_unicode=}")

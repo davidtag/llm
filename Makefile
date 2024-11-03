@@ -44,3 +44,11 @@ test:  python_extensions
 .PHONY: download_text
 download_text:
 	PYTHONPATH=. python scripts/download_and_split_data.py
+
+
+.PHONY: check
+check:
+	black --check llm/
+	black --check scripts/
+	mypy llm/
+	mypy scripts/
