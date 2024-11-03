@@ -18,6 +18,8 @@ source venv/bin/activate
 make install_requirements
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 ```
+To avoid needing to set the PYTHONPATH each time, the `export` command can be added to the `activate` script.
+
 
 2. Compile Cython extension modules
 ```shell
@@ -55,12 +57,72 @@ python scripts/train_model.py -y -n v2 -t default_10k -bs 8 -nb 100 -s v1 -c 100
 python scripts/generate_text.py -t default_10k -n v2 -c 100
 ```
 
+## Sample Generation
+
+Here's an example of the generation output for a model trained on the works of Shakespeare. It uses a vocabulary of 10,256 tokens, also trained on the same source text, and context size of 128. It has 1.6M paramers, 1,000x smaller than GPT-2, and 100,000x smaller than GPT-3. It was trained on 100,000 randomly sampled batches of size 16 with decaying learning rate.
+
+The context window was seeded with `"ACT I. Scene I.\n\n"` for generation:
+```text
+ACT I. Scene I.
+
+
+Enter ANGELO with a letter
+
+  ISABELLA. The man of friar should never be affords,
+    But holy sir, in Vienna, I foe,
+    Come to light again, if not one y'are mad,
+    I shall be reveng'd i' his bed.
+  ANGELO. I pray ye show myself.
+    I have leave you, sir! I have heard of your justice
+    Brid your affection.
+  LUCIO. [To ISABELLA] You know your private guation is
+    A gentleman of his knowledge; if your reason
+    Will put yourself into an intent
+    When he is in love to good manners, as oft
+    It might not satisfy them. Heaven increase he
+    That wears by us thus to give 'em. Yet tell me
+    These griefs and not what he would serve my bear
+    A lord of France! The deputy leads him
+    In a wonder who waits the husband,
+    Is left the three-alloon, that he hath fought,
+    And takes this a flap of brazen pay and hate
+    Runs by his vacant in his cursed wrath.
+    So, March have we all against a line
+    Be heat for mercy left enemy to me,
+    And pray'rs if you were mistaken to show,
+    Such French got Sackles thy cheeks and ghosts,
+    Even, to stop their tags, in despiteful truth,
+    When thou disasters of Salisbury fought,
+    And to the nobility of the world,
+    When thousands vanquisherly besiege,
+    Poor fiery sceptresadoes the minor stands,
+    The Bishop, his and quantityilties,
+    Who writ behaviour! He hath no actor drops
+    Cleopatra traitor; in onehere I learn'd
+    To any o' so wise with the heavens; which we call
+    The loveful fathers prick'd, perus'd by rushes-
+    For husbands, which should not bear a wild man,
+    Mine honour'd is but weak as many wrong.
+  DUNCAN. Welcome, Queen.
+  DUNCAN. Guildenstern sadly yourselves.
+    Is that the tyrant my master made true?
+  BRUTUS. Why, Sir?
+  LENNOX. To draw aside; he is heavy, and therefore
+    ARCHBISHOP Hunted.
+  MACBETH. I am eag strangers
+    He'll seek his laws, and meet us with none.
+                          Enter Banquo.
+
+  BANQUO. Hail, fair countrymen.
+    These bear superfluous
+```
+Though the text is non-sensical, this very small model has captured the cadence and structure of a Shakespeare play, understanding the essence of dialogue and play directions. Some modeling of dependencies is also captured, with the character Banquo entering and then speaking near the end of the generation.
+
 ## TODO
 
 P0:
 - Add GitHub actions for formatters / linters / checkers
 - Unit tests
-    - bpe.pyx
     - RegexTokenizer
     - New modules in llm/data
 - RegexTokenizer
@@ -69,6 +131,7 @@ P0:
     - 2D PCA for viz
         - do we see natural groups? whitespace, punctuation, character names
     - Clustering
+- Remove code TODOs
 
 P1:
 - Revisit hack in LayerNorm when n_input==2
