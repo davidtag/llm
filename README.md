@@ -122,7 +122,6 @@ Though the text is non-sensical, this very small model has captured the cadence 
 
 P0:
 - Clean up repo of stale files
-- Update .gitignore
 - Remove code TODOs
 - Add GitHub actions for formatters / linters / checkers
 - Unit tests
