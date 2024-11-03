@@ -124,6 +124,7 @@ class Transformer(Model):
         self.unembedding_layer.load_parameters(params["unembedding_layer"])
 
     def save(self, model_file: PathLike) -> None:
+        """Checkpoint the current model state to disk."""
         model_path = Path(model_file)
         base_dir = model_path.parent
         base_dir.mkdir(parents=False, exist_ok=True)
@@ -144,6 +145,7 @@ class Transformer(Model):
             pickle.dump(model_definition, f)
 
     def load(self, model_file: PathLike) -> None:
+        """Load model parameters from a checkpoint file on disk."""
         with open(model_file, "rb") as f:
             model_definition = pickle.load(f)
         if not isinstance(model_definition, list) and not len(model_definition) == 2:
@@ -153,6 +155,7 @@ class Transformer(Model):
 
     @classmethod
     def load_for_training(cls, model_file: PathLike, optimizer: Optimizer) -> Transformer:
+        """Initialize a model from a checkpoint file on disk and set the optimizer."""
         with open(model_file, "rb") as f:
             model_definition = pickle.load(f)
         if not isinstance(model_definition, list) and not len(model_definition) == 2:
@@ -168,6 +171,7 @@ class Transformer(Model):
 
     @classmethod
     def load_for_eval(cls, model_file: PathLike) -> Transformer:
+        """Initialize a model from a checkpoint file on disk in evaluation mode."""
         with open(model_file, "rb") as f:
             model_definition = pickle.load(f)
         if not isinstance(model_definition, list) and not len(model_definition) == 2:
