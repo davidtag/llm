@@ -16,6 +16,7 @@ def get_cython_extension_modules() -> list[Extension]:
         compiler_directives={
             "language_level": "3str",
         },
+        build_dir="build",
     )
 
 

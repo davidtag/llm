@@ -2,11 +2,9 @@
 # This project's ignores                                    #
 #############################################################
 
+
 # Downloaded files & checkpoint artifacts
 assets/
-
-# Compiled Cython modules
-llm/tokenizers/cython/*.c
 
 
 #############################################################
