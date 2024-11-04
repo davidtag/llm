@@ -161,19 +161,18 @@ The difference in tokenization here occurs because of the logic of the GPT-4 spl
 ## TODO
 
 P0:
-- Clean up repo of stale files
+- Add unit tests for RegexTokenizer
+- Create a backup branch, then flatten this branch to 1 commit
 - Add GitHub actions for formatters / linters / checkers
-- Unit tests
-    - RegexTokenizer
-- RegexTokenizer
-    - Add support for special tokens
+
+P1:
 - Test on Python >=3.9
 - Update pyproject.toml to support packaging
     - dependencies
     - optional dependencies
     - build-system
 
-P1:
+P2:
 - Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)
 - Analyze the embeddings
     - 2D PCA for viz
