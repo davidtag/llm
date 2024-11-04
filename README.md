@@ -52,7 +52,7 @@ python scripts/train_model.py -y -n v1 -t default_10k -bs 8 -nb 100
 python scripts/train_model.py -y -n v2 -t default_10k -bs 8 -nb 100 -s v1 -c 100 -lr 0.0001
 ```
 
-8. Generate output from the model:
+8. **Generate output from the model**:
 ```shell
 python scripts/generate_text.py -t default_10k -n v2 -c 100
 ```
@@ -120,10 +120,34 @@ Enter ANGELO with a letter
 Though the text is non-sensical, this very small model has captured the cadence and structure of a Shakespeare play, understanding the essence of dialogue and play directions. Some modeling of dependencies is also captured, with the character Banquo entering and then speaking near the end of the generation.
 
 
+## Serving Requests
+The `serving` directory contains a very basic example of performing tokenization and text completions as a service. This is also illustrative for better understanding tokenization.
+
+Once you've trained a tokenizer and a model, from one terminal run:
+```shell
+python serving/server.py -t default_10k -n v2 -c 100
+```
+
+From another terminal run:
+```shell
+python serving/client.py -e tokenize
+...
+Enter text to tokenize:MACBETH
+    77: [M]
+   609: [AC]
+ 1,243: [BE]
+   538: [TH]
+Enter text to tokenize: MACBETH
+ 1,410: [ MACBETH]
+...
+```
+The difference in tokenization here occurs because of the logic of the GPT-4 split pattern used to train the tokenizer, which attaches leading whitespace to split words.
+
 ## Repo Structure
 
-- `llm`: Contains a library implementation of a Transformer model architecture and BPE tokenizer.
+- `llm`: Contains a library implementation of a Transformer model architecture and BPE tokenizer
 - `scripts`: Implements various functionalities on top of the core libraries
+- `serving`: Sample server/client implementation for tokenization and text-completion as a service
 
 
 ## Future Work
