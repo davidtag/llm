@@ -11,7 +11,7 @@ from llm.data.registry import ModelRegistry, TokenRegistry, TokenizerRegistry
 from llm.loss.cross_entropy import CrossEntropyLoss
 from llm.models.transformer import Transformer
 from llm.optimizers.adam import Adam
-from llm.tokenizers.regex_tokenizer import RegexTokenizer
+from llm.tokenizers import RegexTokenizer
 
 
 def _initialize_checkpoint_dir(args: argparse.Namespace) -> Path:

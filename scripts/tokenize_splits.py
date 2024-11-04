@@ -5,7 +5,7 @@ from pathlib import Path
 
 from llm.data.loaders import load_text_file, write_token_file
 from llm.data.registry import DataRegistry, TokenRegistry, TokenizerRegistry
-from llm.tokenizers.regex_tokenizer import RegexTokenizer
+from llm.tokenizers import RegexTokenizer
 
 
 def _load_tokenizer(name: str) -> RegexTokenizer:

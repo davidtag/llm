@@ -12,7 +12,7 @@ import numpy as np
 
 from llm.data.registry import ModelRegistry, TokenizerRegistry
 from llm.models.transformer import Transformer
-from llm.tokenizers.regex_tokenizer import RegexTokenizer
+from llm.tokenizers import RegexTokenizer
 
 
 def _load_tokenizer(name: str) -> RegexTokenizer:
