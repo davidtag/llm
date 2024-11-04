@@ -122,6 +122,7 @@ def _train_model(
         model.backward(dlogits)
         model.step()
 
+        # Report batch loss and per-token perplexity
         perplexity = np.exp(loss)
         print(f"  {i + 1:6}/{num_batches}: {loss=:6.3f}  {perplexity=:7,.0f}")
 

@@ -83,7 +83,7 @@ class Transformer(Model):
 
     @property
     def n_params(self) -> int:
-        """The number of parameters in the layer."""
+        """The number of parameters in the model."""
         return (
             self.embedding_layer.n_params
             + self.decoder.n_params
