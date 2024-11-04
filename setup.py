@@ -1,7 +1,7 @@
 """Configuration for the llm package."""
 
-from setuptools import setup, Extension
 from Cython.Build import cythonize
+from setuptools import setup, Extension, find_packages
 
 
 def get_cython_extension_modules() -> list[Extension]:
@@ -23,5 +23,6 @@ def get_cython_extension_modules() -> list[Extension]:
 setup(
     name="llm",
     ext_modules=get_cython_extension_modules(),
+    packages=find_packages(),
     zip_safe=False,
 )
