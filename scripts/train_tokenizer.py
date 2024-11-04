@@ -7,7 +7,7 @@ import time
 from llm.data.loaders import load_text_file
 from llm.data.registry import DataRegistry, TokenizerRegistry
 from llm.tokenizers import RegexTokenizer
-from llm.tokenizers.split_pattern import SplitPattern
+from llm.tokenizers import SplitPattern
 
 
 def _validate(tokenizer: RegexTokenizer) -> None:
