@@ -1,10 +1,10 @@
-name: Python Static Analyzers
+name: Python Unit Tests & Coverage
 
 on: [pull_request]
 
 jobs:
-  lint:
-    name: Python Static Analyzers
+  test:
+    name: Python Unit Tests & Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -19,6 +19,6 @@ jobs:
         run: |
           make install_requirements
 
-      - name: Run Analyzers
+      - name: Run Tests
         run: |
-          make check
+          make test-coverage

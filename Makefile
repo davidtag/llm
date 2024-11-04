@@ -65,7 +65,7 @@ benchmark:
 ############################################################################
 
 .PHONY: check
-check:
+check: python_extensions
 	black --check llm/
 	black --check scripts/
 	black --check serving/
