@@ -1,5 +1,10 @@
+##############################################
+# Top-Level Makefile for the llm repo
+##############################################
+
 all: default
-default: install_requirements
+default: install_requirements python_extensions test
+
 
 ############################################################################
 # Environment Setup
@@ -18,6 +23,7 @@ install_base_requirements: upgrade_pip
 .PHONY: install_dev_requirements
 install_dev_requirements: upgrade_pip
 	pip install -r requirements_dev.txt
+
 
 .PHONY: install_requirements
 install_requirements: install_base_requirements install_dev_requirements
@@ -41,10 +47,9 @@ test:  python_extensions
 	python -m unittest discover
 
 
-.PHONY: download_text
-download_text:
-	python scripts/download_and_split_data.py
-
+############################################################################
+# Linting
+############################################################################
 
 .PHONY: check
 check:
@@ -54,3 +59,12 @@ check:
 	mypy scripts/
 	flake8 llm/
 	flake8 scripts/
+
+
+############################################################################
+# Convenience Recipes
+############################################################################
+
+.PHONY: download_text
+download_text:
+	python scripts/download_and_split_data.py
