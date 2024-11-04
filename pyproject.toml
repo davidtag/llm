@@ -22,6 +22,8 @@ max-line-length = 110
 ignore = [
     "ANN101", # Missing type annotation for self in method
     "ANN102", # Missing type annotation for cls in classmethod
+    "ANN002", # Missing type annotation for *args
+    "ANN003", # Missing type annotation for **kwargs
     "E203",   # whitespace before ':' (conflicts with black)
     "W503",   # line break before binary operator  (conflicts with black)
 ]

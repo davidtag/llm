@@ -55,10 +55,13 @@ test:  python_extensions
 check:
 	black --check llm/
 	black --check scripts/
+	black --check serving/
 	mypy llm/
 	mypy scripts/
+	mypy serving/
 	flake8 llm/
 	flake8 scripts/
+	flake8 serving/
 
 
 ############################################################################
