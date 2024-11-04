@@ -1,3 +1,6 @@
+# For unit test coverage
+coverage==7.6.4
+
 # Linters & static analyzers
 black==24.8.0
 mypy==1.13.0
