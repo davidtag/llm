@@ -1,3 +1,17 @@
+#############################################################
+# This project's ignores                                    #
+#############################################################
+
+
+# Downloaded files & checkpoint artifacts
+assets/
+
+
+#############################################################
+# Standard Python ignores, as suggested by GitHub           #
+#############################################################
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
