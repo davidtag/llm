@@ -65,7 +65,7 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train the Transformer model.")
+    parser = argparse.ArgumentParser(description="Generate text from a trained Transformer model.")
     parser.add_argument(
         "-t",
         "--tokenizer_name",
