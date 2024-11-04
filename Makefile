@@ -47,6 +47,12 @@ test:  python_extensions
 	python -m unittest discover
 
 
+.PHONY: test-coverage
+test-coverage: python_extensions
+	coverage run -m unittest discover
+	coverage report --fail-under=90
+
+
 .PHONY: benchmark
 benchmark:
 	python llm/tokenizers/benchmarks/benchmark_stdtoken.py
@@ -59,7 +65,7 @@ benchmark:
 ############################################################################
 
 .PHONY: check
-check:
+check: python_extensions
 	black --check llm/
 	black --check scripts/
 	black --check serving/
