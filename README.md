@@ -48,8 +48,8 @@ python scripts/tokenize_splits.py -n default_10k
 
 7. **Train the Transformer model** Trains a small model of 1.6M parameters. Hyperparameters can be changed by modifying the model constructor in the script. The script has the ability to continue training from a checkpoint with a different learning rate, batch size, and number of batches. The trained model checkpoints can be found in `assets/model_checkpoints/{v1, v2}`.
 ```shell
-python scripts/train_model.py -y -n v1 -t default_10k -bs 8 -nb 100
-python scripts/train_model.py -y -n v2 -t default_10k -bs 8 -nb 100 -s v1 -c 100 -lr 0.0001
+python scripts/train_model.py -y -n v1 -t default_10k -bs 4 -nb 100
+python scripts/train_model.py -y -n v2 -t default_10k -bs 4 -nb 100 -s v1 -c 100 -lr 0.0001
 ```
 
 8. **Generate output from the model**:
@@ -146,15 +146,14 @@ The difference in tokenization here occurs because of the logic of the GPT-4 spl
 ## Repo Structure
 
 - `llm`: Contains a library implementation of a Transformer model architecture and BPE tokenizer
-- `scripts`: Implements various functionalities on top of the core libraries
+- `scripts`: Implements various functionalities on top of the core libraries for training and generation
 - `serving`: Sample server/client implementation for tokenization and text-completion as a service
 
 
 ## Future Work
 
 - Add support for special tokens in `RegexTokenizer`
-- Convert the plain Python dictionary to an LRU cache in `RegexTokenizer` so it could be used in a serving system.
-- Implement a lightweight REST API server implementing tokenization and completions.
+- Convert the plain Python dictionary to an LRU cache in `RegexTokenizer` so it can be used in a serving system.
 - Speed up text generation in `Transformer` using a KV-cache
 
 

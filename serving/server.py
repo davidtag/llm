@@ -89,7 +89,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         tokens = self.tokenizer.encode(text)
         start_sequence = np.array(tokens)
 
-        for token in self.model.generate_stream(start_sequence, max_tokens=500):
+        for token in self.model.generate_stream(start_sequence, max_tokens=100):
             token_bytes = self.tokenizer.decode_bytes([token])
             self.wfile.write(token_bytes)
             self.wfile.flush()  # Ensure immediate transmission
