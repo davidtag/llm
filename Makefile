@@ -47,6 +47,13 @@ test:  python_extensions
 	python -m unittest discover
 
 
+.PHONY: benchmark
+benchmark:
+	python llm/tokenizers/benchmarks/benchmark_stdtoken.py
+	python llm/tokenizers/benchmarks/benchmark_frequencies.py
+	python llm/tokenizers/benchmarks/benchmark_merges.py
+
+
 ############################################################################
 # Linting
 ############################################################################
