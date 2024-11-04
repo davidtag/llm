@@ -143,6 +143,11 @@ P0:
     - RegexTokenizer
 - RegexTokenizer
     - Add support for special tokens
+- Test on Python >=3.9
+- Update pyproject.toml to support packaging
+    - dependencies
+    - optional dependencies
+    - build-system
 
 P1:
 - Explore GPU acceleration via CuPy (dropin) or Numba (JIT compiler for Python)

@@ -1,5 +1,21 @@
+[project]
+name = "llm"
+version = "0.1.0"
+description = "Ground-up implementation of LLMs with `NumPy` and `regex` as the only dependencies"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "David Tagliamonti" }, { email = "noreply@dtag.ai" }]
+requires-python = ">=3.12"
+
+
+[project.urls]
+homepage = "https://github.com/davidtag/llm"
+repository = "https://github.com/davidtag/llm"
+
+
 [tool.black]
 line-length = 110
+
 
 [tool.flake8]
 max-line-length = 110
