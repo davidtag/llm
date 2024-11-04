@@ -5,7 +5,6 @@ from typing import Callable
 
 import numpy as np
 
-from llm.tokenizers.benchmarks.profile import Profile
 from llm.tokenizers.cython.frequencies import (
     get_pairwise_token_frequencies_sequential_pure_python,
     get_pairwise_token_frequencies_from_list,
@@ -19,6 +18,7 @@ from llm.tokenizers.cython.frequencies import (
 )
 from llm.tokenizers.cython.stdtoken import TokenPair, TokenPairNode
 from llm.tokenizers.cython.pytoken import TokenDtype, MaskedTokenDtype, NumpyTokenSequence
+from llm.utils.profile import Profile
 
 
 def get_pairwise_token_frequencies_from_list_wrapped(

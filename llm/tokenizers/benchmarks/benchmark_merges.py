@@ -4,7 +4,6 @@ import heapq
 
 import numpy as np
 
-from llm.tokenizers.benchmarks.profile import Profile
 from llm.tokenizers.cython.frequencies import (
     get_pairwise_token_frequencies_numpy,
     get_pairwise_token_frequencies_numpy_maxonly,
@@ -16,6 +15,7 @@ from llm.tokenizers.cython.merge import (
     merge_inplace_and_update_frequencies_and_heap,
 )
 from llm.tokenizers.cython.pytoken import TokenDtype, NumpyTokenSequence
+from llm.utils.profile import Profile
 
 
 def _repeated_freq_and_merge(tokens: NumpyTokenSequence, num_merges: int) -> int:
