@@ -1,0 +1,25 @@
+name: Python Static Analyzers
+
+on: [pull_request]
+
+jobs:
+  lint:
+    name: Python Static Analyzers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Setup Python Environemnt
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.12
+
+      - name: Install Requirements
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements_dev.txt
+
+      - name: Run Analyzers
+        run: |
+          make check
