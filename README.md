@@ -2,7 +2,7 @@
 
 Ground-up implementation of LLMs with `NumPy` and `regex` as the only dependencies.
 
-The purpose of this repo is educational - explore the main concepts of LLMs without relying on 3rd party packages for the heavy lifting. In particular, the computation of gradients (i.e., the "backward pass") is done manually, instead of relying on autograd systems, like the ones in PyTorch and Tensorflow. The Byte-Pair Encoding (BPE) algorithm is also manually implemented with no dependencies other than a regex library to support GPT-style text split patterns, and supports training the merges.
+The purpose of this repo is educational - explore the main concepts of LLMs without relying on 3rd party packages for the heavy lifting. In particular, the computation of gradients (i.e., the "backward pass") is done manually, instead of relying on autograd systems, like the ones in PyTorch and Tensorflow. The Byte-Pair Encoding (BPE) algorithm is also manually implemented - with no dependencies other than a regex library to support GPT-style text split patterns - and supports training the merges.
 
 A good amount of effort has been spent on making all aspects of the BPE tokenizer (train, encode, decode) fast through algorithmic optimizations and by implementing the core operations in Python extension modules with Cython.
 
