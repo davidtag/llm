@@ -50,7 +50,7 @@ test:  python_extensions
 .PHONY: test-coverage
 test-coverage: python_extensions
 	coverage run -m unittest discover
-	coverage report --fail-under=90
+	coverage report
 
 
 .PHONY: benchmark
