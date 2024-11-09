@@ -50,7 +50,7 @@ def _evaluate_model(
     loss_fn = CrossEntropyLoss(enable_grad=False)
 
     num_predictions = 0
-    total_loss = 0
+    total_loss = 0.0
 
     def get_batch() -> tuple[np.ndarray, np.ndarray]:
         idxs = np.random.randint(low=0, high=len(eval_tokens) - model.context_size, size=batch_size)
@@ -68,7 +68,7 @@ def _evaluate_model(
 
         n = targets.size
         num_predictions += n
-        total_loss += batch_loss * n
+        total_loss += float(batch_loss) * n
 
         avg_loss = total_loss / num_predictions
         perplexity = np.exp(avg_loss)
