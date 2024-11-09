@@ -115,8 +115,8 @@ class TestSaveAndLoad(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory(delete=False)
         self.tokenizer = RegexTokenizer(
             merge_list=[
-                (TokenPair(32, 32), 256),
-                (TokenPair(97, 98), 257),
+                (TokenPair(32, 32), 256),  # " "
+                (TokenPair(97, 98), 257),  # "ab"
             ],
             split_pattern=SplitPattern.get_pattern("gpt-4"),
         )
