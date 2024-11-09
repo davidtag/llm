@@ -1,0 +1,8 @@
+[run]
+source = llm
+omit =
+    llm/tokenizers/benchmarks/*
+
+
+[report]
+fail_under = 95
