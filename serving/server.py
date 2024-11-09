@@ -13,6 +13,7 @@ import numpy as np
 from llm.data.registry import ModelRegistry, TokenizerRegistry
 from llm.models.transformer import Transformer
 from llm.tokenizers import RegexTokenizer
+from llm.tokenizers import bpe
 
 
 def _load_tokenizer(name: str) -> RegexTokenizer:
@@ -76,7 +77,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         tokens = self.tokenizer.encode(text)
 
         for token in tokens:
-            token_text = self.tokenizer.decode([token])
+            token_bytes = self.tokenizer.decode_bytes([token])
+            token_text = bpe.render_bytes(token_bytes)
             self.wfile.write(f"{token:>6,}: [{token_text}]\n".encode("utf-8"))
             self.wfile.flush()  # Ensure immediate transmission
 

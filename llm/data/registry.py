@@ -98,6 +98,11 @@ class TokenRegistry(_BaseRegistry):
 class ModelRegistry(_BaseRegistry):
     """Registry for trained model checkpoints."""
 
+    DEFAULT_1M_NAME = "default_1m"
+    DEFAULT_1M_URL = "https://dtag.ai/wp-content/uploads/2024/11/default_1m.pkl_.pdf"
+    DEFAULT_1M_SIZE = 13_041_634
+    DEFAULT_1M_DIGEST = "241bcfee6623871b8fb390fde870f1e4f90581131489487e288f360e9a0ac1fe"
+
     @property
     def checkpoint_dir(self) -> Path:
         """Root directory for all trained model checkpoints."""

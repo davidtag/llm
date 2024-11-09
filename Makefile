@@ -84,3 +84,8 @@ check: python_extensions
 .PHONY: download_text
 download_text:
 	python scripts/download_and_split_data.py
+
+
+.PHONY: download_pretrained
+download_pretrained:
+	python scripts/download_pretrained_weights.py

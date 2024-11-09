@@ -127,11 +127,18 @@ Though the text is non-sensical, this very small model has captured the cadence 
 
 The `serving` directory contains a very basic example of performing tokenization and text completions as a service. This is also illustrative for better understanding tokenization.
 
-Once you've trained a tokenizer and a model, from one terminal run:
+First, train the `default_10k` tokenizer as described in the Quick Start section. Then, download the pre-trained model weights:
+```shell
+make download_pretrained
+```
+These weights are based on the `default_10k` tokenization. Training the tokenizer is deterministic, so the output of local training will match the one used when training the model, provided all configurations are the same.
+
+Then, from one terminal run:
 
 ```shell
-python serving/server.py -t default_10k -n v2 -c 100
+python serving/server.py -t default_10k -n default_1m -c 0
 ```
+NB: Alternatively, you can use your own trained model by supplying the `-n` and `-c` paramters.
 
 From another terminal run:
 
@@ -149,6 +156,32 @@ Enter text to tokenize: MACBETH
 ```
 
 The difference in tokenization here occurs because of the logic of the GPT-4 split pattern used to train the tokenizer, which splits text by attaching leading whitespace to the start of words.
+
+For text completions, run:
+```shell
+python serving/client.py -e complete
+...
+Enter text to complete: ACT 1. Scene 1.
+ Hold, O butcher's tears!
+    What heavy sense! Tom is this child tigree
+    In such a scorh; and, ere our wings shall down
+    Faocks with all convenient people, we many
+    Their diffks for the heater than a thing in the streets.
+    Why did this night- the south toil pale ghosts,
+    And shunphog'd in to me all his rage and heaven
+    And blood full; so the tide of the gods
+    Pume their offer'd him o'erlook'd unto
+    The lungs are the grove. Here was it not,
+    Being ten times at this afternoon; 'tis full.
+  LADY MACBETH. Away, you mock the general speed from thence.
+                                                 Exeunt certain straight.
+  LADY MACBETH. O, set down your shot,
+    Help your dare not my tongue. Gods, I hear three- pierc'd morn
+    When last night has been different.
+  MACBETH. I have found'd thee too much long.
+...
+```
+The model will use the provided text as input context and begin sample generation, up to 500 tokens.
 
 ## Repo Structure
 
