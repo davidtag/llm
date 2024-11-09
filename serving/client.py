@@ -11,10 +11,20 @@ TOKENIZE_ENDPOINT = "/api/tokenize/"
 COMPLETION_ENDPOINT = "/api/complete/"
 
 
+def _replace_control_characters(user_input: str) -> str:
+    output = user_input.replace(r"\n", "\n")
+    return output
+
+
 def _tokenize(host: str) -> None:
     url = host + TOKENIZE_ENDPOINT
     while True:
-        user_text = input("Enter text to tokenize:")
+        try:
+            user_text = input("Enter text to tokenize:")
+        except (KeyboardInterrupt, EOFError):
+            print()
+            break
+        user_text = _replace_control_characters(user_text)
         user_bytes = user_text.encode("utf-8")
         response = requests.post(url, data=user_bytes, stream=True)
         for chunk in response.iter_content(chunk_size=1):
@@ -25,7 +35,12 @@ def _tokenize(host: str) -> None:
 def _complete(host: str) -> None:
     url = host + COMPLETION_ENDPOINT
     while True:
-        user_text = input("Enter text to complete:")
+        try:
+            user_text = input("Enter text to complete:")
+        except (KeyboardInterrupt, EOFError):
+            print()
+            break
+        user_text = _replace_control_characters(user_text)
         user_bytes = user_text.encode("utf-8")
         response = requests.post(url, data=user_bytes, stream=True)
         for chunk in response.iter_content(chunk_size=1):
