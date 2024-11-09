@@ -80,7 +80,7 @@ if __name__ == "__main__":
         type=str,
         required=True,
         default="",
-        help="The name of a previously saved model checkpoint",
+        help="The name of the saved model checkpoint",
     )
     parser.add_argument(
         "-c",
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         type=int,
         required=True,
         default=0,
-        help="The iteration number of the previously saved model checkpoint",
+        help="The iteration number of the saved model checkpoint",
     )
     args = parser.parse_args()
 
