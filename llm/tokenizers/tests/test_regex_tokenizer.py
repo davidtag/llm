@@ -169,9 +169,15 @@ class TestSaveAndLoad(unittest.TestCase):
         self.assertDictEqual(new_tokenizer.runtime_cache, {})
 
 
+@paramt.parameterized_class(
+    ("verbose",),
+    [(True,), (False,)],
+)
 @patch("builtins.print")
 class TestTrain(unittest.TestCase):
     """Unit tests for train."""
+
+    verbose: bool
 
     def test_train(self, mock_print: MagicMock) -> None:
         """Test training merges."""
@@ -179,7 +185,7 @@ class TestTrain(unittest.TestCase):
             text=" aa   bbaa   ,",
             split_pattern=SplitPattern.get_pattern("gpt-4"),
             num_merges=100,
-            verbose=True,
+            verbose=self.verbose,
         )
 
         self.assertEqual(tokenizer.split_pattern, SplitPattern.get_pattern("gpt-4"))
@@ -191,7 +197,10 @@ class TestTrain(unittest.TestCase):
             ],
         )
 
-        mock_print.assert_called()
+        if self.verbose:
+            mock_print.assert_called()
+        else:
+            mock_print.assert_not_called()
 
     def test_train_piece_cache(self, mock_print: MagicMock) -> None:
         """Test additional training of the piece cache."""
@@ -206,7 +215,7 @@ class TestTrain(unittest.TestCase):
         new_tokenizer = tokenizer.train_piece_cache(
             text=" ababab ababab    ",
             num_extra_pieces=10,
-            verbose=True,
+            verbose=self.verbose,
         )
 
         self.assertEqual(new_tokenizer.split_pattern, SplitPattern.get_pattern("gpt-4"))
@@ -216,4 +225,7 @@ class TestTrain(unittest.TestCase):
         self.assertEqual(new_tokenizer.trained_cache[" ababab"], [32, 257, 257, 257])
         self.assertEqual(new_tokenizer.trained_cache["    "], [256, 256])
 
-        mock_print.assert_called()
+        if self.verbose:
+            mock_print.assert_called()
+        else:
+            mock_print.assert_not_called()
