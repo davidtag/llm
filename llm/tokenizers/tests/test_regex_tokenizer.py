@@ -179,6 +179,28 @@ class TestTrain(unittest.TestCase):
 
     verbose: bool
 
+    def test_validate_num_merges(self, mock_print: MagicMock) -> None:
+        """Test failure if number of merges is negative."""
+        with self.assertRaises(ValueError):
+            tokenizer = RegexTokenizer.train(
+                text="",
+                split_pattern=SplitPattern.get_pattern("gpt-4"),
+                num_merges=-1,
+                verbose=self.verbose,
+            )
+
+    def test_train_with_no_text(self, mock_print: MagicMock) -> None:
+        """Test training results in nor merges if no text."""
+        tokenizer = RegexTokenizer.train(
+            text="",
+            split_pattern=SplitPattern.get_pattern("gpt-4"),
+            num_merges=100,
+            verbose=self.verbose,
+        )
+
+        self.assertEqual(tokenizer.split_pattern, SplitPattern.get_pattern("gpt-4"))
+        self.assertEqual(tokenizer.merge_list, [])
+
     def test_train(self, mock_print: MagicMock) -> None:
         """Test training merges."""
         tokenizer = RegexTokenizer.train(
