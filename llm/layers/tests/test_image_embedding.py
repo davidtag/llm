@@ -15,6 +15,16 @@ class TestImageEmbedding(unittest.TestCase):
     def setUp(self) -> None:
         self.data = np.random.standard_normal(size=(3, 16, 16, 3))  # batch of 3 normalized images
 
+    def test_failed_init(self) -> None:
+        """Test paramter validation failures in the constructore."""
+        with self.assertRaises(ValueError) as cm:
+            ImageEmbedding(patch_size=17, canonical_height=137, canonical_width=137)
+        self.assertEqual(str(cm.exception), "Width must be a multiple of patch size")
+
+        with self.assertRaises(ValueError) as cm:
+            ImageEmbedding(patch_size=16, canonical_height=137, canonical_width=224)
+        self.assertEqual(str(cm.exception), "Height must be a multiple of patch size")
+
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
         model = ImageEmbedding(patch_size=8, canonical_width=16, canonical_height=16, n_channel=3, d_model=64)
@@ -62,6 +72,24 @@ class TestImageEmbedding(unittest.TestCase):
         model.load_parameters(params)
         out2 = model.forward(self.data)
         np.testing.assert_array_compare(operator.__ne__, out1, out2)
+
+    def test_load_parameters_failure(self) -> None:
+        """Test validation in load_parameters()."""
+        model = ImageEmbedding(patch_size=16)
+
+        with self.assertRaises(ValueError) as cm:
+            model.load_parameters({})
+        self.assertEqual(str(cm.exception), "Missing parameters")
+
+        with self.assertRaises(ValueError) as cm:
+            model.load_parameters(
+                {
+                    "class_token": 0,  # type: ignore
+                    "patch_proj": 0,  # type: ignore
+                    "position_embedding_matrix": 0,  # type: ignore
+                }
+            )
+        self.assertEqual(str(cm.exception), "Invalid shape for parameters map")
 
     def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
         """Test that the return value of get_parameters() can be loaded."""
