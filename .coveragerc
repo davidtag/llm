@@ -4,6 +4,7 @@ omit =
     llm/tokenizers/benchmarks/*
     */tests/*
     test_*.py
+branch = True
 
 [report]
-fail_under = 95
+fail_under = 93
