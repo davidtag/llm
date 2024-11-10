@@ -1,9 +1,13 @@
 """Unit tests for transformer.py."""
 
+from pathlib import Path
+import tempfile
 import unittest
+from unittest.mock import MagicMock
 
 import numpy as np
 
+from llm.optimizers import Optimizer
 from llm.models.transformer import Transformer
 
 
@@ -90,3 +94,24 @@ class TestTransformer(unittest.TestCase):
         self.assertTrue(output.shape, (5,))
         self.assertGreaterEqual(np.min(output), 0)
         self.assertLess(np.max(output), 13)
+
+    def test_save_and_load(self) -> None:
+        """Test the ability to save and load checkpoint files."""
+        with tempfile.NamedTemporaryFile() as f:
+            path = Path(f.name)
+            self.model.save(path)
+
+            self.model.load(path)
+
+            optimizer = MagicMock(spec=Optimizer)
+            model2 = Transformer.load_for_training(path, optimizer)
+            self.assertTrue(model2.enable_grad)
+            self.assertIs(model2.optimizer, optimizer)
+
+            model3 = Transformer.load_for_eval(path)
+            self.assertFalse(model3.enable_grad)
+            self.assertIsNone(model3.optimizer)
+
+            with self.assertRaises(ValueError):  # load fails because there's a size mismatch
+                model4 = Transformer(vocab_size=1, context_size=1, n_blocks=1)
+                model4.load(path)
