@@ -1,4 +1,4 @@
-"""Unit tests for loaders.py"""
+"""Unit tests for loaders.py."""
 
 from pathlib import Path
 import tempfile
