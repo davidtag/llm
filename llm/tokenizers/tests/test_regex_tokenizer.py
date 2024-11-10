@@ -8,13 +8,21 @@ import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
 
+import parameterized as paramt
+
 from llm.tokenizers.cython.stdtoken import TokenPair
 from llm.tokenizers.regex_tokenizer import RegexTokenizer
 from llm.tokenizers.split_pattern import SplitPattern
 
 
+@paramt.parameterized_class(
+    ("use_cache",),
+    [(True,), (False,)],
+)
 class TestEmptyMerges(unittest.TestCase):
     """Unit tests for RegexTokenizer when there's an empty merge list."""
+
+    use_cache: bool
 
     def setUp(self) -> None:
         self.tokenizer = RegexTokenizer(
@@ -26,7 +34,7 @@ class TestEmptyMerges(unittest.TestCase):
         self.assertEqual(self.tokenizer.vocab_size, 256)
 
     def test_empty(self) -> None:
-        tokens = self.tokenizer.encode("")
+        tokens = self.tokenizer.encode("", use_cache=self.use_cache)
         self.assertEqual(tokens, [])
 
         text_bytes = self.tokenizer.decode_bytes([])
@@ -36,7 +44,7 @@ class TestEmptyMerges(unittest.TestCase):
         self.assertEqual(text, "")
 
     def test_encode_single_split(self) -> None:
-        tokens = self.tokenizer.encode("aa")
+        tokens = self.tokenizer.encode("aa", use_cache=self.use_cache)
         self.assertEqual(tokens, [97, 97])
 
         text_bytes = self.tokenizer.decode_bytes([97, 97])
@@ -46,7 +54,7 @@ class TestEmptyMerges(unittest.TestCase):
         self.assertEqual(text, "aa")
 
     def test_multiple_splits(self) -> None:
-        tokens = self.tokenizer.encode("a b")
+        tokens = self.tokenizer.encode("a b", use_cache=self.use_cache)
         self.assertEqual(tokens, [97, 32, 98])
 
         text_bytes = self.tokenizer.decode_bytes([97, 32, 98])
@@ -56,8 +64,14 @@ class TestEmptyMerges(unittest.TestCase):
         self.assertEqual(text, "a b")
 
 
+@paramt.parameterized_class(
+    ("use_cache",),
+    [(True,), (False,)],
+)
 class TestSingleMerge(unittest.TestCase):
     """Unit tests for RegexTokenizer when there's a single merge rule."""
+
+    use_cache: bool
 
     def setUp(self) -> None:
         self.tokenizer = RegexTokenizer(
@@ -69,7 +83,7 @@ class TestSingleMerge(unittest.TestCase):
         self.assertEqual(self.tokenizer.vocab_size, 257)
 
     def test_empty(self) -> None:
-        tokens = self.tokenizer.encode("")
+        tokens = self.tokenizer.encode("", use_cache=self.use_cache)
         self.assertEqual(tokens, [])
 
         text_bytes = self.tokenizer.decode_bytes([])
@@ -79,7 +93,7 @@ class TestSingleMerge(unittest.TestCase):
         self.assertEqual(text, "")
 
     def test_encode_single_split(self) -> None:
-        tokens = self.tokenizer.encode("aa")
+        tokens = self.tokenizer.encode("aa", use_cache=self.use_cache)
         self.assertEqual(tokens, [97, 97])
 
         text_bytes = self.tokenizer.decode_bytes([97, 97])
@@ -89,7 +103,7 @@ class TestSingleMerge(unittest.TestCase):
         self.assertEqual(text, "aa")
 
     def test_multiple_splits(self) -> None:
-        tokens = self.tokenizer.encode("a b")
+        tokens = self.tokenizer.encode("a b", use_cache=self.use_cache)
         self.assertEqual(tokens, [97, 32, 98])
 
         text_bytes = self.tokenizer.decode_bytes([97, 32, 98])
@@ -99,7 +113,7 @@ class TestSingleMerge(unittest.TestCase):
         self.assertEqual(text, "a b")
 
     def test_merge(self) -> None:
-        tokens = self.tokenizer.encode("a   b")
+        tokens = self.tokenizer.encode("a   b", use_cache=self.use_cache)
         self.assertEqual(tokens, [97, 256, 32, 98])
 
         text_bytes = self.tokenizer.decode_bytes([97, 256, 32, 98])
