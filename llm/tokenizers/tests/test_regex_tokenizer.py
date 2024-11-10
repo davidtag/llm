@@ -167,7 +167,6 @@ class TestTrain(unittest.TestCase):
             num_merges=100,
             verbose=True,
         )
-        mock_print.assert_called()
 
         self.assertEqual(tokenizer.split_pattern, SplitPattern.get_pattern("gpt-4"))
         self.assertEqual(
@@ -177,6 +176,8 @@ class TestTrain(unittest.TestCase):
                 (TokenPair(first=97, second=97), 257),  # "aa"
             ],
         )
+
+        mock_print.assert_called()
 
     def test_train_piece_cache(self, mock_print: MagicMock) -> None:
         """Test additional training of the piece cache."""
@@ -193,7 +194,6 @@ class TestTrain(unittest.TestCase):
             num_extra_pieces=10,
             verbose=True,
         )
-        mock_print.assert_called()
 
         self.assertEqual(new_tokenizer.split_pattern, SplitPattern.get_pattern("gpt-4"))
         self.assertEqual(new_tokenizer.merge_list, tokenizer.merge_list)
@@ -201,3 +201,5 @@ class TestTrain(unittest.TestCase):
 
         self.assertEqual(new_tokenizer.trained_cache[" ababab"], [32, 257, 257, 257])
         self.assertEqual(new_tokenizer.trained_cache["    "], [256, 256])
+
+        mock_print.assert_called()
