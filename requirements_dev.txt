@@ -1,5 +1,6 @@
-# For unit test coverage
+# For unit tests
 coverage==7.6.4
+parameterized==0.9.0
 
 # Linters & static analyzers
 black==24.8.0

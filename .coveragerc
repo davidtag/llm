@@ -1,0 +1,10 @@
+[run]
+source = llm
+omit =
+    llm/tokenizers/benchmarks/*
+    */tests/*
+    test_*.py
+branch = True
+
+[report]
+fail_under = 93
