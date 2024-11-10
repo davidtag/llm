@@ -6,6 +6,7 @@ These are largely interface tests. There are more involved functional tests in t
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch, MagicMock
 
 from llm.tokenizers.cython.stdtoken import TokenPair
 from llm.tokenizers.regex_tokenizer import RegexTokenizer
@@ -154,17 +155,20 @@ class TestSaveAndLoad(unittest.TestCase):
         self.assertDictEqual(new_tokenizer.runtime_cache, {})
 
 
+@patch("builtins.print")
 class TestTrain(unittest.TestCase):
     """Unit tests for train."""
 
-    def test_train(self) -> None:
+    def test_train(self, mock_print: MagicMock) -> None:
         """Test training merges."""
         tokenizer = RegexTokenizer.train(
             text=" aa   bbaa   ,",
             split_pattern=SplitPattern.get_pattern("gpt-4"),
             num_merges=100,
-            verbose=False,
+            verbose=True,
         )
+        mock_print.assert_called()
+
         self.assertEqual(tokenizer.split_pattern, SplitPattern.get_pattern("gpt-4"))
         self.assertEqual(
             tokenizer.merge_list,
@@ -174,7 +178,7 @@ class TestTrain(unittest.TestCase):
             ],
         )
 
-    def test_train_piece_cache(self) -> None:
+    def test_train_piece_cache(self, mock_print: MagicMock) -> None:
         """Test additional training of the piece cache."""
         tokenizer = RegexTokenizer(
             merge_list=[
@@ -187,8 +191,10 @@ class TestTrain(unittest.TestCase):
         new_tokenizer = tokenizer.train_piece_cache(
             text=" ababab ababab    ",
             num_extra_pieces=10,
-            verbose=False,
+            verbose=True,
         )
+        mock_print.assert_called()
+
         self.assertEqual(new_tokenizer.split_pattern, SplitPattern.get_pattern("gpt-4"))
         self.assertEqual(new_tokenizer.merge_list, tokenizer.merge_list)
         self.assertEqual(len(new_tokenizer.trained_cache), len(tokenizer.trained_cache) + 2)
