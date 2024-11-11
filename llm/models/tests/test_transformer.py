@@ -77,6 +77,7 @@ class TestTransformer(unittest.TestCase):
         self.model.backward(dout)
 
         self.assertTrue(np.all(self.model.unembedding_layer.cache["dx"] == 0))
+        # TODO(dtag): add test for final norm
         self.assertTrue(np.all(self.model.decoder.cache["dx"] == 0))
         self.assertTrue(np.all(self.model.embedding_layer.cache["dtoken_embedding_matrix"] == 0))
         self.assertTrue(np.all(self.model.embedding_layer.cache["dposition_embedding_matrix"] == 0))
