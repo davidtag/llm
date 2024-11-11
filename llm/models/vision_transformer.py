@@ -75,7 +75,7 @@ class VisionTransformer(Model):
             d_v=d_v,
             h=h,
             d_ff=d_ff,
-            masked_attention=False,
+            masked_attention=False,  # encoder instead of decoder
             dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
