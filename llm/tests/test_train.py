@@ -17,7 +17,7 @@ from llm.layers import (
     TextEmbedding,
 )
 from llm.loss import CrossEntropyLoss
-from llm.models import Transformer
+from llm.models import Transformer, VisionTransformer
 from llm.utils.math import softmax
 
 
@@ -598,3 +598,53 @@ class TestTrainingEndToEnd(unittest.TestCase):
             model.generate(np.array([0]), max_tokens=10, is_random=False),
             np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
         )
+
+    def test_train_vision_transformer(self, num_epochs: int = 100) -> None:
+        """Test that we can train a VisionTransformer."""
+        optimizer = Adam(lr=0.005)
+        model = VisionTransformer(
+            n_classes=self.C,
+            patch_size=4,
+            canonical_width=16,
+            canonical_height=16,
+            n_channel=3,
+            n_blocks=6,
+            d_model=64,
+            d_k=8,
+            d_v=8,
+            h=8,
+            d_ff=256,
+            optimizer=optimizer,
+        )
+        loss_fn = CrossEntropyLoss()
+
+        data = np.random.standard_normal((self.N, 16, 16, 3))
+        targets = self.targets
+
+        initial_loss = float("inf")
+        last_loss = float("inf")
+
+        for i in range(num_epochs):
+            # Forward Pass
+            logits = model.forward(data)
+            loss = loss_fn.forward(logits, targets)
+
+            if i == 0:
+                initial_loss = float(loss)
+            if i == num_epochs - 1:
+                last_loss = float(loss)
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            model.backward(dlogits)
+            model.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 0.1)
+
+        # Predictions are Correct
+        logits = model.forward(data)
+        probabilities = softmax(logits)
+        self.assert_probabilites_match_targets(probabilities, decimal=2)
