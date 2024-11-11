@@ -131,3 +131,19 @@ class ImageDataRegistry(_BaseRegistry):
     def splits_dir(self) -> Path:
         """The directory for the extracted data splits."""
         return Path(self.image_dir, "cifar-10-batches-py")
+
+    @property
+    def train_files(self) -> tuple[Path, Path, Path, Path, Path]:
+        """Paths to the 5 training splits, with 10k images each."""
+        return (
+            Path(self.splits_dir, "data_batch_1"),
+            Path(self.splits_dir, "data_batch_2"),
+            Path(self.splits_dir, "data_batch_3"),
+            Path(self.splits_dir, "data_batch_4"),
+            Path(self.splits_dir, "data_batch_5"),
+        )
+
+    @property
+    def test_file(self) -> Path:
+        """Path to the test split with 10k images."""
+        return Path(self.splits_dir, "test_batch")
