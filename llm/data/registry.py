@@ -17,7 +17,7 @@ class _BaseRegistry:
 
 
 class TextDataRegistry(_BaseRegistry):
-    """Registry of all data assets."""
+    """Registry of all text data assets."""
 
     SOURCE_URL = "https://ocw.mit.edu/ans7870/6/6.006/s08/lecturenotes/files/t8.shakespeare.txt"
 
@@ -107,3 +107,27 @@ class ModelRegistry(_BaseRegistry):
     def checkpoint_dir(self) -> Path:
         """Root directory for all trained model checkpoints."""
         return Path(self.assets_dir, "model_checkpoints")
+
+
+class ImageDataRegistry(_BaseRegistry):
+    """Registry for all image data assets."""
+
+    SOURCE_URL = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
+
+    EXPECTED_TOTAL_SIZE = 170_498_071
+    MD5_SUM = "c58f30108f718f92721af3b95e74349a"
+
+    @property
+    def image_dir(self) -> Path:
+        """Root directory for all image assets."""
+        return Path(self.assets_dir, "images")
+
+    @property
+    def tar_file(self) -> Path:
+        """The .tar.gz file downloaded from the source."""
+        return Path(self.image_dir, "cifar-10-python.tar.gz")
+
+    @property
+    def splits_dir(self) -> Path:
+        """The directory for the extracted data splits."""
+        return Path(self.image_dir, "cifar-10-batches-py")
