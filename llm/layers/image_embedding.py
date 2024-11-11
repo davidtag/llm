@@ -136,7 +136,7 @@ class ImageEmbedding(Layer):
         N = H * W // (self.patch_size**2)
         assert dout.shape == (B, N + 1, self.d_model)
 
-        # Zero-out static gradient matrices instead of re-allocating on each pass
+        # Zero-out static gradient matrix instead of re-allocating on each pass
         dposition_embedding_matrix = self.cache["dposition_embedding_matrix"]
         dposition_embedding_matrix[:] = 0
         dposition_embedding_matrix[: N + 1] = dout.sum(axis=0)
