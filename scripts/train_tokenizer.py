@@ -5,7 +5,7 @@ from pathlib import Path
 import time
 
 from llm.data.loaders import load_text_file
-from llm.data.registry import DataRegistry, TokenizerRegistry
+from llm.data.registry import TextDataRegistry, TokenizerRegistry
 from llm.tokenizers import RegexTokenizer
 from llm.tokenizers import SplitPattern
 
@@ -37,7 +37,7 @@ def main(args: argparse.Namespace) -> None:
     checkpoint_dir.mkdir(exist_ok=True)
 
     # Load the training data
-    data_registry = DataRegistry()
+    data_registry = TextDataRegistry()
     train_text = load_text_file(data_registry.train_text_file)
 
     # Train the tokenizer

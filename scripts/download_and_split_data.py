@@ -3,10 +3,10 @@
 import requests
 
 from llm.data.loaders import write_text_file, load_text_file
-from llm.data.registry import DataRegistry
+from llm.data.registry import TextDataRegistry
 
 
-_registry = DataRegistry()
+_registry = TextDataRegistry()
 
 
 def _download_and_save_raw_data() -> None:

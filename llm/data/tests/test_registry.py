@@ -4,7 +4,7 @@ import unittest
 
 
 from llm.data.registry import (
-    DataRegistry,
+    TextDataRegistry,
     TokenizerRegistry,
     TokenRegistry,
     ModelRegistry,
@@ -15,7 +15,7 @@ class TestDataRegistry(unittest.TestCase):
     """Unit tests for DataRegistry."""
 
     def test_all(self) -> None:
-        registry = DataRegistry()
+        registry = TextDataRegistry()
 
         self.assertTrue(registry.text_dir.as_posix().endswith("assets/text"))
         self.assertTrue(registry.raw_text_file.as_posix().endswith("assets/text/raw.txt"))

@@ -16,7 +16,7 @@ class _BaseRegistry:
         return Path(self.project_dir, "assets")
 
 
-class DataRegistry(_BaseRegistry):
+class TextDataRegistry(_BaseRegistry):
     """Registry of all data assets."""
 
     SOURCE_URL = "https://ocw.mit.edu/ans7870/6/6.006/s08/lecturenotes/files/t8.shakespeare.txt"
