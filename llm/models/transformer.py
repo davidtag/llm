@@ -217,7 +217,7 @@ class Transformer(Model):
         assert self.optimizer, "Cannot take an optimization step with optimizer=None"
 
         self.unembedding_layer.step()
-        # TODO(dtag): final_norm.step() is missing
+        self.final_norm.step()
         self.decoder.step()
         self.embedding_layer.step()
 
