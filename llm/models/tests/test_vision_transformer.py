@@ -23,13 +23,19 @@ class TestVisionTransformer(unittest.TestCase):
             canonical_width=16,
             canonical_height=16,
             n_channel=3,
-            d_model=64,
+            n_blocks=2,
+            d_model=10,
+            d_k=17,
+            d_v=37,
+            h=7,
+            d_ff=256,
         )
 
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
-        embedding_params = 13 * 10 + 128 * 10
-        block_stack_params = 2 * (
+        embedding_params = 10 + 192 * 10 + (4 + 1) * 10
+        initial_norm_params = 10 + 10
+        encoder_params = 2 * (
             # MultiHeadAttention
             7 * 10 * (17 + 17 + 37 + 37)
             # LayerNorm
@@ -43,10 +49,12 @@ class TestVisionTransformer(unittest.TestCase):
             + 10 * 2
         )
         final_norm_params = 10 + 10
-        unembedding_params = 10 * 13 + 13
-        total_params = embedding_params + block_stack_params + final_norm_params + unembedding_params
+        prediction_params = 10 * 13 + 13
+        total_params = (
+            embedding_params + initial_norm_params + encoder_params + final_norm_params + prediction_params
+        )
 
-        self.assertEqual(self.model.n_params, total_params - total_params + 2387277)  # TODO(dtag): Fix me
+        self.assertEqual(self.model.n_params, total_params)
 
     def test_get_parameters(self) -> None:
         """Test the get_parameters() method."""
@@ -69,7 +77,7 @@ class TestVisionTransformer(unittest.TestCase):
     def test_represent(self) -> None:
         """Test the forward pass up to the pre-final layer."""
         out = self.model.represent(self.data)
-        self.assertEqual(out.shape, (3, 64))
+        self.assertEqual(out.shape, (3, 10))
 
     def test_forward(self) -> None:
         """Test the forward pass."""
