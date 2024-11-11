@@ -14,7 +14,7 @@ class ImageEmbedding(Layer):
 
     def __init__(
         self,
-        patch_size: int,
+        patch_size: int = 16,
         canonical_width: int = 224,
         canonical_height: int = 224,
         n_channel: int = 3,

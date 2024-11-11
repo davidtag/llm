@@ -1,4 +1,4 @@
-"""Unit tests for transformer.py."""
+"""Unit tests for vision_transformer.py."""
 
 from pathlib import Path
 import tempfile
@@ -7,28 +7,35 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-from llm.optimizers import Optimizer
-from llm.models.transformer import Transformer
+from llm.optimizers.base import Optimizer
+from llm.models.vision_transformer import VisionTransformer
 
 
-class TestTransformer(unittest.TestCase):
-    """Unit tests for Transformer."""
+class TestVisionTransformer(unittest.TestCase):
+    """Unit tests for VisionTransformer."""
 
     def setUp(self) -> None:
-        self.data = np.array(  # shape = (2, 7)
-            [
-                [3, 2, 9, 1, 8, 4, 1],
-                [0, 2, 7, 2, 9, 4, 9],
-            ]
-        )
-        self.model = Transformer(
-            vocab_size=13, context_size=128, n_blocks=2, d_model=10, d_k=17, d_v=37, h=7, d_ff=256
+        self.data = np.random.standard_normal(size=(3, 16, 16, 3))  # batch of 3 normalized images
+        self.C = 13
+        self.model = VisionTransformer(
+            n_classes=self.C,
+            patch_size=8,
+            canonical_width=16,
+            canonical_height=16,
+            n_channel=3,
+            n_blocks=2,
+            d_model=10,
+            d_k=17,
+            d_v=37,
+            h=7,
+            d_ff=256,
         )
 
     def test_n_params(self) -> None:
         """Test the layer reports the correct number of parameters."""
-        embedding_params = 13 * 10 + 128 * 10
-        block_stack_params = 2 * (
+        embedding_params = 10 + 192 * 10 + (4 + 1) * 10
+        initial_norm_params = 10 + 10
+        encoder_params = 2 * (
             # MultiHeadAttention
             7 * 10 * (17 + 17 + 37 + 37)
             # LayerNorm
@@ -42,8 +49,10 @@ class TestTransformer(unittest.TestCase):
             + 10 * 2
         )
         final_norm_params = 10 + 10
-        unembedding_params = 10 * 13 + 13
-        total_params = embedding_params + block_stack_params + final_norm_params + unembedding_params
+        prediction_params = 10 * 13 + 13
+        total_params = (
+            embedding_params + initial_norm_params + encoder_params + final_norm_params + prediction_params
+        )
 
         self.assertEqual(self.model.n_params, total_params)
 
@@ -51,7 +60,8 @@ class TestTransformer(unittest.TestCase):
         """Test the get_parameters() method."""
         params = self.model.get_parameters()
         self.assertSetEqual(
-            set(params.keys()), {"embedding_layer", "decoder", "final_norm", "unembedding_layer"}
+            set(params.keys()),
+            {"embedding_layer", "initial_norm", "encoder", "final_norm", "prediction_head"},
         )
 
     def test_get_parameters_and_load_parameters_roundtrip(self) -> None:
@@ -64,10 +74,15 @@ class TestTransformer(unittest.TestCase):
         out2 = self.model.forward(self.data)
         np.testing.assert_array_equal(out1, out2)
 
+    def test_represent(self) -> None:
+        """Test the forward pass up to the pre-final layer."""
+        out = self.model.represent(self.data)
+        self.assertEqual(out.shape, (3, 10))
+
     def test_forward(self) -> None:
         """Test the forward pass."""
         out = self.model.forward(self.data)
-        self.assertEqual(out.shape, (2, 7, 13))
+        self.assertEqual(out.shape, (3, self.C))
 
     def test_backward_at_zero(self) -> None:
         """Test the backward pass with upstream gradient being 0."""
@@ -76,25 +91,13 @@ class TestTransformer(unittest.TestCase):
         dout = np.zeros_like(out)
         self.model.backward(dout)
 
-        self.assertTrue(np.all(self.model.unembedding_layer.cache["dx"] == 0))
+        self.assertTrue(np.all(self.model.prediction_head.cache["dx"] == 0))
         self.assertTrue(np.all(self.model.final_norm.cache["dx"] == 0))
-        self.assertTrue(np.all(self.model.decoder.cache["dx"] == 0))
-        self.assertTrue(np.all(self.model.embedding_layer.cache["dtoken_embedding_matrix"] == 0))
+        self.assertTrue(np.all(self.model.encoder.cache["dx"] == 0))
+        self.assertTrue(np.all(self.model.initial_norm.cache["dx"] == 0))
         self.assertTrue(np.all(self.model.embedding_layer.cache["dposition_embedding_matrix"] == 0))
-
-    def test_predict(self) -> None:
-        """Test the predict method."""
-        probs = self.model.predict(self.data[0])
-        self.assertEqual(probs.shape, (13,))  # probability distribution over the vocab
-        self.assertTrue(np.all(probs > 0))
-        self.assertAlmostEqual(probs.sum(), 1)
-
-    def test_generate(self) -> None:
-        """Test the generate method."""
-        output = self.model.generate(self.data[0], max_tokens=5)
-        self.assertTrue(output.shape, (5,))
-        self.assertGreaterEqual(np.min(output), 0)
-        self.assertLess(np.max(output), 13)
+        self.assertTrue(np.all(self.model.embedding_layer.cache["dpatch_proj"] == 0))
+        self.assertTrue(np.all(self.model.embedding_layer.cache["dclass_token"] == 0))
 
     def test_save_and_load(self) -> None:
         """Test the ability to save and load checkpoint files."""
@@ -105,14 +108,14 @@ class TestTransformer(unittest.TestCase):
             self.model.load(path)
 
             optimizer = MagicMock(spec=Optimizer)
-            model2 = Transformer.load_for_training(path, optimizer)
+            model2 = VisionTransformer.load_for_training(path, optimizer)
             self.assertTrue(model2.enable_grad)
             self.assertIs(model2.optimizer, optimizer)
 
-            model3 = Transformer.load_for_eval(path)
+            model3 = VisionTransformer.load_for_eval(path)
             self.assertFalse(model3.enable_grad)
             self.assertIsNone(model3.optimizer)
 
             with self.assertRaises(ValueError):  # load fails because there's a size mismatch
-                model4 = Transformer(vocab_size=1, context_size=1, n_blocks=1)
+                model4 = VisionTransformer(n_classes=7, n_blocks=1)
                 model4.load(path)

@@ -1,11 +1,11 @@
-"""Implementation of a Transformer model architecture."""
+"""Implementation of a VisionTransformer (ViT) model architecture."""
 
 from __future__ import annotations
 
 from pathlib import Path
 import pickle
 from os import PathLike
-from typing import Generator, Optional
+from typing import Optional
 
 import numpy as np
 
@@ -13,19 +13,21 @@ from llm.constants import DType, DEFAULT_DTYPE, BaseParameter, Parameters
 from llm.layers.block_stack import BlockStack
 from llm.layers.linear import Linear
 from llm.layers.layer_norm import LayerNorm
-from llm.layers.text_embedding import TextEmbedding
+from llm.layers.image_embedding import ImageEmbedding
 from llm.models.base import Model
 from llm.optimizers import Optimizer
-from llm.utils.math import softmax
 
 
-class Transformer(Model):
-    """A Transformer architecture for sequence processing."""
+class VisionTransformer(Model):
+    """A VisionTransformer (ViT) architecture for image processing."""
 
     def __init__(
         self,
-        vocab_size: int,
-        context_size: int,
+        n_classes: int,
+        patch_size: int = 16,
+        canonical_width: int = 224,
+        canonical_height: int = 224,
+        n_channel: int = 3,
         n_blocks: int = 6,
         d_model: int = 512,
         d_k: int = 64,
@@ -38,8 +40,11 @@ class Transformer(Model):
     ) -> None:
         """Initialize the model."""
         super().__init__(dtype=dtype, enable_grad=enable_grad, optimizer=optimizer)
-        self.vocab_size = vocab_size
-        self.context_size = context_size
+        self.n_classes = n_classes
+        self.patch_size = patch_size
+        self.canonical_width = canonical_width
+        self.canonical_height = canonical_height
+        self.n_channel = n_channel
         self.n_blocks = n_blocks
         self.d_model = d_model
         self.d_k = d_k
@@ -47,22 +52,30 @@ class Transformer(Model):
         self.h = h
         self.d_ff = d_ff
 
-        self.embedding_layer = TextEmbedding(
-            vocab_size=vocab_size,
-            context_size=context_size,
+        self.embedding_layer = ImageEmbedding(
+            patch_size=patch_size,
+            canonical_width=canonical_width,
+            canonical_height=canonical_height,
+            n_channel=n_channel,
             d_model=d_model,
             dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
-        self.decoder = BlockStack(
+        self.initial_norm = LayerNorm(
+            n_input=d_model,
+            dtype=dtype,
+            enable_grad=enable_grad,
+            optimizer=optimizer,
+        )
+        self.encoder = BlockStack(
             n_blocks=n_blocks,
             d_model=d_model,
             d_k=d_k,
             d_v=d_v,
             h=h,
             d_ff=d_ff,
-            masked_attention=True,
+            masked_attention=False,  # encoder instead of decoder
             dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
@@ -73,9 +86,9 @@ class Transformer(Model):
             enable_grad=enable_grad,
             optimizer=optimizer,
         )
-        self.unembedding_layer = Linear(
+        self.prediction_head = Linear(
             n_input=d_model,
-            n_output=vocab_size,
+            n_output=n_classes,
             dtype=dtype,
             enable_grad=enable_grad,
             optimizer=optimizer,
@@ -86,18 +99,20 @@ class Transformer(Model):
         """The number of parameters in the model."""
         return (
             self.embedding_layer.n_params
-            + self.decoder.n_params
+            + self.initial_norm.n_params
+            + self.encoder.n_params
             + self.final_norm.n_params
-            + self.unembedding_layer.n_params
+            + self.prediction_head.n_params
         )
 
     def get_parameters(self) -> Parameters:
         """Return the parameter map for the layer."""
         params = {
             "embedding_layer": self.embedding_layer.get_parameters(),
-            "decoder": self.decoder.get_parameters(),
+            "initial_norm": self.initial_norm.get_parameters(),
+            "encoder": self.encoder.get_parameters(),
             "final_norm": self.final_norm.get_parameters(),
-            "unembedding_layer": self.unembedding_layer.get_parameters(),
+            "prediction_head": self.prediction_head.get_parameters(),
         }
         return params
 
@@ -105,22 +120,25 @@ class Transformer(Model):
         """Set the parameters."""
         if (
             "embedding_layer" not in params
-            or "decoder" not in params
+            or "initial_norm" not in params
+            or "encoder" not in params
             or "final_norm" not in params
-            or "unembedding_layer" not in params
+            or "prediction_head" not in params
         ):
             raise ValueError("Missing parameters")
         if (
             isinstance(params["embedding_layer"], BaseParameter)
-            or isinstance(params["decoder"], BaseParameter)
+            or isinstance(params["initial_norm"], BaseParameter)
+            or isinstance(params["encoder"], BaseParameter)
             or isinstance(params["final_norm"], BaseParameter)
-            or isinstance(params["unembedding_layer"], BaseParameter)
+            or isinstance(params["prediction_head"], BaseParameter)
         ):
             raise ValueError("Invalid shape for parameters map")
         self.embedding_layer.load_parameters(params["embedding_layer"])
-        self.decoder.load_parameters(params["decoder"])
+        self.initial_norm.load_parameters(params["initial_norm"])
+        self.encoder.load_parameters(params["encoder"])
         self.final_norm.load_parameters(params["final_norm"])
-        self.unembedding_layer.load_parameters(params["unembedding_layer"])
+        self.prediction_head.load_parameters(params["prediction_head"])
 
     def save(self, model_file: PathLike) -> None:
         """Checkpoint the current model state to disk."""
@@ -128,8 +146,11 @@ class Transformer(Model):
         base_dir = model_path.parent
         base_dir.mkdir(parents=False, exist_ok=True)
         constructor_args = {
-            "vocab_size": self.vocab_size,
-            "context_size": self.context_size,
+            "n_classes": self.n_classes,
+            "patch_size": self.patch_size,
+            "canonical_width": self.canonical_width,
+            "canonical_height": self.canonical_height,
+            "n_channel": self.n_channel,
             "n_blocks": self.n_blocks,
             "d_model": self.d_model,
             "d_k": self.d_k,
@@ -153,7 +174,7 @@ class Transformer(Model):
         self.load_parameters(params)
 
     @classmethod
-    def load_for_training(cls, model_file: PathLike, optimizer: Optimizer) -> Transformer:
+    def load_for_training(cls, model_file: PathLike, optimizer: Optimizer) -> VisionTransformer:
         """Initialize a model from a checkpoint file on disk and set the optimizer."""
         with open(model_file, "rb") as f:
             model_definition = pickle.load(f)
@@ -169,7 +190,7 @@ class Transformer(Model):
         return model
 
     @classmethod
-    def load_for_eval(cls, model_file: PathLike) -> Transformer:
+    def load_for_eval(cls, model_file: PathLike) -> VisionTransformer:
         """Initialize a model from a checkpoint file on disk in evaluation mode."""
         with open(model_file, "rb") as f:
             model_definition = pickle.load(f)
@@ -184,14 +205,27 @@ class Transformer(Model):
         model.load_parameters(params)
         return model
 
+    def represent(self, x: np.ndarray) -> np.ndarray:
+        """Compute the pre-final output for a given input."""
+        assert x.ndim == 4  # (B, H, W, C)
+
+        # T := N + 1; N = number of image patches = H*W/P^2
+        raw_embedding = self.embedding_layer.forward(x)  # shape = (B, T, d_model)
+        encoder_input = self.initial_norm.forward(raw_embedding)  # shape = (B, T, d_model)
+        refined_embedding = self.encoder.forward(encoder_input)  # shape = (B, T, d_model)
+        normed_embedding = self.final_norm.forward(refined_embedding)  # shape = (B, T, d_model)
+
+        # Output is the representation of the prepended class token in the ImageEmbedding layer
+        y = normed_embedding[:, 0, :]  # shape = (B, d_model)
+
+        return y
+
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Compute the layer output for a given input."""
-        assert x.ndim == 2  # shape = (B, T)
+        assert x.ndim == 4  # (B, H, W, C)
 
-        raw_embedding = self.embedding_layer.forward(x)  # shape = (B, T, d_model)
-        refined_embedding = self.decoder.forward(raw_embedding)  # shape = (B, T, d_model)
-        normed_embedding = self.final_norm.forward(refined_embedding)  # shape = (B, T, d_model)
-        logits = self.unembedding_layer.forward(normed_embedding)  # shape = (B, T, vocab_size)
+        y = self.represent(x)  # shape = (B, d_model)
+        logits = self.prediction_head.forward(y)  # shape = (B, n_classes)
 
         return logits
 
@@ -199,16 +233,22 @@ class Transformer(Model):
         """Compute the layer gradients given the upstream gradient."""
         assert self.enable_grad, "Cannot compute the backward pass with enable_grad=False"
         x = self.embedding_layer.cache["x"]
-        B, T = x.shape
-        assert dout.shape == (B, T, self.vocab_size)
+        B, H, W, C = x.shape
+        N = H * W // (self.patch_size**2)
+        T = N + 1
+        assert dout.shape == (B, self.n_classes)
 
         dlogits = dout
-        self.unembedding_layer.backward(dlogits)
-        dnormed_embedding = self.unembedding_layer.cache["dx"]
+        self.prediction_head.backward(dlogits)
+        dy = self.prediction_head.cache["dx"]
+        dnormed_embedding = np.zeros((B, T, self.d_model))
+        dnormed_embedding[:, 0, :] = dy
         self.final_norm.backward(dnormed_embedding)
         drefined_embedding = self.final_norm.cache["dx"]
-        self.decoder.backward(drefined_embedding)
-        draw_embedding = self.decoder.cache["dx"]
+        self.encoder.backward(drefined_embedding)
+        dencoder_input = self.encoder.cache["dx"]
+        self.initial_norm.backward(dencoder_input)
+        draw_embedding = self.initial_norm.cache["dx"]
         self.embedding_layer.backward(draw_embedding)
 
     def step(self) -> None:
@@ -216,43 +256,8 @@ class Transformer(Model):
         assert self.enable_grad, "Cannot take an optimization step with enable_grad=False"
         assert self.optimizer, "Cannot take an optimization step with optimizer=None"
 
-        self.unembedding_layer.step()
+        self.prediction_head.step()
         self.final_norm.step()
-        self.decoder.step()
+        self.encoder.step()
+        self.initial_norm.step()
         self.embedding_layer.step()
-
-    def predict(self, input_sequence: np.ndarray) -> np.ndarray:
-        """Generate a probability distribution over the next token for a given input sequence."""
-        assert input_sequence.ndim == 1
-        x = np.expand_dims(input_sequence, axis=0)  # add batch dimension
-        logits = self.forward(x)
-        next_token_logits = logits[0, -1]
-        probabilities = softmax(next_token_logits)
-        return probabilities
-
-    def generate(self, start_sequence: np.ndarray, max_tokens: int = 5, is_random: bool = True) -> np.ndarray:
-        """Generate an output sequence based on predicted next token probabilities."""
-        output_sequence = []
-
-        for token in self.generate_stream(
-            start_sequence=start_sequence, max_tokens=max_tokens, is_random=is_random
-        ):
-            output_sequence.append(token)
-
-        return np.array(output_sequence)
-
-    def generate_stream(
-        self, start_sequence: np.ndarray, max_tokens: int = 5, is_random: bool = True
-    ) -> Generator[int]:
-        """Generate an output stream based on predicted next token probabilities."""
-        assert start_sequence.ndim == 1
-        current_sequence = start_sequence.copy()
-
-        for _ in range(max_tokens):
-            probs = self.predict(current_sequence)
-            if is_random:
-                token = np.random.choice(self.vocab_size, p=probs)
-            else:
-                token = int(np.argmax(probs))
-            current_sequence = np.append(current_sequence, token)[-self.context_size :]
-            yield token
