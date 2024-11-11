@@ -6,7 +6,16 @@ import unittest
 import numpy as np
 
 from llm.optimizers import Adam, StochasticGradientDescent
-from llm.layers import Block, BlockStack, FeedForward, LayerNorm, Linear, MultiHeadAttention, TextEmbedding
+from llm.layers import (
+    Block,
+    BlockStack,
+    FeedForward,
+    ImageEmbedding,
+    LayerNorm,
+    Linear,
+    MultiHeadAttention,
+    TextEmbedding,
+)
 from llm.loss import CrossEntropyLoss
 from llm.models import Transformer
 from llm.utils.math import softmax
@@ -382,6 +391,48 @@ class TestTrainingEndToEnd(unittest.TestCase):
         logits = layer_2.forward(hidden)
         probabilities = softmax(logits)
         probabilities = probabilities[0]
+        self.assert_probabilites_match_targets(probabilities, decimal=4)
+
+    def test_train_image_embedding(self, num_iters: int = 50) -> None:
+        """Test that we can train an image embedding layer."""
+        optimizer = Adam(lr=0.5)
+        model = ImageEmbedding(
+            patch_size=4, canonical_width=16, canonical_height=16, d_model=self.C, optimizer=optimizer
+        )
+        loss_fn = CrossEntropyLoss()
+
+        data = np.random.standard_normal((self.N, 16, 16, 3))
+        targets = self.targets
+
+        for i in range(num_iters):
+            # Forward Pass
+            activations = model.forward(data)
+            logits = activations.mean(axis=1)  # global average pooling
+            loss = loss_fn.forward(logits, targets)
+
+            if i == 0:
+                initial_loss = float(loss)
+            if i == num_iters - 1:
+                last_loss = float(loss)
+                break
+
+            # Backward Pass
+            dlogits = loss_fn.backward()
+            dlogits_expanded = np.expand_dims(dlogits, axis=1)
+            dactivations = (
+                np.broadcast_to(dlogits_expanded, (self.N, 16 + 1, self.C)) / self.N
+            )  # 16 = n_patches
+            model.backward(dactivations)
+            model.step()
+
+        # Loss Improvement
+        self.assertLess(last_loss, initial_loss)
+        self.assertLess(last_loss, 1e-6)
+
+        # Predictions are Correct
+        activations = model.forward(data)
+        logits = activations.mean(axis=1)
+        probabilities = softmax(logits)
         self.assert_probabilites_match_targets(probabilities, decimal=4)
 
     def test_train_transformer_depth_1(self, num_iters: int = 50) -> None:
