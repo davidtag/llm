@@ -6,9 +6,9 @@ import tiktoken
 
 from llm.data.registry import TokenizerRegistry
 from llm.tokenizers import bpe
-from llm.tokenizers.cython import bpe as _bpe_internal
 from llm.tokenizers import RegexTokenizer
 from llm.tokenizers.bpe import convert_reverse_vocabulary_to_vocabulary, MergeList, MergeDict, Vocabulary
+from llm.tokenizers.cython import bpe as _bpe_internal
 from llm.tokenizers.cython.stdtoken import TokenPair
 
 
