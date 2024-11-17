@@ -80,16 +80,15 @@ def _convert_mergeable_ranks_to_merge_list(mergeable_ranks: dict[bytes, int]) ->
     return merge_list
 
 
-def _convert_encoder_to_regex_tokenizer(encoder: tiktoken.Encoding) -> RegexTokenizer:
+def _convert_tiktoken_encoder_to_regex_tokenizer(encoder: tiktoken.Encoding) -> RegexTokenizer:
     merge_list = _convert_mergeable_ranks_to_merge_list(encoder._mergeable_ranks)
     split_pattern = encoder._pat_str
     return RegexTokenizer(merge_list=merge_list, split_pattern=split_pattern)
 
 
-def _convert() -> None:
-    name = "cl100k_base"
+def _convert(name: str) -> None:
     encoder = tiktoken.get_encoding(name)
-    tokenizer = _convert_encoder_to_regex_tokenizer(encoder)
+    tokenizer = _convert_tiktoken_encoder_to_regex_tokenizer(encoder)
 
     # Initialize the checkpoint directory
     tokenizer_registry = TokenizerRegistry()
@@ -102,10 +101,6 @@ def _convert() -> None:
     with open(Path(checkpoint_dir, "vocab.ref.txt"), mode="w", encoding="utf-8") as f:
         for token, token_bytes in enumerate(vocab):
             f.write(f"[{token}] : [{bpe.render_bytes(token_bytes)}]\n")
-
-    text = "Hello World! my name is AMAZING  123 LOL (안녕하세요!) joined123 😉"
-    print(encoder.encode(text))
-    print(tokenizer.encode(text))
 
 
 def _load_tokenizer(name: str) -> RegexTokenizer:
@@ -121,14 +116,19 @@ def _load_tokenizer(name: str) -> RegexTokenizer:
     return tokenizer
 
 
-def _test() -> None:
-    tokenizer = _load_tokenizer("cl100k_base")
-    print(tokenizer.encode(" AMAZING"))
+def _test(name: str) -> None:
+    encoder = tiktoken.get_encoding(name)
+    tokenizer = _load_tokenizer(name)
+
+    text = "Hello World! my name is AMAZING  123 LOL (안녕하세요!) joined123 😉"
+    print(encoder.encode(text))
+    print(tokenizer.encode(text))
 
 
 def main() -> None:
     """Entrypoint."""
-    _convert()
+    _convert("cl100k_base")
+    _test("cl100k_base")
 
 
 if __name__ == "__main__":
