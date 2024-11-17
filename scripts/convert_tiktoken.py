@@ -87,6 +87,7 @@ def _convert_tiktoken_encoder_to_regex_tokenizer(encoder: tiktoken.Encoding) -> 
 
 
 def _convert(name: str) -> None:
+    print(f"-- Converting encoding={name}")
     encoder = tiktoken.get_encoding(name)
     tokenizer = _convert_tiktoken_encoder_to_regex_tokenizer(encoder)
 
@@ -119,6 +120,7 @@ def _load_tokenizer(name: str) -> RegexTokenizer:
 
 
 def _test(name: str) -> None:
+    print(f"-- Testing encoding={name}")
     encoder = tiktoken.get_encoding(name)
     tokenizer = _load_tokenizer(name)
 
