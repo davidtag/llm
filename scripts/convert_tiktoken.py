@@ -26,6 +26,7 @@ ENCODINGS_TO_CONVERT = [
 
 def _normalize_token(token: int, vocab: Vocabulary) -> int:
     if token < 256:
+        # Handle permutations present in the base tokens
         token_bytes = vocab[token]
         return ord(token_bytes)
     return token
