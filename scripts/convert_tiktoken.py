@@ -4,12 +4,14 @@ from pathlib import Path
 
 import tiktoken
 
-from llm.data.registry import TokenizerRegistry
+from llm.data.loaders import load_text_file
+from llm.data.registry import TokenizerRegistry, TextDataRegistry
 from llm.tokenizers import bpe
 from llm.tokenizers import RegexTokenizer
 from llm.tokenizers.bpe import convert_reverse_vocabulary_to_vocabulary, MergeList, MergeDict, Vocabulary
 from llm.tokenizers.cython import bpe as _bpe_internal
 from llm.tokenizers.cython.stdtoken import TokenPair
+from llm.utils.profile import Profile
 
 
 def _normalize_token(token: int, vocab: Vocabulary) -> int:
@@ -112,10 +114,6 @@ def _load_tokenizer(name: str) -> RegexTokenizer:
     if not checkpoint_dir.exists():
         raise RuntimeError(f"Checkpoint dir {checkpoint_dir} doesn't exist. Did you train the tokenizer?")
     tokenizer = RegexTokenizer.load(checkpoint_dir)
-    print(
-        f"Loaded tokenizer '{name}' with "
-        f"vocab_size={tokenizer.vocab_size:,} and cache_size={len(tokenizer.trained_cache):,}"
-    )
     return tokenizer
 
 
@@ -132,10 +130,30 @@ def _test(name: str) -> None:
     assert tokenizer.decode(these_tokens) == text
 
 
+def _profile(name: str) -> None:
+    print(f"-- Profiling encoding={name}")
+    encoder = tiktoken.get_encoding(name)
+    tokenizer = _load_tokenizer(name)
+
+    registry = TextDataRegistry()
+    text = load_text_file(registry.raw_text_file)
+    size = len(text) / 1024 / 1024
+    print(f"Loaded text of {size:.1f} MB")
+
+    with Profile() as prof:
+        encoder.encode(text)
+    print(f"tiktoken.Encoding: {prof.milliseconds:>5,.0f} ms ({size / prof.seconds:.1f} MB/s)")
+
+    with Profile() as prof:
+        tokenizer.encode(text, use_cache=False)
+    print(f"RegexTokenizer   : {prof.milliseconds:>5,.0f} ms ({size / prof.seconds:.1f} MB/s)")
+
+
 def main() -> None:
     """Entrypoint."""
     _convert("cl100k_base")
     _test("cl100k_base")
+    _profile("cl100k_base")
 
 
 if __name__ == "__main__":
