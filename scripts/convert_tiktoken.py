@@ -17,6 +17,8 @@ from llm.utils.profile import Profile
 ENCODINGS_TO_CONVERT = [
     "gpt2",
     "r50k_base",
+    # NOTE: the "p50k_base" and "p50k_edit" encodings lead to errors because the token values are not
+    # exactly [0,1,2,...,vocab_size-1]. Specifically, 50256 is absent.
     "cl100k_base",
     "o200k_base",
 ]
