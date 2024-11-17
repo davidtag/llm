@@ -26,15 +26,17 @@ def _convert_mergeable_ranks_to_merge_list(mergeable_ranks: dict[bytes, int]) ->
     vocab = convert_reverse_vocabulary_to_vocabulary(mergeable_ranks)
 
     for token, token_bytes in enumerate(vocab):
+        # The 0...255 tokens are a permutation of the base bytes
+        # These tokens are not the result of a merge rule
         if token < 256:
-            # tokens 0...255 are a permutation of the base bytes
-            # These tokens are not the result of a merge
             assert len(token_bytes) == 1
             continue
+        assert token >= 256
 
+        # For the other tokens, token_bytes is a concatenation of the representation of
+        # 2 preceding tokens (i.e., those with values < token)
         valid_pairs = []
         for split_point in range(1, len(token_bytes)):
-            # token_bytes is a concatenation of the representation of 2 tokens with values < token
             part_1 = token_bytes[:split_point]
             part_2 = token_bytes[split_point:]
             maybe_token_1 = mergeable_ranks.get(part_1, None)
