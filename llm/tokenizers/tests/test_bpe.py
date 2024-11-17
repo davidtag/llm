@@ -11,6 +11,7 @@ from llm.tokenizers.bpe import (
     convert_merge_list_to_merge_dict,
     convert_merge_list_to_vocabulary,
     convert_vocabulary_to_reverse_vocabulary,
+    convert_reverse_vocabulary_to_vocabulary,
     convert_vocabulary_to_piece_cache,
     encode_piece,
     decode_bytes,
@@ -107,6 +108,57 @@ class TestConvertVocabularyToReverseVocabulary(unittest.TestCase):
         }
         out = convert_vocabulary_to_reverse_vocabulary(vocab)
         self.assertDictEqual(out, expected)
+
+
+class TestConvertReverseVocabularyToVocabulary(unittest.TestCase):
+    """Unit tests for convert_reverse_vocabulary_to_vocabulary()."""
+
+    def test_empty(self) -> None:
+        reverse_vocab: ReverseVocabulary = {}
+        expected: Vocabulary = []
+        out = convert_reverse_vocabulary_to_vocabulary(reverse_vocab)
+        self.assertListEqual(out, expected)
+
+    def test_multiple_items(self) -> None:
+        reverse_vocab: ReverseVocabulary = {
+            b"A": 0,
+            b"B": 2,
+            b"C": 1,
+        }
+        expected: Vocabulary = [
+            b"A",
+            b"C",
+            b"B",
+        ]
+        out = convert_reverse_vocabulary_to_vocabulary(reverse_vocab)
+        self.assertListEqual(out, expected)
+
+    def test_duplicate_tokens(self) -> None:
+        reverse_vocab: ReverseVocabulary = {
+            b"A": 0,
+            b"B": 0,
+        }
+        with self.assertRaises(ValueError) as cm:
+            convert_reverse_vocabulary_to_vocabulary(reverse_vocab)
+        self.assertEqual(str(cm.exception), "Duplicate tokens in the ReverseVocabulary")
+
+    def test_nonexaustive_1(self) -> None:
+        reverse_vocab: ReverseVocabulary = {
+            b"A": 0,
+            b"B": 2,
+        }
+        with self.assertRaises(ValueError) as cm:
+            convert_reverse_vocabulary_to_vocabulary(reverse_vocab)
+        self.assertEqual(str(cm.exception), "Invalid token values")
+
+    def test_nonexaustive_2(self) -> None:
+        reverse_vocab: ReverseVocabulary = {
+            b"A": -1,
+            b"B": 1,
+        }
+        with self.assertRaises(ValueError) as cm:
+            convert_reverse_vocabulary_to_vocabulary(reverse_vocab)
+        self.assertEqual(str(cm.exception), "Invalid token values")
 
 
 class TestConvertVocabularyToPieceCache(unittest.TestCase):
