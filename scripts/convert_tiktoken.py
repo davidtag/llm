@@ -125,8 +125,11 @@ def _test(name: str) -> None:
     tokenizer = _load_tokenizer(name)
 
     text = "Hello World! my name is AMAZING  123 LOL (안녕하세요!) joined123 😉"
-    print(encoder.encode(text))
-    print(tokenizer.encode(text))
+    ref_tokens = encoder.encode(text)
+    these_tokens = tokenizer.encode(text)
+    assert len(ref_tokens) == len(these_tokens)  # tokens are the same up to a permutation of base tokens
+    assert encoder.decode(ref_tokens) == text
+    assert tokenizer.decode(these_tokens) == text
 
 
 def main() -> None:
