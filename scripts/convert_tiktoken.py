@@ -95,8 +95,10 @@ def _convert(name: str) -> None:
     checkpoint_dir = Path(tokenizer_registry.checkpoint_dir, name)
     checkpoint_dir.mkdir(exist_ok=True)
 
+    # Save the tokenizer
     tokenizer.save(checkpoint_dir)
 
+    # Save the reference vocabularty for manual inspection and comparison
     vocab = convert_reverse_vocabulary_to_vocabulary(encoder._mergeable_ranks)
     with open(Path(checkpoint_dir, "vocab.ref.txt"), mode="w", encoding="utf-8") as f:
         for token, token_bytes in enumerate(vocab):
