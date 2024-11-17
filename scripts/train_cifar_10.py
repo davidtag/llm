@@ -9,10 +9,10 @@ from llm.models import VisionTransformer
 from llm.optimizers.adam import Adam
 
 
-def _get_data_statistics(x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _get_data_statistics(x: np.ndarray, eps: float = 1e-6) -> tuple[np.ndarray, np.ndarray]:
     x_mean = np.mean(x, axis=0, keepdims=True)
     x_var = np.mean(np.square(x - x_mean), axis=0, keepdims=True)
-    x_std = np.sqrt(x_var + 1e-5)
+    x_std = np.sqrt(x_var + eps)
     return x_mean, x_std
 
 
@@ -26,8 +26,12 @@ def _load_data() -> tuple[tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.nd
         Ys.append(Y)
     X_train = np.vstack(Xs)
     Y_train = np.concatenate(Ys)
+    assert X_train.shape == (50_000, 32, 32, 3)
+    assert Y_train.shape == (50_000,)
 
     X_test, Y_test = load_cifar_10_split(registry.test_file)
+    assert X_test.shape == (10_000, 32, 32, 3)
+    assert Y_test.shape == (10_000,)
 
     m, s = _get_data_statistics(X_train)
 
@@ -37,6 +41,13 @@ def _load_data() -> tuple[tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.nd
     print(f"Loaded {X_train.shape[0]:,} train examples")
     print(f"Loaded {X_test.shape[0]:,} test examples")
     return ((X_train, Y_train), (X_test, Y_test))
+
+
+def _get_accuracy(logits: np.ndarray, targets: np.ndarray) -> float:
+    assert logits.shape[0] == targets.shape[0]
+    predictions = np.argmax(logits, axis=1)
+    accuracy = 100 * np.mean(predictions == targets)
+    return accuracy
 
 
 def _initialize_model_for_training(
@@ -49,7 +60,7 @@ def _initialize_model_for_training(
         canonical_width=32,
         canonical_height=32,
         n_channel=3,
-        n_blocks=3,
+        n_blocks=2,
         d_model=64,
         d_k=8,
         d_v=8,
@@ -70,6 +81,7 @@ def _train_model(
     batch_size: int = 32,
     num_batches: int = 20,
     test_evaluation_freq: int = 30,
+    test_evaluation_batch_size: int = 512,
 ) -> VisionTransformer:
     assert x_train.shape[0] == y_train.shape[0]
     assert x_test.shape[0] == y_test.shape[0]
@@ -81,16 +93,15 @@ def _train_model(
         return x_train[idxs], y_train[idxs]
 
     def get_test_batch() -> tuple[np.ndarray, np.ndarray]:
-        idxs = np.random.randint(low=0, high=x_test.shape[0], size=512)
+        idxs = np.random.randint(low=0, high=x_test.shape[0], size=test_evaluation_batch_size)
         return x_test[idxs], y_test[idxs]
 
     def get_test_loss_and_accuracy() -> tuple[float, float]:
         data, targets = get_test_batch()
         logits = model.forward(data)
         loss = loss_fn.forward(logits, targets)
-        predictions = np.argmax(logits, axis=1)
-        accuracy = 100 * np.mean(predictions == targets)
-        return float(loss), float(accuracy)
+        accuracy = _get_accuracy(logits, targets)
+        return float(loss), accuracy
 
     print("-- Training --------------------------------------------------------------")
     for i in range(num_batches):
@@ -106,8 +117,7 @@ def _train_model(
         model.step()
 
         # Report batch loss and accuracy
-        predictions = np.argmax(logits, axis=1)
-        accuracy = 100 * np.mean(predictions == targets_i)
+        accuracy = _get_accuracy(logits, targets_i)
         if i % test_evaluation_freq == 0:
             test_loss, test_accuracy = get_test_loss_and_accuracy()
             test_str = f"| {test_loss=:6.3f}  {test_accuracy=:5.1f}%"
