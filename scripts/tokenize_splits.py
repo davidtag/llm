@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from llm.data.loaders import load_text_file, write_token_file
-from llm.data.registry import DataRegistry, TokenRegistry, TokenizerRegistry
+from llm.data.registry import TextDataRegistry, TokenRegistry, TokenizerRegistry
 from llm.tokenizers import RegexTokenizer
 
 
@@ -39,7 +39,7 @@ def main(args: argparse.Namespace) -> None:
     """Entrypoint."""
     tokenizer = _load_tokenizer(args.name)
 
-    data_registry = DataRegistry()
+    data_registry = TextDataRegistry()
 
     token_registry = TokenRegistry(tokenizer_name=args.name)
     token_registry.token_dir.mkdir(parents=True, exist_ok=True)
