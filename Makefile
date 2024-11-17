@@ -89,3 +89,8 @@ download_text:
 .PHONY: download_pretrained
 download_pretrained:
 	python scripts/download_pretrained_weights.py
+
+
+.PHONY: download_images
+download_images:
+	python scripts/download_cifar_10.py
