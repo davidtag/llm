@@ -14,6 +14,14 @@ from llm.tokenizers.cython.stdtoken import TokenPair
 from llm.utils.profile import Profile
 
 
+ENCODINGS_TO_CONVERT = [
+    "gpt2",
+    "r50k_base",
+    "cl100k_base",
+    "o200k_base",
+]
+
+
 def _normalize_token(token: int, vocab: Vocabulary) -> int:
     if token < 256:
         token_bytes = vocab[token]
@@ -141,19 +149,22 @@ def _profile(name: str) -> None:
     print(f"Loaded text of {size:.1f} MB")
 
     with Profile() as prof:
-        encoder.encode(text)
+        ref_tokens = encoder.encode(text)
     print(f"tiktoken.Encoding: {prof.milliseconds:>5,.0f} ms ({size / prof.seconds:.1f} MB/s)")
 
     with Profile() as prof:
-        tokenizer.encode(text, use_cache=False)
+        these_tokens = tokenizer.encode(text, use_cache=False)
     print(f"RegexTokenizer   : {prof.milliseconds:>5,.0f} ms ({size / prof.seconds:.1f} MB/s)")
+
+    assert len(ref_tokens) == len(these_tokens)  # tokens are the same up to a permutation of base tokens
 
 
 def main() -> None:
     """Entrypoint."""
-    _convert("cl100k_base")
-    _test("cl100k_base")
-    _profile("cl100k_base")
+    for name in ENCODINGS_TO_CONVERT:
+        _convert(name)
+        _test(name)
+        _profile(name)
 
 
 if __name__ == "__main__":
