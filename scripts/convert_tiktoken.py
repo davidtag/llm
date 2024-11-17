@@ -61,8 +61,7 @@ def _convert_mergeable_ranks_to_merge_list(mergeable_ranks: dict[bytes, int]) ->
             merge_dict[pair] = token
 
         else:
-            # There might be more than one possible pair.
-            # During merging, we prefer pairs in order of (t1, t2), so we recover them in the same way here.
+            # Among possible merges, pick the one that preserves the encoding
             matched = False
             for pair in valid_pairs:
                 merge_list.append((pair, token))
