@@ -43,6 +43,44 @@ def _load_data() -> tuple[tuple[np.ndarray, np.ndarray], tuple[np.ndarray, np.nd
     return ((X_train, Y_train), (X_test, Y_test))
 
 
+def _mask_pixels(data: np.ndarray, percent_of_pixels: float = 0.01) -> np.ndarray:
+    H = data.shape[1]
+    W = data.shape[2]
+    num_pixels = H * W
+    num_masked = int(num_pixels * percent_of_pixels)
+    y_mask = np.random.randint(low=0, high=H, size=num_masked)
+    x_mask = np.random.randint(low=0, high=W, size=num_masked)
+    mask = np.ones_like(data)
+    mask[:, y_mask, x_mask, :] = 0
+    new_data = data * mask
+    return new_data
+
+
+def _rotate_cw(data: np.ndarray) -> np.ndarray:
+    rotated_images = np.array([np.rot90(img, k=1) for img in data])
+    return rotated_images
+
+
+def _rotate_ccw(data: np.ndarray) -> np.ndarray:
+    rotated_images = np.array([np.rot90(img, k=-1) for img in data])
+    return rotated_images
+
+
+def _augment(data: np.ndarray, data_augment_rate: float = 0.5) -> np.ndarray:
+    should_augment = np.random.random() < data_augment_rate
+    if should_augment:
+        technique = np.random.randint(low=0, high=2)
+        if technique == 0:
+            return _mask_pixels(data)
+        elif technique == 1:
+            return _rotate_cw(data)
+        elif technique == 2:
+            return _rotate_ccw(data)
+        else:
+            raise RuntimeError("Unrecognized technique")
+    return data
+
+
 def _get_accuracy(logits: np.ndarray, targets: np.ndarray) -> float:
     assert logits.shape[0] == targets.shape[0]
     predictions = np.argmax(logits, axis=1)
@@ -60,12 +98,12 @@ def _initialize_model_for_training(
         canonical_width=32,
         canonical_height=32,
         n_channel=3,
-        n_blocks=2,
+        n_blocks=6,
         d_model=64,
         d_k=8,
         d_v=8,
         h=8,
-        d_ff=128,
+        d_ff=256,
         optimizer=optimizer,
     )
     print(f"Initialized model with n_params={model.n_params:,}")
@@ -106,6 +144,7 @@ def _train_model(
     print("-- Training --------------------------------------------------------------")
     for i in range(num_batches):
         data_i, targets_i = get_train_batch()
+        data_i = _augment(data_i)
 
         # Forward Pass
         logits = model.forward(data_i)
