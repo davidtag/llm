@@ -123,7 +123,7 @@ def _load_tokenizer(name: str) -> RegexTokenizer:
     tokenizer_registry = TokenizerRegistry()
     checkpoint_dir = Path(tokenizer_registry.checkpoint_dir, name)
     if not checkpoint_dir.exists():
-        raise RuntimeError(f"Checkpoint dir {checkpoint_dir} doesn't exist. Did you train the tokenizer?")
+        raise RuntimeError(f"Checkpoint dir {checkpoint_dir} doesn't exist. Did you convert the tokenizer?")
     tokenizer = RegexTokenizer.load(checkpoint_dir)
     return tokenizer
 
