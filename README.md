@@ -6,6 +6,8 @@ The purpose of this repo is educational - explore the main concepts of LLMs with
 
 A good amount of effort has been spent on making all aspects of the BPE tokenizer (train, encode, decode) fast through algorithmic optimizations and by implementing the core operations in Python extension modules with Cython.
 
+This repo is inspired by [llm.c](https://github.com/karpathy/llm.c) by Andrej Karpathy.
+
 ## Quick Start
 
 1. **Setup a virtual environment** and activate it. Code has been developed and tested on Python 3.12. To avoid needing to set the PYTHONPATH each time, the `export` command can be added to the `activate` script.
