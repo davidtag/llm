@@ -10,7 +10,7 @@ from llm.tokenizers.cython.stdtoken import TokenPair
 MergeList = list[tuple[TokenPair, int]]
 MergeDict = dict[TokenPair, int]
 Vocabulary = list[bytes]
-ReverseVocabulary = dict[bytes, int]
+ReverseVocabulary = dict[bytes, int]  # tiktoken calls this "Mergeable Ranks"
 PieceCache = dict[str, list[int]]
 
 
@@ -49,6 +49,29 @@ def convert_vocabulary_to_reverse_vocabulary(vocab: Vocabulary) -> ReverseVocabu
     """Convert a token vocabulary into an encoding lookup for byte fragments."""
     reverse_vocab = {token_bytes: token for token, token_bytes in enumerate(vocab)}
     return reverse_vocab
+
+
+def convert_reverse_vocabulary_to_vocabulary(reverse_vocab: ReverseVocabulary) -> Vocabulary:
+    """Convert a reverse vocabulary, a lookup of byte fragments, to a token vocabulary."""
+    tokens = list(reverse_vocab.values())
+
+    if len(tokens) != len(set(tokens)):
+        raise ValueError("Duplicate tokens in the ReverseVocabulary")
+
+    vocab_size = len(tokens)
+    if vocab_size == 0:
+        return []
+
+    if min(tokens) != 0 or max(tokens) != vocab_size - 1:
+        # This check, along with the uniqueness check above, guarantees token values are precisely:
+        # [0, 1, ..., vocab_size - 1]
+        raise ValueError("Invalid token values")
+
+    vocab: Vocabulary = [b"" for _ in range(vocab_size)]
+    for token_bytes, token in reverse_vocab.items():
+        vocab[token] = token_bytes
+
+    return vocab
 
 
 def convert_vocabulary_to_piece_cache(vocab: Vocabulary) -> PieceCache:

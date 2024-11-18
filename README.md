@@ -183,6 +183,15 @@ Enter text to complete: ACT 1. Scene 1.
 ```
 The model will use the provided text as input context and begin sample generation, up to 500 tokens.
 
+## OpenAI Tokenizers
+The public OpenAI tokenizers, such as those used for the GPT-4 and o1 models, can be downloaded and converted to this repo's format.
+```shell
+python scripts/convert_tiktoken.py
+```
+These are then available to use for training an LLM, in the same way the `default_10k` tokenizer is used in the Quick Start section.
+
+Moreover, this conversion script recovers the merge rules and vocabulary used by these tokenizers, which can then be inspected. For example, the merge rules for the `o1` model can be found at `assets/bpe_checkpoints/o200k_base/merges.txt` and the vocab at `assets/bpe_checkpoints/o200k_base/vocab.ref.txt`
+
 ## Repo Structure
 
 - `llm`: Contains a library implementation of a Transformer model architecture and BPE tokenizer
@@ -193,7 +202,6 @@ The model will use the provided text as input context and begin sample generatio
 
 ## Future Work
 
-- Add a script to download GPT tokenizers from `tiktoken` and convert them to this repo's format
 - Add support for special tokens in `RegexTokenizer`
 - Convert the plain Python dictionary to an LRU cache in `RegexTokenizer` so it can be used in a serving system
 - Speed up text generation in `Transformer` using a KV-cache
