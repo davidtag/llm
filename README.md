@@ -202,7 +202,6 @@ Moreover, this conversion script recovers the merge rules and vocabulary used by
 
 ## Future Work
 
-- Add a script to download GPT tokenizers from `tiktoken` and convert them to this repo's format
 - Add support for special tokens in `RegexTokenizer`
 - Convert the plain Python dictionary to an LRU cache in `RegexTokenizer` so it can be used in a serving system
 - Speed up text generation in `Transformer` using a KV-cache
