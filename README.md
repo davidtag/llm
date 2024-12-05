@@ -64,7 +64,7 @@ python scripts/generate_text.py -t default_10k -n v2 -c 100
 
 ## Sample Generation
 
-Here's an example of the generation output for a model trained on the works of Shakespeare. It uses a vocabulary of 10,256 tokens, also trained on the same source text, and context size of 128. It has 1.6M paramers, 1,000x smaller than GPT-2, and 100,000x smaller than GPT-3. It was trained on 100,000 randomly sampled batches of size 16 with decaying learning rate. The training set perplexity was ~20 for the final checkpoint.
+Here's an example of the generation output for a model trained on the works of Shakespeare. It uses a vocabulary of 10,256 tokens, also trained on the same source text, and context size of 128. It has 1.6M parameters, 1,000x smaller than GPT-2, and 100,000x smaller than GPT-3. It was trained on 100,000 randomly sampled batches of size 16 with decaying learning rate. The training set perplexity was ~20 for the final checkpoint.
 
 The context window was seeded with `"ACT I. Scene I.\n\n"` for generation:
 
